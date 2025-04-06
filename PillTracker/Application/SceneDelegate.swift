@@ -17,7 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window = UIWindow(windowScene: windowScene)
         
-        let viewcontroller = ViewController()
+        let viewcontroller = MyPillsViewController()
         let navigationController = UINavigationController(rootViewController: viewcontroller)
         
         window?.rootViewController = navigationController

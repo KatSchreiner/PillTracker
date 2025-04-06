@@ -9,7 +9,11 @@ import UIKit
 
 class MyPillsViewController: UIViewController {
     // MARK: - Private Properties
-
+    lazy var weeklyCalendarView: WeeklyCalendarView = {
+        let view = WeeklyCalendarView()
+        return view
+    }()
+    
     lazy var bottomBorderView: UIView = {
         let view = UIView()
         view.backgroundColor = .lGray
@@ -40,6 +44,10 @@ class MyPillsViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Private Properties
+    private var selectedDate: Date = Date()
+        
+    // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -51,19 +59,46 @@ class MyPillsViewController: UIViewController {
 //        let addNewPill = AddNewPillViewController()
 //        navigationController?.pushViewController(addNewPill, animated: true)
     }
+    
+    @objc
+    func handleDaySwipe(_ gesture: UISwipeGestureRecognizer) {
+        let calendar = Calendar.current
+        let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedDate))!
+        let weekEnd = calendar.date(byAdding: .day, value: 6, to: weekStart)!
+
+        if gesture.direction == .left {
+            if selectedDate >= weekEnd {
+                weeklyCalendarView.currentDate = calendar.date(byAdding: .weekOfYear, value: 1, to: weeklyCalendarView.currentDate)!
+            }
+            selectedDate = calendar.date(byAdding: .day, value: 1, to: selectedDate)!
+        } else if gesture.direction == .right {
+            if selectedDate <= weekStart {
+                weeklyCalendarView.currentDate = calendar.date(byAdding: .weekOfYear, value: -1, to: weeklyCalendarView.currentDate)!
+            }
+            selectedDate = calendar.date(byAdding: .day, value: -1, to: selectedDate)!
+        }
+
+        dateLabel.text = formatDate(selectedDate)
+        weeklyCalendarView.updateSelectedDate(selectedDate)
+    }
 
     // MARK: - Private Methods
     private func setupView() {
         view.backgroundColor = .systemBackground
                 
-        [dateLabelBackground, dateLabel, addPillButton, bottomBorderView].forEach { view in
+        weeklyCalendarView.delegate = self
+        
+        [weeklyCalendarView, dateLabelBackground, dateLabel, addPillButton, bottomBorderView].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        dateLabel.text = "06 апреля 2025"
+        selectedDate = Calendar.current.startOfDay(for: Date())
+        weeklyCalendarView.currentDate = selectedDate
+        dateLabel.text = formatDate(selectedDate)
         
         addConstraint()
+        addSwipeGestures()
     }
     
     private func addConstraint() {
@@ -78,7 +113,13 @@ class MyPillsViewController: UIViewController {
             dateLabel.trailingAnchor.constraint(equalTo: dateLabelBackground.trailingAnchor),
             dateLabel.centerYAnchor.constraint(equalTo: dateLabelBackground.centerYAnchor),
             
-            bottomBorderView.topAnchor.constraint(equalTo: dateLabel.bottomAnchor),
+            weeklyCalendarView.topAnchor.constraint(equalTo: dateLabelBackground.bottomAnchor),
+            weeklyCalendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -10),
+            weeklyCalendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 10),
+            weeklyCalendarView.heightAnchor.constraint(equalToConstant: 70),
+            weeklyCalendarView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            bottomBorderView.topAnchor.constraint(equalTo: weeklyCalendarView.bottomAnchor),
             bottomBorderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomBorderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomBorderView.heightAnchor.constraint(equalToConstant: 2),
@@ -97,4 +138,21 @@ class MyPillsViewController: UIViewController {
         return dateFormatter.string(from: date)
     }
 
+    private func addSwipeGestures() {
+        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleDaySwipe(_:)))
+        swipeLeft.direction = .left
+        view.addGestureRecognizer(swipeLeft)
+        
+        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleDaySwipe(_:)))
+        swipeRight.direction = .right
+        view.addGestureRecognizer(swipeRight)
+    }
+}
+
+// MARK: - WeeklyCalendarViewDelegate
+extension MyPillsViewController: WeeklyCalendarViewDelegate {
+    func didSelectDate(_ date: Date) {
+        selectedDate = date
+        dateLabel.text = formatDate(selectedDate)
+    }
 }

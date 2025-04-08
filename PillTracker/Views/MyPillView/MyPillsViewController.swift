@@ -9,6 +9,16 @@ import UIKit
 
 class MyPillsViewController: UIViewController {
     // MARK: - Private Properties
+    private var pills: [Pill] = []
+    
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.register(PillTableViewCell.self, forCellReuseIdentifier: PillTableViewCell.identifier)
+        tableView.dataSource = self
+        tableView.delegate = self
+        return tableView
+    }()
+    
     lazy var weeklyCalendarView: WeeklyCalendarView = {
         let view = WeeklyCalendarView()
         return view
@@ -57,6 +67,7 @@ class MyPillsViewController: UIViewController {
     @objc
     private func didTapAddPillButton() {
         let addNewPill = AddNewPillViewController()
+        addNewPill.delegate = self
         navigationController?.pushViewController(addNewPill, animated: true)
     }
     
@@ -88,7 +99,7 @@ class MyPillsViewController: UIViewController {
                 
         weeklyCalendarView.delegate = self
         
-        [weeklyCalendarView, dateLabelBackground, dateLabel, addPillButton, bottomBorderView].forEach { view in
+        [weeklyCalendarView, dateLabelBackground, dateLabel, addPillButton, bottomBorderView, tableView].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -124,6 +135,11 @@ class MyPillsViewController: UIViewController {
             bottomBorderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomBorderView.heightAnchor.constraint(equalToConstant: 2),
             
+            tableView.topAnchor.constraint(equalTo: weeklyCalendarView.bottomAnchor, constant: 20),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: addPillButton.topAnchor, constant: -20),
+            
             addPillButton.widthAnchor.constraint(equalToConstant: 70),
             addPillButton.heightAnchor.constraint(equalToConstant: 70),
             addPillButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
@@ -154,5 +170,65 @@ extension MyPillsViewController: WeeklyCalendarViewDelegate {
     func didSelectDate(_ date: Date) {
         selectedDate = date
         dateLabel.text = formatDate(selectedDate)
+        tableView.reloadData()
+    }
+}
+
+// MARK: - UITableViewDataSource
+extension MyPillsViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let filteredPills = pills.filter { pill in
+            let weekDay = (Calendar.current.component(.weekday, from: selectedDate) + 5) % 7 + 1
+            
+            let filteredPills = pills.filter { pill in
+                return pill.selectedDays.contains(weekDay)
+            }
+            return pill.selectedDays.contains(weekDay)
+        }
+
+        return filteredPills.flatMap { $0.times }.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: PillTableViewCell.identifier, for: indexPath) as! PillTableViewCell
+        
+        let weekDay = (Calendar.current.component(.weekday, from: selectedDate) + 5) % 7 + 1
+        let filteredPills = pills.filter { pill in
+            return pill.selectedDays.contains(weekDay)
+        }
+        
+        var allTimes: [(hour: String, minute: String)] = []
+        for pill in filteredPills {
+            allTimes.append(contentsOf: pill.times)
+        }
+        
+        let currentTime = allTimes[indexPath.row]
+        
+        var currentPill: Pill?
+        var timeIndex = 0
+        for pill in filteredPills {
+            if timeIndex + pill.times.count > indexPath.row {
+                currentPill = pill
+                break
+            }
+            timeIndex += pill.times.count
+        }
+        
+        if let pill = currentPill {
+            cell.configure(with: pill, time: currentTime)
+        }
+        return cell
+    }
+    
+}
+// MARK: – UITableViewDelegate
+extension MyPillsViewController: UITableViewDelegate {
+}
+
+// MARK: - AddNewPillDelegate
+extension MyPillsViewController: AddNewPillDelegate {
+    func didAddPill(_ pill: Pill) {
+        pills.append(pill)
+        tableView.reloadData()
     }
 }

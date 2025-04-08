@@ -9,6 +9,9 @@ import UIKit
 
 final class AddNewPillViewController: UIViewController {
     
+    // MARK: - Public Properties
+    var pillStepOneModel = PillStepOneModel()
+    
     // MARK: - Private Properties
     private lazy var progressView: UIProgressView = {
         let progressView = UIProgressView(progressViewStyle: .default)
@@ -152,7 +155,11 @@ final class AddNewPillViewController: UIViewController {
     
     func moveToStepOne() {
         if let stepOneVC = currentChildVC as? NewPillStepOneViewController {
-
+            pillStepOneModel.title = stepOneVC.titleTextField.text
+            pillStepOneModel.dosage = stepOneVC.dosageTextField.text
+            pillStepOneModel.selectedIcon = stepOneVC.formTypesButton.image(for: .normal)
+            let selectedRow = stepOneVC.unitPickerView.selectedRow(inComponent: 0)
+            pillStepOneModel.selectedUnit = stepOneVC.unitPickerViewData[selectedRow]
         }
     }
     
@@ -177,7 +184,7 @@ private extension AddNewPillViewController {
         switch step {
         case .stepOne:
             let stepOne = NewPillStepOneViewController()
-//            stepOne.pillStepOneModel = pillStepOneModel
+            stepOne.pillStepOneModel = pillStepOneModel
             newPillView = stepOne
         case .stepTwo:
             let stepTwo = NewPillStepTwoViewController()

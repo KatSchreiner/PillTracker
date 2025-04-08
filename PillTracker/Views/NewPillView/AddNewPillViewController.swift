@@ -11,6 +11,8 @@ final class AddNewPillViewController: UIViewController {
     
     // MARK: - Public Properties
     var pillStepOneModel = PillStepOneModel()
+    var pillStepTwoModel = PillStepTwoModel()
+
     
     // MARK: - Private Properties
     private lazy var progressView: UIProgressView = {
@@ -165,7 +167,10 @@ final class AddNewPillViewController: UIViewController {
     
     func moveToStepTwo() {
         if let stepTwoVC = currentChildVC as? NewPillStepTwoViewController {
-
+            stepTwoVC.updateSelectedTimes()
+            pillStepTwoModel.selectedTimes = stepTwoVC.selectedTimes
+            let selectedRow = stepTwoVC.pickerView.selectedRow(inComponent: 0)
+            pillStepTwoModel.selectedOption = stepTwoVC.pickerData[selectedRow]
         }
     }
     
@@ -188,7 +193,7 @@ private extension AddNewPillViewController {
             newPillView = stepOne
         case .stepTwo:
             let stepTwo = NewPillStepTwoViewController()
-//            stepTwo.pillStepTwoModel = pillStepTwoModel
+            stepTwo.pillStepTwoModel = pillStepTwoModel
             newPillView = stepTwo
         case .stepThree:
             let stepThree = NewPillStepThreeViewController()

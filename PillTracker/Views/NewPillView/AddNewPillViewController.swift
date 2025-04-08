@@ -12,7 +12,7 @@ final class AddNewPillViewController: UIViewController {
     // MARK: - Public Properties
     var pillStepOneModel = PillStepOneModel()
     var pillStepTwoModel = PillStepTwoModel()
-
+    var pillStepThreeModel = PillStepThreeModel()
     
     // MARK: - Private Properties
     private lazy var progressView: UIProgressView = {
@@ -176,7 +176,8 @@ final class AddNewPillViewController: UIViewController {
     
     func moveToStepThree() {
         if let stepThreeVC = currentChildVC as? NewPillStepThreeViewController {
-
+            pillStepThreeModel.selectedDays = stepThreeVC.model.selectedDays
+            pillStepThreeModel.isReminderEnabled = stepThreeVC.model.isReminderEnabled
         }
     }
 }
@@ -197,7 +198,7 @@ private extension AddNewPillViewController {
             newPillView = stepTwo
         case .stepThree:
             let stepThree = NewPillStepThreeViewController()
-//            stepThree.model = pillStepThreeModel
+            stepThree.model = pillStepThreeModel
             newPillView = stepThree
         }
         

@@ -56,8 +56,8 @@ class MyPillsViewController: UIViewController {
     // MARK: - IB Actions
     @objc
     private func didTapAddPillButton() {
-//        let addNewPill = AddNewPillViewController()
-//        navigationController?.pushViewController(addNewPill, animated: true)
+        let addNewPill = AddNewPillViewController()
+        navigationController?.pushViewController(addNewPill, animated: true)
     }
     
     @objc

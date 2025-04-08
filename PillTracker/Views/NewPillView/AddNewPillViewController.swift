@@ -7,12 +7,18 @@
 
 import UIKit
 
+protocol AddNewPillDelegate: AnyObject {
+    func didAddPill(_ pill: Pill)
+}
+
 final class AddNewPillViewController: UIViewController {
     
     // MARK: - Public Properties
     var pillStepOneModel = PillStepOneModel()
     var pillStepTwoModel = PillStepTwoModel()
     var pillStepThreeModel = PillStepThreeModel()
+    
+    weak var delegate: AddNewPillDelegate?
     
     // MARK: - Private Properties
     private lazy var progressView: UIProgressView = {
@@ -47,6 +53,32 @@ final class AddNewPillViewController: UIViewController {
     @objc
     private func didTapDoneButton() {
         moveToStepThree()
+        
+        let pill = Pill(
+            id: UUID(),
+            icon: pillStepOneModel.selectedIcon,
+            name: pillStepOneModel.title ?? "",
+            dosage: Int(pillStepOneModel.dosage ?? "") ?? 0,
+            unit: pillStepOneModel.selectedUnit ?? "",
+            howToTake: pillStepTwoModel.selectedOption ?? "",
+            times: pillStepTwoModel.selectedTimes,
+            selectedDays: pillStepThreeModel.selectedDays
+        )
+        
+        delegate?.didAddPill(pill)
+        
+        print("Данные переданы:")
+        print("ID лекарства: \(pill.id)")
+        print("Иконка: \(pillStepOneModel.selectedIcon?.description ?? "nil")")
+        print("Название лекарства: \(pillStepOneModel.title ?? "nil")")
+        print("Дозировка: \(pillStepOneModel.dosage ?? "nil")")
+        print("Единица измерения: \(pillStepOneModel.selectedUnit ?? "nil")")
+        
+        print("Время приема: \(String(describing: pillStepTwoModel.selectedTimes))")
+        print("Как принимать: \(pillStepTwoModel.selectedOption ?? "nil")")
+        
+        print("Выбранные дни: \(pillStepThreeModel.selectedDays)")
+        print("Напомнить: \(pillStepThreeModel.isReminderEnabled)")
         
         navigationController?.popViewController(animated: true)
     }

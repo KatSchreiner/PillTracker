@@ -7,16 +7,10 @@
 
 import UIKit
 
-protocol CustomTimePickerDelegate: AnyObject {
-    func didPickTime(hour: String, minute: String)
-}
-
 class CustomTimePicker: UIPickerView {
     var hours: [String] = []
     var minutes: [String] = []
-                
-    weak var timePickerDelegate: CustomTimePickerDelegate?
-    
+                    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -26,32 +20,26 @@ class CustomTimePicker: UIPickerView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: Public Methods
+    func populateHours() {
+        for hour in 0..<24 {
+            hours.append(String(format: "%02d", hour))
+        }
+    }
+    
+    func populateMinutes() {
+        for minute in stride(from: 0, to: 60, by: 5) {
+            minutes.append(String(format: "%02d", minute))
+        }
+    }
+    
+    // MARK: Private Methods
     private func setupView() {
         self.delegate = self
         self.dataSource = self
         
         populateHours()
         populateMinutes()
-    }
-    
-    private func populateHours() {
-        for hour in 0..<24 {
-            hours.append(String(format: "%02d", hour))
-        }
-    }
-    
-    private func populateMinutes() {
-        for minute in stride(from: 0, to: 60, by: 5) {
-            minutes.append(String(format: "%02d", minute))
-        }
-    }
-    
-    private func notifyDelegate() {
-        let selectedHour = hours[self.selectedRow(inComponent: 0)]
-        let selectedMinute = minutes[self.selectedRow(inComponent: 2)]
-        
-            timePickerDelegate?.didPickTime(hour: selectedHour, minute: selectedMinute)
-     
     }
     
     private func createLabelTime(with text: String, font: UIFont = .systemFont(ofSize: 20), textColor: UIColor = .dGray) -> UILabel {
@@ -64,6 +52,7 @@ class CustomTimePicker: UIPickerView {
     }
 }
 
+// MARK: UIPickerViewDataSource
 extension CustomTimePicker: UIPickerViewDataSource {
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 3
@@ -90,8 +79,8 @@ extension CustomTimePicker: UIPickerViewDataSource {
     }
 }
 
+// MARK: UIPickerViewDelegate
 extension CustomTimePicker: UIPickerViewDelegate {
-    
     func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
         60
     }

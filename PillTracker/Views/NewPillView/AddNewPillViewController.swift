@@ -92,6 +92,10 @@ final class AddNewPillViewController: UIViewController {
     private func goToPreviousStep() {
         guard let currentIndex = AddPillStep.allCases.firstIndex(of: currentStep), currentIndex > 0 else { return }
         
+        if currentStep == .stepThree {
+            moveToStepThree()
+        }
+        
         currentStep = AddPillStep.allCases[currentIndex - 1]
         showStepViewController(for: currentStep, isMovingForward: false)
         updateProgress()
@@ -119,7 +123,6 @@ final class AddNewPillViewController: UIViewController {
     }
 
     // MARK: - Private Methods
-    
     private func setupView() {
         view.backgroundColor = .systemBackground
         setupNavigation()
@@ -137,7 +140,7 @@ final class AddNewPillViewController: UIViewController {
         updateProgress()
     }
     
-    func setupNavigation() {
+    private func setupNavigation() {
         navigationItem.setHidesBackButton(true, animated: false)
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGesture.cancelsTouchesInView = false
@@ -187,7 +190,7 @@ final class AddNewPillViewController: UIViewController {
         return button
     }
     
-    func moveToStepOne() {
+    private func moveToStepOne() {
         if let stepOneVC = currentChildVC as? NewPillStepOneViewController {
             pillStepOneModel.title = stepOneVC.titleTextField.text
             pillStepOneModel.dosage = stepOneVC.dosageTextField.text
@@ -197,7 +200,7 @@ final class AddNewPillViewController: UIViewController {
         }
     }
     
-    func moveToStepTwo() {
+    private func moveToStepTwo() {
         if let stepTwoVC = currentChildVC as? NewPillStepTwoViewController {
             stepTwoVC.updateSelectedTimes()
             pillStepTwoModel.selectedTimes = stepTwoVC.selectedTimes
@@ -206,7 +209,7 @@ final class AddNewPillViewController: UIViewController {
         }
     }
     
-    func moveToStepThree() {
+    private func moveToStepThree() {
         if let stepThreeVC = currentChildVC as? NewPillStepThreeViewController {
             pillStepThreeModel.selectedDays = stepThreeVC.model.selectedDays
             pillStepThreeModel.isReminderEnabled = stepThreeVC.model.isReminderEnabled

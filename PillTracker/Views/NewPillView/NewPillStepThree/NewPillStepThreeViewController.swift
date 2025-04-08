@@ -8,10 +8,12 @@
 import UIKit
 
 class NewPillStepThreeViewController: UIViewController {
+    // MARK: - Public Properties
     static var stepThree = "NewPillStepThreeCell"
     
     var model = PillStepThreeModel()
     
+    // MARK: - Private Properties
     private lazy var repeatLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 20, weight: .regular)
@@ -69,12 +71,19 @@ class NewPillStepThreeViewController: UIViewController {
         return reminderStackView
     }()
     
+    // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         loadData()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadData()
+    }
+    
+    // MARK: - IB Actions
     @objc
     private func didTapDayButton(sender: UIButton) {
         let index = sender.tag + 1
@@ -94,6 +103,7 @@ class NewPillStepThreeViewController: UIViewController {
         model.isReminderEnabled = sender.isOn
     }
     
+    // MARK: - Private Methods
     private func setupView() {
         view.backgroundColor = .white
         
@@ -122,7 +132,7 @@ class NewPillStepThreeViewController: UIViewController {
     
     private func loadData() {
         for button in dayButtons {
-            let index = button.tag
+            let index = button.tag + 1
             if model.selectedDays.contains(index) {
                 button.backgroundColor = .dBlue
                 button.setTitleColor(.lGray, for: .normal)

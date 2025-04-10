@@ -195,8 +195,7 @@ final class AddNewPillViewController: UIViewController {
             pillStepOneModel.title = stepOneVC.titleTextField.text
             pillStepOneModel.dosage = stepOneVC.dosageTextField.text
             pillStepOneModel.selectedIcon = stepOneVC.formTypesButton.image(for: .normal)
-            let selectedRow = stepOneVC.unitPickerView.selectedRow(inComponent: 0)
-            pillStepOneModel.selectedUnit = stepOneVC.unitPickerViewData[selectedRow]
+            pillStepOneModel.selectedUnit = stepOneVC.selectedUnit
         }
     }
     

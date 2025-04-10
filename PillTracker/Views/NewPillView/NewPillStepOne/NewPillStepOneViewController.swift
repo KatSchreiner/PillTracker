@@ -20,11 +20,15 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     lazy var titleTextField: UITextField = createTextField()
     lazy var dosageTextField: UITextField = createTextField()
     
-    lazy var unitPickerView: UIPickerView = {
-        let pickerView = UIPickerView()
-        pickerView.delegate = self
-        pickerView.dataSource = self
-        return pickerView
+    lazy var unitButton: UIButton = {
+        let unitButton = UIButton(type: .system)
+        unitButton.setTitle("Выберите единицу", for: .normal)
+        unitButton.setTitleColor(.dGray, for: .normal)
+        unitButton.titleLabel?.font = UIFont.systemFont(ofSize: 20)
+        unitButton.backgroundColor = .lGray
+        unitButton.layer.cornerRadius = 8
+        unitButton.addTarget(self, action: #selector(didTapUnitButton), for: .touchUpInside)
+        return unitButton
     }()
     
     lazy var formTypesButton: UIButton = {
@@ -62,6 +66,27 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc
+    private func didTapUnitButton() {
+        let unitSelectionView = UnitSelectionViewController()
+        unitSelectionView.units = unitPickerViewData
+        unitSelectionView.selectedUnit = { [weak self] selectedUnit in
+            self?.selectedUnit = selectedUnit
+            self?.pillStepOneModel?.selectedUnit = selectedUnit
+            self?.updateUnitButtonTitle()
+        }
+        
+        unitSelectionView.modalPresentationStyle = .popover
+        
+        if let popoverController = unitSelectionView.popoverPresentationController {
+            popoverController.sourceView = unitButton
+            popoverController.sourceRect = unitButton.bounds
+            popoverController.permittedArrowDirections = .any
+        }
+        
+        present(unitSelectionView, animated: true, completion: nil)
+    }
+    
+    @objc
     private func textFieldDidChange(_ textField: UITextField) {
         updateNextButtonState()
     }
@@ -74,7 +99,7 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
         
         loadData()
         
-        [formTypesButton, titleLabel, titleTextField, dosageLabel, dosageTextField, unitPickerView].forEach { view in
+        [formTypesButton, titleLabel, titleTextField, dosageLabel, dosageTextField, unitButton].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -102,11 +127,18 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
             dosageTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             dosageTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             dosageTextField.heightAnchor.constraint(equalToConstant: 60),
-
-            unitPickerView.widthAnchor.constraint(equalToConstant: 180),
-            unitPickerView.topAnchor.constraint(equalTo: dosageTextField.bottomAnchor),
-            unitPickerView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            
+            unitButton.topAnchor.constraint(equalTo: dosageTextField.bottomAnchor, constant: 20),
+            unitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            unitButton.heightAnchor.constraint(equalToConstant: 60),
+            unitButton.widthAnchor.constraint(equalToConstant: 200)
         ])
+    }
+    
+    private func updateUnitButtonTitle() {
+        if let selectedUnit = selectedUnit {
+            unitButton.setTitle(selectedUnit, for: .normal)
+        }
     }
     
     private func createLabel(text: String, textColor: UIColor, fontSize: CGFloat) -> UILabel {
@@ -145,8 +177,8 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
             formTypesButton.setImage(selectedIcon, for: .normal)
         }
         
-        if let selectedUnit = pillStepOneModel?.selectedUnit, let index = unitPickerViewData.firstIndex(of: selectedUnit) {
-            unitPickerView.selectRow(index, inComponent: 0, animated: false)
+        if let selectedUnit = pillStepOneModel?.selectedUnit {
+            self.selectedUnit = selectedUnit
         }
     }
     
@@ -159,40 +191,5 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
             addNewPillVC.nextButton.isEnabled = isEnabled
             addNewPillVC.nextButton.alpha = isEnabled ? 1.0 : 0.5
         }
-    }
-}
-
-extension NewPillStepOneViewController: UIPickerViewDataSource {
-    // MARK: - UIPickerViewDataSource
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return unitPickerViewData.count
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
-        let label = (view as? UILabel) ?? UILabel()
-        label.font = UIFont.systemFont(ofSize: 20)
-        label.textAlignment = .center
-        label.textColor = .dGray
-        label.text = unitPickerViewData[row]
-        return label
-    }
-}
-
-// MARK: - UIPickerViewDelegate
-extension NewPillStepOneViewController: UIPickerViewDelegate {
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        selectedUnit = unitPickerViewData[row]
-        
-        if let addNewPillVC = parent as? AddNewPillViewController {
-            addNewPillVC.pillStepOneModel.selectedUnit = selectedUnit
-        }
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
-        return 60
     }
 }

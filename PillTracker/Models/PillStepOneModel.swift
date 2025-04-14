@@ -9,7 +9,7 @@ import UIKit
 
 struct PillStepOneModel {
     var title: String?
-    var dosage: String?
+    var dosage: Double?
     var selectedIcon: UIImage?
     var selectedUnit: String?
 }

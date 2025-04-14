@@ -37,7 +37,6 @@ class IconSelectionViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.allowsSelection = true
         collectionView.register(IconCell.self, forCellWithReuseIdentifier: "IconCell")
-        collectionView.backgroundColor = .clear
         return collectionView
     }()
 
@@ -74,7 +73,15 @@ extension IconSelectionViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "IconCell", for: indexPath) as! IconCell
-        cell.imageView.image = imagesFormTypes[indexPath.item]
+        
+        let selectedImage = imagesFormTypes[indexPath.item]
+        
+        cell.imageView.image = selectedImage
+        
+        if selectedImage == nil {
+            print("Image not found for index: \(indexPath.item)")
+        }
+        
         return cell
     }
 }
@@ -86,5 +93,18 @@ extension IconSelectionViewController: UICollectionViewDelegate {
         
         selectedIcon?(selectedImage)
         dismiss(animated: true)
+    }
+}
+
+extension IconSelectionViewController: UIViewControllerTransitioningDelegate {
+    func presentAsBottomSheet(on parent: UIViewController) {
+        self.modalPresentationStyle = .custom
+        self.transitioningDelegate = self
+        
+        parent.present(self, animated: true, completion: nil)
+    }
+    
+    func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+        return CustomPresentationController(presentedViewController: presented, presenting: presenting)
     }
 }

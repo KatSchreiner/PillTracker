@@ -14,7 +14,6 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     
     var pillStepOneModel: PillStepOneModel?
     
-    let unitPickerViewData = ["мл", "мг", "мкг", "г", "%", "мг/мл", "МЕ", "Капля", "Таблетка", "Капсула", "Укол", "Пшик"]
     var selectedUnit: String?
     
     lazy var titleTextField: UITextField = createTextField()
@@ -42,9 +41,7 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     // MARK: - Private Properties
     private lazy var titleLabel: UILabel = createLabel(text: "Название", textColor: .black, fontSize: 20)
     private lazy var dosageLabel: UILabel = createLabel(text: "Дозировка", textColor: .black, fontSize: 20)
-    
-    private var iconSelectionVC = IconSelectionViewController()
-    
+        
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,29 +58,20 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
             self?.pillStepOneModel?.selectedIcon = selectedIcon
         }
         
-        let navigationController = UINavigationController(rootViewController: iconSelectionVC)
-        present(navigationController, animated: true, completion: nil)
+        iconSelectionVC.presentAsBottomSheet(on: self)
     }
     
     @objc
     private func didTapUnitButton() {
         let unitSelectionView = UnitSelectionViewController()
-        unitSelectionView.units = unitPickerViewData
+
         unitSelectionView.selectedUnit = { [weak self] selectedUnit in
             self?.selectedUnit = selectedUnit
             self?.pillStepOneModel?.selectedUnit = selectedUnit
-            self?.updateUnitButtonTitle()
+            self?.unitButton.setTitle(selectedUnit, for: .normal)
         }
         
-        unitSelectionView.modalPresentationStyle = .popover
-        
-        if let popoverController = unitSelectionView.popoverPresentationController {
-            popoverController.sourceView = unitButton
-            popoverController.sourceRect = unitButton.bounds
-            popoverController.permittedArrowDirections = .any
-        }
-        
-        present(unitSelectionView, animated: true, completion: nil)
+        unitSelectionView.presentAsBottomSheet(on: self)
     }
     
     @objc
@@ -98,6 +86,8 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
         formTypesButton.setImage(UIImage(named: "tablet"), for: .normal)
         
         loadData()
+        
+        dosageTextField.keyboardType = .decimalPad
         
         [formTypesButton, titleLabel, titleTextField, dosageLabel, dosageTextField, unitButton].forEach { view in
             self.view.addSubview(view)
@@ -135,12 +125,6 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
         ])
     }
     
-    private func updateUnitButtonTitle() {
-        if let selectedUnit = selectedUnit {
-            unitButton.setTitle(selectedUnit, for: .normal)
-        }
-    }
-    
     private func createLabel(text: String, textColor: UIColor, fontSize: CGFloat) -> UILabel {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: fontSize)
@@ -171,7 +155,12 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     
     private func loadData() {
         titleTextField.text = pillStepOneModel?.title
-        dosageTextField.text = pillStepOneModel?.dosage
+        
+        if let dosage = pillStepOneModel?.dosage {
+            dosageTextField.text = String(format: "%.1f", dosage)
+        } else {
+            dosageTextField.text = nil
+        }
         
         if let selectedIcon = pillStepOneModel?.selectedIcon {
             formTypesButton.setImage(selectedIcon, for: .normal)
@@ -191,5 +180,14 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
             addNewPillVC.nextButton.isEnabled = isEnabled
             addNewPillVC.nextButton.alpha = isEnabled ? 1.0 : 0.5
         }
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if textField == dosageTextField {
+            let allowedCharacters = CharacterSet(charactersIn: "0123456789.")
+            let characterSet = CharacterSet(charactersIn: string)
+            return allowedCharacters.isSuperset(of: characterSet)
+        }
+        return true
     }
 }

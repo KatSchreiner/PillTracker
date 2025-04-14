@@ -15,7 +15,7 @@ class CustomPresentationController: UIPresentationController {
         
         let size = presentedView?.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize) ?? .zero
         
-        let height = size.height
+        let height = size.height > 0 ? size.height : 400
         
         return CGRect(x: 0, y: containerBounds.height - height, width: containerBounds.width, height: height)
     }

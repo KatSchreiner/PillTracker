@@ -58,7 +58,7 @@ final class AddNewPillViewController: UIViewController {
             id: UUID(),
             icon: pillStepOneModel.selectedIcon,
             name: pillStepOneModel.title ?? "",
-            dosage: Int(pillStepOneModel.dosage ?? "") ?? 0,
+            dosage: pillStepOneModel.dosage ?? 0.0,
             unit: pillStepOneModel.selectedUnit ?? "",
             howToTake: pillStepTwoModel.selectedOption ?? "",
             times: pillStepTwoModel.selectedTimes,
@@ -71,7 +71,7 @@ final class AddNewPillViewController: UIViewController {
         print("ID лекарства: \(pill.id)")
         print("Иконка: \(pillStepOneModel.selectedIcon?.description ?? "nil")")
         print("Название лекарства: \(pillStepOneModel.title ?? "nil")")
-        print("Дозировка: \(pillStepOneModel.dosage ?? "nil")")
+        print("Дозировка: \(pillStepOneModel.dosage ?? 0.0)")
         print("Единица измерения: \(pillStepOneModel.selectedUnit ?? "nil")")
         
         print("Время приема: \(String(describing: pillStepTwoModel.selectedTimes))")
@@ -193,10 +193,13 @@ final class AddNewPillViewController: UIViewController {
     private func moveToStepOne() {
         if let stepOneVC = currentChildVC as? NewPillStepOneViewController {
             pillStepOneModel.title = stepOneVC.titleTextField.text
-            pillStepOneModel.dosage = stepOneVC.dosageTextField.text
+            if let dosageText = stepOneVC.dosageTextField.text, let dosageValue = Double(dosageText) {
+                pillStepOneModel.dosage = dosageValue
+            } else {
+                pillStepOneModel.dosage = nil // или какое-то значение по умолчанию, если необходимо
+            }
             pillStepOneModel.selectedIcon = stepOneVC.formTypesButton.image(for: .normal)
-//            let selectedRow = stepOneVC.unitPickerView.selectedRow(inComponent: 0)
-//            pillStepOneModel.selectedUnit = stepOneVC.unitPickerViewData[selectedRow]
+            pillStepOneModel.selectedUnit = stepOneVC.selectedUnit
         }
     }
     

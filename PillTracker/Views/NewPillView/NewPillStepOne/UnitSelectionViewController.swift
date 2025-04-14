@@ -9,7 +9,7 @@ import UIKit
 
 class UnitSelectionViewController: UIViewController {
     
-    var units: [String] = []
+    var units = ["мл", "мг", "мкг", "г", "%", "мг/мл", "МЕ", "Капля", "Таблетка", "Капсула", "Саше", "Укол", "Пшик"]
     var selectedUnit: ((String) -> Void)?
     
     private lazy var tableView: UITableView = {
@@ -39,7 +39,7 @@ class UnitSelectionViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
     }
 }
@@ -66,5 +66,19 @@ extension UnitSelectionViewController: UITableViewDelegate {
         let selectedUnit = units[indexPath.row]
         self.selectedUnit?(selectedUnit)
         dismiss(animated: true, completion: nil)
+    }
+}
+
+// MARK: - UIViewControllerTransitioningDelegate
+extension UnitSelectionViewController: UIViewControllerTransitioningDelegate {
+    func presentAsBottomSheet(on parent: UIViewController) {
+        self.modalPresentationStyle = .custom
+        self.transitioningDelegate = self
+        
+        parent.present(self, animated: true, completion: nil)
+    }
+    
+    func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+        return CustomPresentationController(presentedViewController: presented, presenting: presenting)
     }
 }

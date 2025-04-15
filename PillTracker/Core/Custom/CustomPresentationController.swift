@@ -48,10 +48,13 @@ class CustomPresentationController: UIPresentationController {
     
     override func dismissalTransitionWillBegin() {
         guard let presentedView = presentedView else { return }
+        
         UIView.animate(withDuration: 0.3) {
+            self.dimmingView.alpha = 0
             presentedView.alpha = 0
         } completion: { _ in
             presentedView.removeFromSuperview()
+            self.dimmingView.removeFromSuperview()
         }
     }
     

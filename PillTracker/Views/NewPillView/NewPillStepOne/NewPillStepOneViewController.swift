@@ -23,9 +23,10 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
         let unitButton = UIButton(type: .system)
         unitButton.setTitle("Выберите единицу", for: .normal)
         unitButton.setTitleColor(.dGray, for: .normal)
-        unitButton.titleLabel?.font = UIFont.systemFont(ofSize: 20)
+        unitButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
         unitButton.backgroundColor = .lGray
         unitButton.layer.cornerRadius = 8
+        unitButton.applyShadow()
         unitButton.addTarget(self, action: #selector(didTapUnitButton), for: .touchUpInside)
         return unitButton
     }()
@@ -39,8 +40,8 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     }()
     
     // MARK: - Private Properties
-    private lazy var titleLabel: UILabel = createLabel(text: "Название", textColor: .black, fontSize: 20)
-    private lazy var dosageLabel: UILabel = createLabel(text: "Дозировка", textColor: .black, fontSize: 20)
+    private lazy var titleLabel: UILabel = createLabel(text: "Название", textColor: .black, fontSize: 18)
+    private lazy var dosageLabel: UILabel = createLabel(text: "Дозировка", textColor: .black, fontSize: 18)
         
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -56,6 +57,7 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
         iconSelectionVC.selectedIcon = { [weak self] selectedIcon in
             self?.formTypesButton.setImage(selectedIcon, for: .normal)
             self?.pillStepOneModel?.selectedIcon = selectedIcon
+            self?.updateNextButtonState()
         }
         
         iconSelectionVC.presentAsBottomSheet(on: self)
@@ -69,6 +71,7 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
             self?.selectedUnit = selectedUnit
             self?.pillStepOneModel?.selectedUnit = selectedUnit
             self?.unitButton.setTitle(selectedUnit, for: .normal)
+            self?.updateNextButtonState()
         }
         
         unitSelectionView.presentAsBottomSheet(on: self)
@@ -102,7 +105,7 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
             formTypesButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             formTypesButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
 
-            titleLabel.topAnchor.constraint(equalTo: formTypesButton.bottomAnchor, constant: 20),
+            titleLabel.topAnchor.constraint(equalTo: formTypesButton.bottomAnchor, constant: 40),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
 
             titleTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
@@ -118,10 +121,10 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
             dosageTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             dosageTextField.heightAnchor.constraint(equalToConstant: 60),
             
-            unitButton.topAnchor.constraint(equalTo: dosageTextField.bottomAnchor, constant: 20),
+            unitButton.topAnchor.constraint(equalTo: dosageTextField.bottomAnchor, constant: 40),
             unitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             unitButton.heightAnchor.constraint(equalToConstant: 60),
-            unitButton.widthAnchor.constraint(equalToConstant: 200)
+            unitButton.widthAnchor.constraint(equalToConstant: 250)
         ])
     }
     
@@ -138,11 +141,19 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     private func createTextField() -> UITextField {
         let textField = UITextField()
         textField.layer.cornerRadius = 8
-        textField.backgroundColor = .lGray
+        textField.backgroundColor = .white
         textField.textColor = .dGray
         textField.textAlignment = .left
         textField.delegate = self
         textField.isUserInteractionEnabled = true
+        
+        textField.layer.shadowColor = UIColor.lGray.cgColor
+        textField.layer.shadowOpacity = 0.1
+        textField.layer.shadowOffset = CGSize(width: 0, height: 1)
+        textField.layer.shadowRadius = 6
+        
+        textField.layer.borderWidth = 1
+        textField.layer.borderColor = UIColor.lGray.cgColor
         
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 60))
         textField.leftViewMode = .always
@@ -172,9 +183,12 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     }
     
     private func updateNextButtonState() {
+        let isIconSelected = pillStepOneModel?.selectedIcon != nil
         let isTitleFilled = !(titleTextField.text?.isEmpty ?? true)
         let isDosageFilled = !(dosageTextField.text?.isEmpty ?? true)
-        let isEnabled = isTitleFilled && isDosageFilled
+        let isUnitSelected = pillStepOneModel?.selectedUnit != nil
+        
+        let isEnabled = isIconSelected && isTitleFilled && isDosageFilled && isUnitSelected
         
         if let addNewPillVC = parent as? AddNewPillViewController {
             addNewPillVC.nextButton.isEnabled = isEnabled

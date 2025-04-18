@@ -183,6 +183,7 @@ class NewPillStepOneViewController: UIViewController {
         
         if let selectedUnit = pillStepOneModel?.selectedUnit {
             self.selectedUnit = selectedUnit
+            unitButton.setTitle(selectedUnit, for: .normal)
         }
     }
     

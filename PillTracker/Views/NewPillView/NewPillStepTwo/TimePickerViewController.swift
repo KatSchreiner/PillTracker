@@ -29,7 +29,7 @@ class TimePickerViewController: UIViewController {
         doneButton.titleLabel?.textColor = .white
         doneButton.tintColor = .white
         doneButton.layer.cornerRadius = 8
-        doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 20)
+        doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
         doneButton.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
         doneButton.translatesAutoresizingMaskIntoConstraints = false
         return doneButton

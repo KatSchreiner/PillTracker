@@ -7,7 +7,7 @@
 
 import UIKit
 
-class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
+class NewPillStepOneViewController: UIViewController {
     
     // MARK: - Public Properties
     static let stepOne = "NewPillStepOneCell"
@@ -34,7 +34,8 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     lazy var formTypesButton: UIButton = {
         let button = UIButton()
         button.setTitleColor(.white, for: .normal)
-        button.setImage(UIImage(named: "tablet"), for: .normal)
+        button.setImage(UIImage(named: "photoCamera"), for: .normal)
+        button.adjustsImageWhenHighlighted = false
         button.addTarget(self, action: #selector(didTapFormTypesButton), for: .touchUpInside)
         return button
     }()
@@ -52,19 +53,23 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     // MARK: - IB Actions
     @objc
     private func didTapFormTypesButton() {
-        let iconSelectionVC = IconSelectionViewController()
+        formTypesButton.animatePress()
+        
+        let iconSelectionView = IconSelectionViewController()
 
-        iconSelectionVC.selectedIcon = { [weak self] selectedIcon in
-            self?.formTypesButton.setImage(selectedIcon, for: .normal)
+        iconSelectionView.selectedIcon = { [weak self] selectedIcon in
+            self?.animateIconChange(to: selectedIcon)
             self?.pillStepOneModel?.selectedIcon = selectedIcon
             self?.updateNextButtonState()
         }
         
-        iconSelectionVC.presentAsBottomSheet(on: self)
+        iconSelectionView.presentAsBottomSheet(on: self)
     }
     
     @objc
     private func didTapUnitButton() {
+        unitButton.animatePress()
+        
         let unitSelectionView = UnitSelectionViewController()
 
         unitSelectionView.selectedUnit = { [weak self] selectedUnit in
@@ -85,9 +90,7 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     // MARK: - Private Methods
     private func setupView() {
         view.backgroundColor = .white
-        
-        formTypesButton.setImage(UIImage(named: "tablet"), for: .normal)
-        
+                
         loadData()
         
         dosageTextField.keyboardType = .decimalPad
@@ -102,6 +105,7 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
     
     private func addConstraint() {
         NSLayoutConstraint.activate([
+            formTypesButton.heightAnchor.constraint(equalToConstant: 120),
             formTypesButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             formTypesButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
 
@@ -196,6 +200,21 @@ class NewPillStepOneViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
+    private func animateIconChange(to newIcon: UIImage?) {
+        let currentImage = formTypesButton.image(for: .normal)
+        
+        formTypesButton.setImage(newIcon, for: .normal)
+        
+        formTypesButton.alpha = 0.0
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            self.formTypesButton.alpha = 1.0
+        }) { _ in
+        }
+    }
+}
+
+extension NewPillStepOneViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         if textField == dosageTextField {
             let allowedCharacters = CharacterSet(charactersIn: "0123456789.")

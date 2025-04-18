@@ -15,4 +15,14 @@ extension UIButton {
         self.layer.shadowRadius = radius
         self.layer.masksToBounds = false
     }
+    
+    func animatePress(scale: CGFloat = 0.9, duration: TimeInterval = 0.1) {
+        UIView.animate(withDuration: duration, animations: {
+            self.transform = CGAffineTransform(scaleX: scale, y: scale)
+        }) { _ in
+            UIView.animate(withDuration: duration) {
+                self.transform = CGAffineTransform.identity
+            }
+        }
+    }
 }

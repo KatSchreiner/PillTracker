@@ -52,6 +52,8 @@ final class AddNewPillViewController: UIViewController {
     // MARK: - IB Actions
     @objc
     private func didTapDoneButton() {
+        doneButton.animatePress()
+
         moveToStepThree()
         
         let pill = Pill(
@@ -85,24 +87,15 @@ final class AddNewPillViewController: UIViewController {
     
     @objc
     private func didTapCancelButton() {
+        cancelButton.animatePress()
+
         navigationController?.popViewController(animated: true)
     }
     
     @objc
-    private func goToPreviousStep() {
-        guard let currentIndex = AddPillStep.allCases.firstIndex(of: currentStep), currentIndex > 0 else { return }
-        
-        if currentStep == .stepThree {
-            moveToStepThree()
-        }
-        
-        currentStep = AddPillStep.allCases[currentIndex - 1]
-        showStepViewController(for: currentStep, isMovingForward: false)
-        updateProgress()
-    }
-    
-    @objc
     private func goToNextStep() {
+        nextButton.animatePress()
+        
         guard let currentIndex = AddPillStep.allCases.firstIndex(of: currentStep),
               currentIndex < AddPillStep.allCases.count - 1 else { return }
         
@@ -114,6 +107,21 @@ final class AddNewPillViewController: UIViewController {
         
         currentStep = AddPillStep.allCases[currentIndex + 1]
         showStepViewController(for: currentStep, isMovingForward: true)
+        updateProgress()
+    }
+    
+    @objc
+    private func goToPreviousStep() {
+        backButton.animatePress()
+        
+        guard let currentIndex = AddPillStep.allCases.firstIndex(of: currentStep), currentIndex > 0 else { return }
+        
+        if currentStep == .stepThree {
+            moveToStepThree()
+        }
+        
+        currentStep = AddPillStep.allCases[currentIndex - 1]
+        showStepViewController(for: currentStep, isMovingForward: false)
         updateProgress()
     }
     
@@ -180,7 +188,7 @@ final class AddNewPillViewController: UIViewController {
             doneButton.heightAnchor.constraint(equalToConstant: 60),
         ])
     }
-    
+
     private func createControlButton(title: String, action: Selector) -> UIButton {
         let button = UIButton()
         button.setTitle(title, for: .normal)
@@ -196,7 +204,7 @@ final class AddNewPillViewController: UIViewController {
             if let dosageText = stepOneVC.dosageTextField.text, let dosageValue = Double(dosageText) {
                 pillStepOneModel.dosage = dosageValue
             } else {
-                pillStepOneModel.dosage = nil // или какое-то значение по умолчанию, если необходимо
+                pillStepOneModel.dosage = nil
             }
             pillStepOneModel.selectedIcon = stepOneVC.formTypesButton.image(for: .normal)
             pillStepOneModel.selectedUnit = stepOneVC.selectedUnit
@@ -207,8 +215,8 @@ final class AddNewPillViewController: UIViewController {
         if let stepTwoVC = currentChildVC as? NewPillStepTwoViewController {
             stepTwoVC.updateSelectedTimes()
             pillStepTwoModel.selectedTimes = stepTwoVC.selectedTimes
-            let selectedRow = stepTwoVC.pickerView.selectedRow(inComponent: 0)
-            pillStepTwoModel.selectedOption = stepTwoVC.pickerData[selectedRow]
+//            let selectedRow = stepTwoVC.pickerView.selectedRow(inComponent: 0)
+//            pillStepTwoModel.selectedOption = stepTwoVC.pickerData[selectedRow]
         }
     }
     
@@ -268,11 +276,66 @@ private extension AddNewPillViewController {
         }
     }
     
-    func updateControlsButton() {
-        backButton.isHidden = currentStep == .stepOne
-        nextButton.isHidden = currentStep == .stepThree
-        cancelButton.isHidden = currentStep != .stepOne
-        doneButton.isHidden = currentStep != .stepThree
+    private func updateControlsButton() {
+        let duration: TimeInterval = 0.3
+
+        if currentStep == .stepOne {
+            self.cancelButton.isHidden = false
+            self.cancelButton.alpha = 0.0
+            UIView.animate(withDuration: duration) {
+                self.cancelButton.alpha = 1.0
+            }
+            UIView.animate(withDuration: duration) {
+                self.backButton.alpha = 0.0
+            } completion: { _ in
+                self.backButton.isHidden = true
+                self.backButton.alpha = 1.0
+            }
+        } else {
+            UIView.animate(withDuration: duration) {
+                self.cancelButton.alpha = 0.0
+            } completion: { _ in
+                self.cancelButton.isHidden = true
+                self.cancelButton.alpha = 1.0
+            }
+            UIView.animate(withDuration: duration) {
+                self.backButton.alpha = 1.0
+                self.backButton.isHidden = false
+            }
+        }
+
+        if currentStep == .stepThree {
+                UIView.animate(withDuration: duration) {
+                    self.nextButton.alpha = 0.0
+                } completion: { _ in
+                    self.nextButton.isHidden = true
+                    self.nextButton.alpha = 1.0
+                }
+                self.doneButton.isHidden = false
+                self.doneButton.alpha = 0.0
+                UIView.animate(withDuration: duration) {
+                    self.doneButton.alpha = 1.0
+                }
+        } else {
+            UIView.animate(withDuration: duration) {
+                self.doneButton.alpha = 0.0
+            } completion: { _ in
+                self.doneButton.isHidden = true
+                self.doneButton.alpha = 1.0
+            }
+            
+            if nextButton.isEnabled {
+                UIView.animate(withDuration: duration) {
+                    self.nextButton.alpha = 1.0
+                    self.nextButton.isHidden = false
+                }
+            } else {
+                UIView.animate(withDuration: duration) {
+                    self.nextButton.alpha = 0.5
+                    self.nextButton.isHidden = false
+                }
+            }
+        }
     }
     
     func updateProgress() {

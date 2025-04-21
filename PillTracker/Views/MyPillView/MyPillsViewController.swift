@@ -66,6 +66,8 @@ class MyPillsViewController: UIViewController {
     // MARK: - IB Actions
     @objc
     private func didTapAddPillButton() {
+        addPillButton.animatePress()
+        
         let addNewPill = AddNewPillViewController()
         addNewPill.delegate = self
         navigationController?.pushViewController(addNewPill, animated: true)

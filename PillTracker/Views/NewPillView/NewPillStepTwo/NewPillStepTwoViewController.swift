@@ -16,21 +16,20 @@ class NewPillStepTwoViewController: UIViewController {
     var selectedTimes: [(hour: String, minute: String)] = []
     
     var selectedOption: String?
-    let pickerData = ["Не зависит от еды", "До еды", "Во время еды", "После еды"]
-
-    lazy var pickerView: UIPickerView = {
-        let pickerView = UIPickerView()
-        pickerView.delegate = self
-        pickerView.dataSource = self
-        return pickerView
-    }()
+    let optionData = ["До еды", "Во время еды", "После еды", "Не важно"]
+    let optionImages = [
+        UIImage(named: "beforeEat"),
+        UIImage(named: "duringEat"),
+        UIImage(named: "afterEat"),
+        UIImage(named: "beforeEat")
+    ]
     
     // MARK: - Private Properties
     private lazy var timePickerLabel: UILabel = {
         let label = UILabel()
         label.text = "Время приема"
         label.textAlignment = .left
-        label.font = UIFont.systemFont(ofSize: 20)
+        label.font = UIFont.systemFont(ofSize: 18)
         label.textColor = .dGray
         return label
     }()
@@ -46,12 +45,42 @@ class NewPillStepTwoViewController: UIViewController {
     private lazy var addTimePickerButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "plus"), for: .normal)
-        button.tintColor = .lRed
+        button.tintColor = .dGray
+        button.backgroundColor = .lGray
+        button.layer.cornerRadius = 8
         button.addTarget(self, action: #selector(didTapAddTimePicker), for: .touchUpInside)
         return button
     }()
     
-    private var pickerViewTopConstraint: NSLayoutConstraint?
+    private lazy var buttonStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.spacing = 10
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.distribution = .fillEqually
+        
+        for (index, option) in optionData.enumerated() {
+            let button = UIButton(type: .system)
+            button.setTitle(option, for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 10)
+            button.setTitleColor(.dGray, for: .normal)
+            button.tag = index
+            button.addTarget(self, action: #selector(optionButtonTapped(_:)), for: .touchUpInside)
+            button.layer.cornerRadius = 8
+            button.layer.masksToBounds = true
+            
+            if let image = optionImages[index] {
+                button.setImage(image, for: .normal)
+                button.imageView?.contentMode = .scaleAspectFit
+            }
+            
+            stackView.addArrangedSubview(button)
+        }
+        
+        return stackView
+    }()
+    
+
     private var timeLabels: [UILabel] = []
     
     // MARK: - View Life Cycles
@@ -64,6 +93,8 @@ class NewPillStepTwoViewController: UIViewController {
     // MARK: - IB Actions
     @objc
     private func didTapAddTimePicker() {
+        addTimePickerButton.animatePress()
+        
         let timePickerView = TimePickerViewController()
         timePickerView.delegate = self
         timePickerView.presentAsBottomSheet(on: self)
@@ -72,9 +103,32 @@ class NewPillStepTwoViewController: UIViewController {
     @objc
     private func didTapRemoveTimePicker(_ sender: UIButton) {
         let index = sender.tag
+        
+        guard index < timeLabels.count, index < timeStackView.arrangedSubviews.count else {
+            return
+        }
+        
         timeLabels[index].removeFromSuperview()
         timeLabels.remove(at: index)
         timeStackView.arrangedSubviews[index].removeFromSuperview()
+        
+        for i in index..<timeStackView.arrangedSubviews.count {
+            if let button = timeStackView.arrangedSubviews[i].subviews.last as? UIButton {
+                button.tag = i
+            }
+        }
+    }
+    
+    @objc
+    private func optionButtonTapped(_ sender: UIButton) {
+        selectedOption = optionData[sender.tag]
+        pillStepTwoModel?.selectedOption = selectedOption
+        
+        for subview in sender.superview?.subviews ?? [] {
+            if let button = subview as? UIButton {
+                button.setTitleColor(.dGray, for: .normal)
+            }
+        }
     }
     
     // MARK: - Public Methods
@@ -97,7 +151,7 @@ class NewPillStepTwoViewController: UIViewController {
     private func setupView() {
         view.backgroundColor = .white
         
-        [timePickerLabel, addTimePickerButton, timeStackView, pickerView].forEach { view in
+        [buttonStackView, timePickerLabel, addTimePickerButton, timeStackView].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -107,56 +161,30 @@ class NewPillStepTwoViewController: UIViewController {
     
     private func addConstraints() {
         NSLayoutConstraint.activate([
-            timePickerLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            timePickerLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            buttonStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            
+            addTimePickerButton.topAnchor.constraint(equalTo: buttonStackView.bottomAnchor, constant: 50),
+            addTimePickerButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            addTimePickerButton.widthAnchor.constraint(equalToConstant: 60),
+            addTimePickerButton.heightAnchor.constraint(equalToConstant: 60),
+            
+            timePickerLabel.topAnchor.constraint(equalTo: addTimePickerButton.bottomAnchor, constant: 20),
+            timePickerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             timeStackView.topAnchor.constraint(equalTo: addTimePickerButton.bottomAnchor, constant: 20),
             timeStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            timeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            pickerView.topAnchor.constraint(equalTo: timeStackView.bottomAnchor, constant: 20),
-            
-            addTimePickerButton.centerYAnchor.constraint(equalTo: timePickerLabel.centerYAnchor),
-            addTimePickerButton.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            timeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
     }
 
     private func loadData() {
-        if let selectedOption = pillStepTwoModel?.selectedOption, let index = pickerData.firstIndex(of: selectedOption) {
-            pickerView.selectRow(index, inComponent: 0, animated: false)
+        if let selectedOption = pillStepTwoModel?.selectedOption, let index = optionData.firstIndex(of: selectedOption) {
+            if let button = buttonStackView.arrangedSubviews[index] as? UIButton {
+                button.setTitleColor(.dBlue, for: .normal)
+            }
         }
-    }
-}
-
-// MARK: - UIPickerViewDataSource
-extension NewPillStepTwoViewController: UIPickerViewDataSource {
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return pickerData.count
-    }
-    
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
-        let label = (view as? UILabel) ?? UILabel()
-        label.font = UIFont.systemFont(ofSize: 20)
-        label.textColor = .dGray
-        label.textAlignment = .center
-        label.text = pickerData[row]
-        return label
-    }
-}
-
-// MARK: - UIPickerViewDelegate
-extension NewPillStepTwoViewController: UIPickerViewDelegate {
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        selectedOption = pickerData[row]
-        pillStepTwoModel?.selectedOption = selectedOption
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
-        return 60
     }
 }
 

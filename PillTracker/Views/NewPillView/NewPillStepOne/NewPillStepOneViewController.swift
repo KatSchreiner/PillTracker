@@ -26,7 +26,6 @@ class NewPillStepOneViewController: UIViewController {
         unitButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
         unitButton.backgroundColor = .lGray
         unitButton.layer.cornerRadius = 8
-        unitButton.applyShadow()
         unitButton.addTarget(self, action: #selector(didTapUnitButton), for: .touchUpInside)
         return unitButton
     }()

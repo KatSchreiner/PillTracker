@@ -18,10 +18,16 @@ class NewPillStepTwoViewController: UIViewController {
     var selectedOption: String?
     let optionData = ["До еды", "Во время еды", "После еды", "Не важно"]
     let optionImages = [
-        UIImage(named: "beforeEat"),
-        UIImage(named: "duringEat"),
-        UIImage(named: "afterEat"),
-        UIImage(named: "beforeEat")
+        UIImage(named: "beforeEat")?.withRenderingMode(.alwaysOriginal),
+        UIImage(named: "duringEat")?.withRenderingMode(.alwaysOriginal),
+        UIImage(named: "afterEat")?.withRenderingMode(.alwaysOriginal),
+        UIImage(named: "beforeEat")?.withRenderingMode(.alwaysOriginal)
+    ]
+    let optionImagesColor = [
+        UIImage(named: "beforeEatColor")?.withRenderingMode(.alwaysOriginal),
+        UIImage(named: "duringEatColor")?.withRenderingMode(.alwaysOriginal),
+        UIImage(named: "afterEatColor")?.withRenderingMode(.alwaysOriginal),
+        UIImage(named: "beforeEatColor")?.withRenderingMode(.alwaysOriginal)
     ]
     
     // MARK: - Private Properties
@@ -60,7 +66,7 @@ class NewPillStepTwoViewController: UIViewController {
         stackView.distribution = .fillEqually
         
         for (index, option) in optionData.enumerated() {
-            let button = UIButton(type: .system)
+            let button = UIButton(type: .custom)
             button.setTitle(option, for: .normal)
             button.titleLabel?.font = UIFont.systemFont(ofSize: 10)
             button.setTitleColor(.dGray, for: .normal)
@@ -69,19 +75,32 @@ class NewPillStepTwoViewController: UIViewController {
             button.layer.cornerRadius = 8
             button.layer.masksToBounds = true
             
+            button.adjustsImageWhenHighlighted = false
+            
             if let image = optionImages[index] {
                 button.setImage(image, for: .normal)
                 button.imageView?.contentMode = .scaleAspectFit
             }
             
-            stackView.addArrangedSubview(button)
+            let label = UILabel()
+            label.text = option
+            label.font = UIFont.systemFont(ofSize: 10)
+            label.textColor = .dGray
+            label.textAlignment = .center
+            
+            let buttonContainer = UIStackView(arrangedSubviews: [button, label])
+            buttonContainer.axis = .vertical
+            buttonContainer.spacing = 4
+            buttonContainer.alignment = .center
+            
+            stackView.addArrangedSubview(buttonContainer)
         }
         
         return stackView
     }()
-    
 
     private var timeLabels: [UILabel] = []
+    private var addTimePickerButtonTopConstraint: NSLayoutConstraint!
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -108,13 +127,19 @@ class NewPillStepTwoViewController: UIViewController {
             return
         }
         
-        timeLabels[index].removeFromSuperview()
-        timeLabels.remove(at: index)
-        timeStackView.arrangedSubviews[index].removeFromSuperview()
+        let viewToRemove = timeStackView.arrangedSubviews[index]
         
-        for i in index..<timeStackView.arrangedSubviews.count {
-            if let button = timeStackView.arrangedSubviews[i].subviews.last as? UIButton {
-                button.tag = i
+        UIView.animate(withDuration: 0.3, animations: {
+            viewToRemove.alpha = 0
+        }) { _ in
+            self.timeLabels[index].removeFromSuperview()
+            self.timeLabels.remove(at: index)
+            viewToRemove.removeFromSuperview()
+            
+            for i in index..<self.timeStackView.arrangedSubviews.count {
+                if let button = self.timeStackView.arrangedSubviews[i].subviews.last as? UIButton {
+                    button.tag = i
+                }
             }
         }
     }
@@ -123,10 +148,22 @@ class NewPillStepTwoViewController: UIViewController {
     private func optionButtonTapped(_ sender: UIButton) {
         selectedOption = optionData[sender.tag]
         pillStepTwoModel?.selectedOption = selectedOption
-        
-        for subview in sender.superview?.subviews ?? [] {
-            if let button = subview as? UIButton {
-                button.setTitleColor(.dGray, for: .normal)
+        pillStepTwoModel?.selectedIcon = optionImagesColor[sender.tag]
+                
+        for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
+            if let buttonContainer = subview as? UIStackView,
+               let button = buttonContainer.arrangedSubviews.first as? UIButton {
+                
+                if index == sender.tag {
+                    UIView.transition(with: button, duration: 0.3, options: .transitionCrossDissolve, animations: {
+                        button.animatePress()
+                        button.setImage(self.optionImagesColor[index], for: .normal)
+                    })
+                } else {
+                    UIView.transition(with: button, duration: 0.3, options: .transitionCrossDissolve, animations: {
+                        button.setImage(self.optionImages[index], for: .normal)
+                    }, completion: nil)
+                }
             }
         }
     }
@@ -151,7 +188,7 @@ class NewPillStepTwoViewController: UIViewController {
     private func setupView() {
         view.backgroundColor = .white
         
-        [buttonStackView, timePickerLabel, addTimePickerButton, timeStackView].forEach { view in
+        [buttonStackView, timePickerLabel, timeStackView, addTimePickerButton].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -162,29 +199,72 @@ class NewPillStepTwoViewController: UIViewController {
     private func addConstraints() {
         NSLayoutConstraint.activate([
             buttonStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
             
-            addTimePickerButton.topAnchor.constraint(equalTo: buttonStackView.bottomAnchor, constant: 50),
-            addTimePickerButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            addTimePickerButton.widthAnchor.constraint(equalToConstant: 60),
-            addTimePickerButton.heightAnchor.constraint(equalToConstant: 60),
+            timePickerLabel.topAnchor.constraint(equalTo: buttonStackView.bottomAnchor, constant: 60),
+            timePickerLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+    
+            timeStackView.topAnchor.constraint(equalTo: timePickerLabel.bottomAnchor, constant: 20),
+            timeStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            timeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
             
-            timePickerLabel.topAnchor.constraint(equalTo: addTimePickerButton.bottomAnchor, constant: 20),
-            timePickerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            timeStackView.topAnchor.constraint(equalTo: addTimePickerButton.bottomAnchor, constant: 20),
-            timeStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            timeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            addTimePickerButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            addTimePickerButton.widthAnchor.constraint(equalToConstant: 40),
+            addTimePickerButton.heightAnchor.constraint(equalToConstant: 40),
         ])
+        
+        addTimePickerButtonTopConstraint = addTimePickerButton.topAnchor.constraint(equalTo: timeStackView.bottomAnchor)
+        addTimePickerButtonTopConstraint.isActive = true
     }
-
+    
     private func loadData() {
         if let selectedOption = pillStepTwoModel?.selectedOption, let index = optionData.firstIndex(of: selectedOption) {
-            if let button = buttonStackView.arrangedSubviews[index] as? UIButton {
-                button.setTitleColor(.dBlue, for: .normal)
+
+            for (i, subview) in buttonStackView.arrangedSubviews.enumerated() {
+                if let buttonContainer = subview as? UIStackView,
+                   let button = buttonContainer.arrangedSubviews.first as? UIButton {
+                    if i == index {
+                        button.setImage(optionImagesColor[i], for: .normal)
+                    } else {
+                        button.setImage(optionImages[i], for: .normal)
+                    }
+                }
             }
         }
+        
+        timeLabels.forEach { $0.removeFromSuperview() }
+            timeLabels.removeAll()
+            for time in pillStepTwoModel?.selectedTimes ?? [] {
+                let timeLabel = UILabel()
+                timeLabel.text = "\(time.hour):\(time.minute)"
+                timeLabel.font = UIFont.systemFont(ofSize: 18)
+                timeLabel.textColor = .dGray
+                timeLabel.textAlignment = .center
+                timeLabel.backgroundColor = .lGray
+                timeLabel.layer.cornerRadius = 8
+                timeLabel.layer.masksToBounds = true
+                timeLabel.translatesAutoresizingMaskIntoConstraints = false
+                
+                timeLabel.heightAnchor.constraint(equalToConstant: 60).isActive = true
+                        
+                let removeButton = UIButton(type: .system)
+                removeButton.setImage(UIImage(systemName: "minus"), for: .normal)
+                removeButton.tintColor = .dGray
+                removeButton.addTarget(self, action: #selector(didTapRemoveTimePicker(_:)), for: .touchUpInside)
+                removeButton.tag = timeLabels.count;
+                
+                let timeContainer = UIStackView(arrangedSubviews: [timeLabel, removeButton])
+                timeContainer.axis = .horizontal
+                timeContainer.spacing = 15
+                timeContainer.translatesAutoresizingMaskIntoConstraints = false
+                
+                timeStackView.addArrangedSubview(timeContainer)
+                timeLabels.append(timeLabel)
+                
+                addTimePickerButtonTopConstraint.constant = 20
+
+            }
     }
 }
 
@@ -192,8 +272,9 @@ extension NewPillStepTwoViewController: TimePickerDelegate {
     func didSelectTime(selectedTime: String) {
         let timeLabel = UILabel()
         timeLabel.text = selectedTime
-        timeLabel.font = UIFont.systemFont(ofSize: 20)
+        timeLabel.font = UIFont.systemFont(ofSize: 18)
         timeLabel.textColor = .dGray
+        timeLabel.textAlignment = .center
         timeLabel.backgroundColor = .lGray
         timeLabel.layer.cornerRadius = 8
         timeLabel.layer.masksToBounds = true
@@ -203,18 +284,21 @@ extension NewPillStepTwoViewController: TimePickerDelegate {
                 
         let removeButton = UIButton(type: .system)
         removeButton.setImage(UIImage(systemName: "minus"), for: .normal)
-        removeButton.tintColor = .lRed
+        removeButton.tintColor = .dGray
         removeButton.addTarget(self, action: #selector(didTapRemoveTimePicker(_:)), for: .touchUpInside)
         removeButton.tag = timeLabels.count
         
         let timeContainer = UIStackView(arrangedSubviews: [timeLabel, removeButton])
         timeContainer.axis = .horizontal
-        timeContainer.spacing = 10
+        timeContainer.spacing = 15
         timeContainer.translatesAutoresizingMaskIntoConstraints = false
         
         timeStackView.addArrangedSubview(timeContainer)
         timeLabels.append(timeLabel)
         
-        view.layoutIfNeeded()
+        addTimePickerButtonTopConstraint.constant = 20
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
 }

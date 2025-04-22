@@ -10,4 +10,5 @@ import UIKit
 struct PillStepTwoModel {
     var selectedTimes: [(hour: String, minute: String)] = []
     var selectedOption: String?
+    var selectedIcon: UIImage?
 }

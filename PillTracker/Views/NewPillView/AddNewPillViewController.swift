@@ -120,6 +120,10 @@ final class AddNewPillViewController: UIViewController {
             moveToStepThree()
         }
         
+        if currentStep == .stepTwo {
+            moveToStepTwo()
+        }
+        
         currentStep = AddPillStep.allCases[currentIndex - 1]
         showStepViewController(for: currentStep, isMovingForward: false)
         updateProgress()
@@ -215,8 +219,11 @@ final class AddNewPillViewController: UIViewController {
         if let stepTwoVC = currentChildVC as? NewPillStepTwoViewController {
             stepTwoVC.updateSelectedTimes()
             pillStepTwoModel.selectedTimes = stepTwoVC.selectedTimes
-//            let selectedRow = stepTwoVC.pickerView.selectedRow(inComponent: 0)
-//            pillStepTwoModel.selectedOption = stepTwoVC.pickerData[selectedRow]
+            pillStepTwoModel.selectedIcon = stepTwoVC.pillStepTwoModel?.selectedIcon
+            pillStepTwoModel.selectedOption = stepTwoVC.pillStepTwoModel?.selectedOption
+            
+            stepTwoVC.selectedTimes = pillStepTwoModel.selectedTimes
+            stepTwoVC.selectedOption = pillStepTwoModel.selectedOption
         }
     }
     

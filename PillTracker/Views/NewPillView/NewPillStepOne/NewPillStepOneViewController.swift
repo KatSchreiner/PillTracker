@@ -59,7 +59,7 @@ class NewPillStepOneViewController: UIViewController {
         iconSelectionView.selectedIcon = { [weak self] selectedIcon in
             self?.animateIconChange(to: selectedIcon)
             self?.pillStepOneModel?.selectedIcon = selectedIcon
-            self?.updateNextButtonState()
+            self?.updateNextButtonStateStepOne()
         }
         
         iconSelectionView.presentAsBottomSheet(on: self)
@@ -75,7 +75,7 @@ class NewPillStepOneViewController: UIViewController {
             self?.selectedUnit = selectedUnit
             self?.pillStepOneModel?.selectedUnit = selectedUnit
             self?.unitButton.setTitle(selectedUnit, for: .normal)
-            self?.updateNextButtonState()
+            self?.updateNextButtonStateStepOne()
         }
         
         unitSelectionView.presentAsBottomSheet(on: self)
@@ -83,7 +83,7 @@ class NewPillStepOneViewController: UIViewController {
     
     @objc
     private func textFieldDidChange(_ textField: UITextField) {
-        updateNextButtonState()
+        updateNextButtonStateStepOne()
     }
     
     // MARK: - Private Methods
@@ -186,7 +186,7 @@ class NewPillStepOneViewController: UIViewController {
         }
     }
     
-    private func updateNextButtonState() {
+    func updateNextButtonStateStepOne() {
         let isIconSelected = pillStepOneModel?.selectedIcon != nil
         let isTitleFilled = !(titleTextField.text?.isEmpty ?? true)
         let isDosageFilled = !(dosageTextField.text?.isEmpty ?? true)
@@ -194,9 +194,9 @@ class NewPillStepOneViewController: UIViewController {
         
         let isEnabled = isIconSelected && isTitleFilled && isDosageFilled && isUnitSelected
         
-        if let addNewPillVC = parent as? AddNewPillViewController {
-            addNewPillVC.nextButton.isEnabled = isEnabled
-            addNewPillVC.nextButton.alpha = isEnabled ? 1.0 : 0.5
+        if let addNewPillView = parent as? AddNewPillViewController {
+            addNewPillView.nextButton.isEnabled = isEnabled
+            addNewPillView.nextButton.alpha = isEnabled ? 1.0 : 0.5
         }
     }
     

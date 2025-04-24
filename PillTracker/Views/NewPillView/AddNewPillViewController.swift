@@ -138,9 +138,9 @@ final class AddNewPillViewController: UIViewController {
     private func setupView() {
         view.backgroundColor = .systemBackground
         setupNavigation()
-
-        nextButton.isEnabled = false
+        
         nextButton.alpha = 0.5
+        nextButton.isEnabled = false
         
         [progressView, containerView, backButton, nextButton, cancelButton, doneButton].forEach { [weak self] view in
             guard let self = self else { return }
@@ -219,8 +219,8 @@ final class AddNewPillViewController: UIViewController {
         if let stepTwoVC = currentChildVC as? NewPillStepTwoViewController {
             stepTwoVC.updateSelectedTimes()
             pillStepTwoModel.selectedTimes = stepTwoVC.selectedTimes
-            pillStepTwoModel.selectedIcon = stepTwoVC.pillStepTwoModel?.selectedIcon
-            pillStepTwoModel.selectedOption = stepTwoVC.pillStepTwoModel?.selectedOption
+            pillStepTwoModel.selectedIcon = stepTwoVC.model?.selectedIcon
+            pillStepTwoModel.selectedOption = stepTwoVC.model?.selectedOption
             
             stepTwoVC.selectedTimes = pillStepTwoModel.selectedTimes
             stepTwoVC.selectedOption = pillStepTwoModel.selectedOption
@@ -247,7 +247,7 @@ private extension AddNewPillViewController {
             newPillView = stepOne
         case .stepTwo:
             let stepTwo = NewPillStepTwoViewController()
-            stepTwo.pillStepTwoModel = pillStepTwoModel
+            stepTwo.model = pillStepTwoModel
             newPillView = stepTwo
         case .stepThree:
             let stepThree = NewPillStepThreeViewController()
@@ -256,6 +256,14 @@ private extension AddNewPillViewController {
         }
         
         addContainerStepView(basicView: newPillView, isMovingForward: isMovingForward)
+        
+        if let stepTwoVC = newPillView as? NewPillStepTwoViewController {
+            stepTwoVC.updateNextButtonStateStepTwo()
+        }
+        
+        if let stepOneVC = newPillView as? NewPillStepOneViewController {
+            stepOneVC.updateNextButtonStateStepOne()
+        }
     }
     
     func addContainerStepView(basicView: UIViewController, isMovingForward: Bool) {
@@ -286,6 +294,10 @@ private extension AddNewPillViewController {
     private func updateControlsButton() {
         let duration: TimeInterval = 0.3
 
+        self.nextButton.isEnabled = false
+        self.nextButton.alpha = 0.5
+        self.nextButton.isHidden = false
+        
         if currentStep == .stepOne {
             self.cancelButton.isHidden = false
             self.cancelButton.alpha = 0.0
@@ -312,37 +324,32 @@ private extension AddNewPillViewController {
         }
 
         if currentStep == .stepThree {
-                UIView.animate(withDuration: duration) {
-                    self.nextButton.alpha = 0.0
-                } completion: { _ in
-                    self.nextButton.isHidden = true
-                    self.nextButton.alpha = 1.0
-                }
                 self.doneButton.isHidden = false
                 self.doneButton.alpha = 0.0
                 UIView.animate(withDuration: duration) {
                     self.doneButton.alpha = 1.0
                 }
-        } else {
-            UIView.animate(withDuration: duration) {
-                self.doneButton.alpha = 0.0
-            } completion: { _ in
-                self.doneButton.isHidden = true
-                self.doneButton.alpha = 1.0
-            }
-            
-            if nextButton.isEnabled {
-                UIView.animate(withDuration: duration) {
-                    self.nextButton.alpha = 1.0
-                    self.nextButton.isHidden = false
-                }
+                self.nextButton.isHidden = true
             } else {
-                UIView.animate(withDuration: duration) {
-                    self.nextButton.alpha = 0.5
-                    self.nextButton.isHidden = false
+                self.doneButton.isHidden = true
+                self.doneButton.alpha = 0.0
+
+                if currentStep == .stepTwo {
+                    if let stepTwoVC = currentChildVC as? NewPillStepTwoViewController {
+                        let isOptionSelected = stepTwoVC.model?.selectedOption != nil
+                        let isTimeSelected = stepTwoVC.model?.selectedTimes != nil
+                        self.nextButton.isEnabled = isOptionSelected && isTimeSelected
+                    }
+                } else if currentStep == .stepOne {
+                    if let stepOneVC = currentChildVC as? NewPillStepOneViewController {
+                        let isTitleValid = !(stepOneVC.titleTextField.text?.isEmpty ?? true)
+                        let isDosageValid = Double(stepOneVC.dosageTextField.text ?? "") != nil
+                        self.nextButton.isEnabled = isTitleValid && isDosageValid
+                    }
                 }
+
+                self.nextButton.alpha = self.nextButton.isEnabled ? 1.0 : 0.5
             }
-        }
     }
     
     func updateProgress() {

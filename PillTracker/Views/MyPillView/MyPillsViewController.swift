@@ -8,6 +8,8 @@
 import UIKit
 
 class MyPillsViewController: UIViewController {
+    var userName: String?
+    
     // MARK: - Private Properties
     private var pills: [Pill] = []
     
@@ -32,8 +34,8 @@ class MyPillsViewController: UIViewController {
     
     lazy var dateLabel: UILabel = {
         let label = UILabel()
-        label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 20)
+        label.textAlignment = .right
+        label.font = UIFont.systemFont(ofSize: 18)
         return label
     }()
     
@@ -52,6 +54,14 @@ class MyPillsViewController: UIViewController {
         button.layer.cornerRadius = 20
         button.addTarget(self, action: #selector(didTapAddPillButton), for: .touchUpInside)
         return button
+    }()
+    
+    private lazy var userNameLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Привет, \(userName ?? "друг")!"
+        label.textAlignment = .left
+        label.font = UIFont.systemFont(ofSize: 18, weight: .bold)
+        return label
     }()
     
     // MARK: - Private Properties
@@ -98,10 +108,11 @@ class MyPillsViewController: UIViewController {
     // MARK: - Private Methods
     private func setupView() {
         view.backgroundColor = .systemBackground
-                
+        navigationItem.hidesBackButton = true
+        
         weeklyCalendarView.delegate = self
         
-        [weeklyCalendarView, dateLabelBackground, dateLabel, addPillButton, bottomBorderView, tableView].forEach { view in
+        [userNameLabel, weeklyCalendarView, dateLabelBackground, dateLabel, addPillButton, bottomBorderView, tableView].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -116,17 +127,13 @@ class MyPillsViewController: UIViewController {
     
     private func addConstraint() {
         NSLayoutConstraint.activate([
-            dateLabelBackground.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            dateLabelBackground.heightAnchor.constraint(equalToConstant: 30),
-            dateLabelBackground.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            dateLabelBackground.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            userNameLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            userNameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             
-            dateLabel.bottomAnchor.constraint(equalTo: dateLabelBackground.bottomAnchor),
-            dateLabel.leadingAnchor.constraint(equalTo: dateLabelBackground.leadingAnchor),
-            dateLabel.trailingAnchor.constraint(equalTo: dateLabelBackground.trailingAnchor),
-            dateLabel.centerYAnchor.constraint(equalTo: dateLabelBackground.centerYAnchor),
+            dateLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             
-            weeklyCalendarView.topAnchor.constraint(equalTo: dateLabelBackground.bottomAnchor),
+            weeklyCalendarView.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 10),
             weeklyCalendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -10),
             weeklyCalendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 10),
             weeklyCalendarView.heightAnchor.constraint(equalToConstant: 70),

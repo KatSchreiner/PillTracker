@@ -12,4 +12,8 @@ struct PillStepOneModel {
     var dosage: Double?
     var selectedIcon: UIImage?
     var selectedUnit: String?
+    
+    func isValid() -> Bool {
+        return title != nil && dosage != nil && selectedIcon != nil && selectedUnit != nil
+    }
 }

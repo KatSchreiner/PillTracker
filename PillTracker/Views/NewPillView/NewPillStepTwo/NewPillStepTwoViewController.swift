@@ -272,10 +272,10 @@ class NewPillStepTwoViewController: UIViewController {
     }
     
     func updateNextButtonStateStepTwo() {
-        let isOptionSelected = model?.selectedOption != nil
-        let isTimeSelected = !selectedTimes.isEmpty
+        model?.selectedTimes = selectedTimes
+        model?.selectedOption = selectedOption
 
-        let isEnabled = isOptionSelected && isTimeSelected
+        let isEnabled = model?.isValid() ?? false
 
         if let addNewPillView = parent as? AddNewPillViewController {
             addNewPillView.nextButton.isEnabled = isEnabled

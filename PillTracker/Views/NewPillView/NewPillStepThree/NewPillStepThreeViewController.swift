@@ -96,11 +96,15 @@ class NewPillStepThreeViewController: UIViewController {
             sender.backgroundColor = .dBlue
             sender.setTitleColor(.lGray, for: .normal)
         }
+        print("Selected Days: \(model.selectedDays)")
+        updateNextButtonStateStepThree()
     }
     
     @objc
     private func didToggleReminderSwitch(sender: UISwitch) {
         model.isReminderEnabled = sender.isOn
+        
+        updateNextButtonStateStepThree()
     }
     
     // MARK: - Private Methods
@@ -143,5 +147,15 @@ class NewPillStepThreeViewController: UIViewController {
         }
         
         reminderSwitch.isOn = model.isReminderEnabled
+    }
+    
+    func updateNextButtonStateStepThree() {
+        let isEnabled = model.isValid()
+        
+        if let addNewPillView = parent as? AddNewPillViewController {
+            addNewPillView.doneButton.isEnabled = isEnabled
+            addNewPillView.doneButton.alpha = isEnabled ? 1.0 : 0.5
+            print("Done button state updated: \(isEnabled)")
+        }
     }
 }

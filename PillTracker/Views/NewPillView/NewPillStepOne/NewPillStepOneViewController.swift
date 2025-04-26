@@ -187,12 +187,14 @@ class NewPillStepOneViewController: UIViewController {
     }
     
     func updateNextButtonStateStepOne() {
-        let isIconSelected = pillStepOneModel?.selectedIcon != nil
-        let isTitleFilled = !(titleTextField.text?.isEmpty ?? true)
-        let isDosageFilled = !(dosageTextField.text?.isEmpty ?? true)
-        let isUnitSelected = pillStepOneModel?.selectedUnit != nil
+        pillStepOneModel?.title = titleTextField.text
+        if let dosageText = dosageTextField.text, let dosageValue = Double(dosageText) {
+            pillStepOneModel?.dosage = dosageValue
+        } else {
+            pillStepOneModel?.dosage = nil
+        }
         
-        let isEnabled = isIconSelected && isTitleFilled && isDosageFilled && isUnitSelected
+        let isEnabled = pillStepOneModel?.isValid() ?? false
         
         if let addNewPillView = parent as? AddNewPillViewController {
             addNewPillView.nextButton.isEnabled = isEnabled

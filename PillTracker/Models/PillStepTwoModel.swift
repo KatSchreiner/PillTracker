@@ -11,4 +11,8 @@ struct PillStepTwoModel {
     var selectedTimes: [(hour: String, minute: String)] = []
     var selectedOption: String?
     var selectedIcon: UIImage?
+    
+    func isValid() -> Bool {
+        return !selectedTimes.isEmpty && selectedOption != nil
+    }
 }

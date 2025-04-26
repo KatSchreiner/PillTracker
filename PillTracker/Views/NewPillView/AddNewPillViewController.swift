@@ -36,7 +36,7 @@ final class AddNewPillViewController: UIViewController {
     
     lazy var nextButton: UIButton = createControlButton(title: "Далее", action: #selector(goToNextStep))
     private lazy var backButton: UIButton = createControlButton(title: "Назад", action: #selector(goToPreviousStep))
-    private lazy var doneButton: UIButton = createControlButton(title: "Готово", action: #selector(didTapDoneButton))
+    lazy var doneButton: UIButton = createControlButton(title: "Готово", action: #selector(didTapDoneButton))
     private lazy var cancelButton: UIButton = createControlButton(title: "Отмена", action: #selector(didTapCancelButton))
     
     private var currentStep: AddPillStep = .stepOne
@@ -53,7 +53,7 @@ final class AddNewPillViewController: UIViewController {
     @objc
     private func didTapDoneButton() {
         doneButton.animatePress()
-
+        
         moveToStepThree()
         
         let pill = Pill(
@@ -88,7 +88,7 @@ final class AddNewPillViewController: UIViewController {
     @objc
     private func didTapCancelButton() {
         cancelButton.animatePress()
-
+        
         navigationController?.popViewController(animated: true)
     }
     
@@ -133,7 +133,7 @@ final class AddNewPillViewController: UIViewController {
     private func dismissKeyboard() {
         view.endEditing(true)
     }
-
+    
     // MARK: - Private Methods
     private func setupView() {
         view.backgroundColor = .systemBackground
@@ -147,7 +147,7 @@ final class AddNewPillViewController: UIViewController {
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
-
+        
         addConstraint()
         updateProgress()
     }
@@ -158,7 +158,7 @@ final class AddNewPillViewController: UIViewController {
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
     }
-
+    
     private func addConstraint() {
         NSLayoutConstraint.activate([
             progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
@@ -175,12 +175,12 @@ final class AddNewPillViewController: UIViewController {
             backButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             backButton.widthAnchor.constraint(equalToConstant: 150),
             backButton.heightAnchor.constraint(equalToConstant: 60),
-
+            
             nextButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             nextButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             nextButton.widthAnchor.constraint(equalToConstant: 150),
             nextButton.heightAnchor.constraint(equalToConstant: 60),
-
+            
             cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             cancelButton.widthAnchor.constraint(equalToConstant: 150),
@@ -192,7 +192,7 @@ final class AddNewPillViewController: UIViewController {
             doneButton.heightAnchor.constraint(equalToConstant: 60),
         ])
     }
-
+    
     private func createControlButton(title: String, action: Selector) -> UIButton {
         let button = UIButton()
         button.setTitle(title, for: .normal)
@@ -256,14 +256,6 @@ private extension AddNewPillViewController {
         }
         
         addContainerStepView(basicView: newPillView, isMovingForward: isMovingForward)
-        
-        if let stepTwoVC = newPillView as? NewPillStepTwoViewController {
-            stepTwoVC.updateNextButtonStateStepTwo()
-        }
-        
-        if let stepOneVC = newPillView as? NewPillStepOneViewController {
-            stepOneVC.updateNextButtonStateStepOne()
-        }
     }
     
     func addContainerStepView(basicView: UIViewController, isMovingForward: Bool) {
@@ -293,63 +285,57 @@ private extension AddNewPillViewController {
     
     private func updateControlsButton() {
         let duration: TimeInterval = 0.3
-
-        self.nextButton.isEnabled = false
-        self.nextButton.alpha = 0.5
-        self.nextButton.isHidden = false
         
-        if currentStep == .stepOne {
-            self.cancelButton.isHidden = false
-            self.cancelButton.alpha = 0.0
-            UIView.animate(withDuration: duration) {
-                self.cancelButton.alpha = 1.0
-            }
+        switch currentStep {
+        case .stepOne:
+            cancelButton.isHidden = false
+            
+            nextButton.isHidden = false
+            
+            nextButton.isEnabled = pillStepOneModel.isValid()
+            nextButton.alpha = nextButton.isEnabled ? 1.0 : 0.5
+            
             UIView.animate(withDuration: duration) {
                 self.backButton.alpha = 0.0
+                self.cancelButton.alpha = 1.0
             } completion: { _ in
                 self.backButton.isHidden = true
-                self.backButton.alpha = 1.0
             }
-        } else {
+            
+            doneButton.isHidden = true
+            
+        case .stepTwo:
+            backButton.isHidden = false
+            nextButton.isHidden = false
+            
+            nextButton.isEnabled = pillStepTwoModel.isValid()
+            nextButton.alpha = nextButton.isEnabled ? 1.0 : 0.5
+            
             UIView.animate(withDuration: duration) {
                 self.cancelButton.alpha = 0.0
+                self.backButton.alpha = 1.0
+                self.doneButton.alpha = 0.0
             } completion: { _ in
                 self.cancelButton.isHidden = true
-                self.cancelButton.alpha = 1.0
             }
+            
+            doneButton.isHidden = true
+            
+        case .stepThree:
+            backButton.isHidden = false
+            doneButton.isHidden = false
+            
+            doneButton.isEnabled = pillStepThreeModel.isValid()
+            doneButton.alpha = doneButton.isEnabled ? 1.0 : 0.5
+            
             UIView.animate(withDuration: duration) {
-                self.backButton.alpha = 1.0
-                self.backButton.isHidden = false
+                self.nextButton.alpha = 0.0
+                self.doneButton.alpha = 0.5
+            } completion: { _ in
+                self.nextButton.isHidden = true
+                
             }
         }
-
-        if currentStep == .stepThree {
-                self.doneButton.isHidden = false
-                self.doneButton.alpha = 0.0
-                UIView.animate(withDuration: duration) {
-                    self.doneButton.alpha = 1.0
-                }
-                self.nextButton.isHidden = true
-            } else {
-                self.doneButton.isHidden = true
-                self.doneButton.alpha = 0.0
-
-                if currentStep == .stepTwo {
-                    if let stepTwoVC = currentChildVC as? NewPillStepTwoViewController {
-                        let isOptionSelected = stepTwoVC.model?.selectedOption != nil
-                        let isTimeSelected = stepTwoVC.model?.selectedTimes != nil
-                        self.nextButton.isEnabled = isOptionSelected && isTimeSelected
-                    }
-                } else if currentStep == .stepOne {
-                    if let stepOneVC = currentChildVC as? NewPillStepOneViewController {
-                        let isTitleValid = !(stepOneVC.titleTextField.text?.isEmpty ?? true)
-                        let isDosageValid = Double(stepOneVC.dosageTextField.text ?? "") != nil
-                        self.nextButton.isEnabled = isTitleValid && isDosageValid
-                    }
-                }
-
-                self.nextButton.alpha = self.nextButton.isEnabled ? 1.0 : 0.5
-            }
     }
     
     func updateProgress() {

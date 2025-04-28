@@ -19,25 +19,47 @@ class WelcomeViewController: UIViewController {
         return textField
     }()
     
+    private lazy var nextButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "nextButton"), for: .normal)
+        button.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var stackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [nameTextField, nextButton])
+        stackView.axis = .horizontal
+        stackView.spacing = 20
+        return stackView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
     }
     
+    @objc
+    private func didTapNextButton() {
+        if let name = nameTextField.text, !name.isEmpty {
+            let myPillsView = MyPillsViewController()
+            myPillsView.userName = name
+            navigationController?.pushViewController(myPillsView, animated: true)
+        }
+    }
+    
     private func setupView() {
         view.backgroundColor = .lGray
         
-        [nameTextField].forEach { view in
-            self.view.addSubview(view)
-            view.translatesAutoresizingMaskIntoConstraints = false
-        }
+        view.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            nameTextField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            nameTextField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            nameTextField.heightAnchor.constraint(equalToConstant: 60),
-            nameTextField.widthAnchor.constraint(equalToConstant: 250),
+            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
+        
+        nameTextField.heightAnchor.constraint(equalToConstant: 60).isActive = true
     }
 }
 
@@ -51,5 +73,15 @@ extension WelcomeViewController: UITextFieldDelegate {
         
         textField.resignFirstResponder()
         return true
+    }
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        let newImageName = textField.text?.isEmpty == false ? "nextButtonTap" : "nextButton"
+        let newImage = UIImage(named: newImageName)
+        
+        UIView.transition(with: nextButton, duration: 1.0, options: .transitionCrossDissolve, animations: {
+            self.nextButton.setImage(newImage, for: .normal
+            )
+        }, completion: nil)
     }
 }

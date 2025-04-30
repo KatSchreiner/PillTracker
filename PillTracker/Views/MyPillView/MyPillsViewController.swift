@@ -13,6 +13,8 @@ class MyPillsViewController: UIViewController {
     
     // MARK: - Private Properties
     private var pills: [Pill] = []
+    private let pillStore = PillStore()
+    private let userStore = UserStore()
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -72,6 +74,11 @@ class MyPillsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
+        loadPills()
+        
+        if userStore.fetchUser() != nil, let userName = userName {
+            userStore.saveUser(name: userName)
+        }
     }
     
     // MARK: - IB Actions
@@ -172,6 +179,11 @@ class MyPillsViewController: UIViewController {
         swipeRight.direction = .right
         view.addGestureRecognizer(swipeRight)
     }
+    
+    private func loadPills() {
+        pills = pillStore.fetchPills()
+        tableView.reloadData()
+    }
 }
 
 // MARK: - WeeklyCalendarViewDelegate
@@ -238,6 +250,7 @@ extension MyPillsViewController: UITableViewDelegate {
 extension MyPillsViewController: AddNewPillDelegate {
     func didAddPill(_ pill: Pill) {
         pills.append(pill)
+        pillStore.savePill(pill: pill)
         tableView.reloadData()
     }
 }

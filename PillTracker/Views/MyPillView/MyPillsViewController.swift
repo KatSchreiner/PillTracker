@@ -75,10 +75,7 @@ class MyPillsViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         loadPills()
-        
-        if userStore.fetchUser() != nil, let userName = userName {
-            userStore.saveUser(name: userName)
-        }
+        loadUser()
     }
     
     // MARK: - IB Actions
@@ -183,6 +180,14 @@ class MyPillsViewController: UIViewController {
     private func loadPills() {
         pills = pillStore.fetchPills()
         tableView.reloadData()
+    }
+    
+    private func loadUser() {
+        if let existingUser  = userStore.fetchUser () {
+            userNameLabel.text = "Привет, \(existingUser .name ?? "друг")!"
+        } else {
+            userNameLabel.text = "Привет, друг!"
+        }
     }
 }
 

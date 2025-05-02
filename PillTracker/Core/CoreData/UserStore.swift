@@ -44,6 +44,11 @@ final class UserStore: NSObject {
     }
     
     func saveUser (name: String) {
+        if let existingUser  = fetchUserByName(name) {
+            print("Пользователь '\(existingUser .name ?? "неизвестный")' уже существует.")
+            return
+        }
+        
         let user = UserCoreData(context: context)
         user.name = name
         
@@ -56,11 +61,26 @@ final class UserStore: NSObject {
     }
     
     func fetchUser () -> UserCoreData? {
-        if let user = fetchedResultsController.fetchedObjects?.first {
-            print("Пользователь '\(user.name ?? "неизвестный")' успешно загружен.")
-            return user
-        } else {
-            print("Пользователь не найден.")
+        let fetchRequest: NSFetchRequest<UserCoreData> = UserCoreData.fetchRequest()
+        
+        do {
+            let users = try context.fetch(fetchRequest)
+            return users.first 
+        } catch {
+            print("Ошибка при выполнении fetch: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    private func fetchUserByName(_ name: String) -> UserCoreData? {
+        let fetchRequest: NSFetchRequest<UserCoreData> = UserCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "name == %@", name)
+        
+        do {
+            let users = try context.fetch(fetchRequest)
+            return users.first
+        } catch {
+            print("Ошибка при выполнении fetch: \(error.localizedDescription)")
             return nil
         }
     }

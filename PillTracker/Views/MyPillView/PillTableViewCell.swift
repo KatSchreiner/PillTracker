@@ -41,6 +41,20 @@ class PillTableViewCell: UITableViewCell {
         return label
     }()
     
+    let markAsTakenButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.layer.cornerRadius = 5
+        button.setImage(UIImage(named: "doneButton"), for: .normal)
+        return button
+    }()
+    
+    var markAsTakenButtonAction: (() -> Void)?
+    
+    @objc private func didTapMarkAsTaken() {
+        
+        markAsTakenButtonAction?()
+    }
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupView()
@@ -51,10 +65,18 @@ class PillTableViewCell: UITableViewCell {
     }
     
     private func setupView() {
-        [pillTimeLabel, pillImageView, pillNameLabel, dosageLabel, howToTakeLabel].forEach { contentView in
+        self.backgroundColor = UIColor.white
+
+        self.applyShadow()
+        
+        self.selectionStyle = .none
+        
+        [pillTimeLabel, pillImageView, pillNameLabel, dosageLabel, howToTakeLabel, markAsTakenButton].forEach { contentView in
             self.contentView.addSubview(contentView)
             contentView.translatesAutoresizingMaskIntoConstraints = false
         }
+        
+        markAsTakenButton.addTarget(self, action: #selector(didTapMarkAsTaken), for: .touchUpInside)
         
         addConstraint()
     }
@@ -80,7 +102,12 @@ class PillTableViewCell: UITableViewCell {
             howToTakeLabel.leadingAnchor.constraint(equalTo: pillNameLabel.leadingAnchor),
             howToTakeLabel.topAnchor.constraint(equalTo: dosageLabel.bottomAnchor, constant: 5),
             howToTakeLabel.trailingAnchor.constraint(equalTo: pillNameLabel.trailingAnchor),
-            howToTakeLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10)
+            howToTakeLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
+            
+            markAsTakenButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
+            markAsTakenButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            markAsTakenButton.widthAnchor.constraint(equalToConstant: 50),
+            markAsTakenButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
@@ -90,5 +117,14 @@ class PillTableViewCell: UITableViewCell {
         pillNameLabel.text = pill.name
         dosageLabel.text = "\(pill.dosage) \(pill.unit)"
         howToTakeLabel.text = "\(pill.howToTake)"
+    }
+    
+    func setTaken(_ taken: Bool) {
+        let imageName = taken ? "doneButtonTap" : "doneButton"
+        let newImage = UIImage(named: imageName)
+        
+        UIView.transition(with: markAsTakenButton, duration: 0.3, options: .transitionCrossDissolve, animations: {
+            self.markAsTakenButton.setImage(newImage, for: .normal)
+        }, completion: nil)
     }
 }

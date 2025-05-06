@@ -14,6 +14,6 @@ struct Pill {
     let dosage: Double
     let unit: String
     let howToTake: String
-    let times: [(hour: String, minute: String)]
+    var times: [(hour: String, minute: String)]
     var selectedDays: Set<Int>
 }

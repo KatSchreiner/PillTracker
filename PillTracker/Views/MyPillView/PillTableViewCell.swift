@@ -32,26 +32,31 @@ class PillTableViewCell: UITableViewCell {
     private let dosageLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = .gray
         return label
     }()
     
     private let howToTakeLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12)
+        label.textColor = .gray
         return label
     }()
     
     let markAsTakenButton: UIButton = {
         let button = UIButton(type: .custom)
-        button.layer.cornerRadius = 5
-        button.setImage(UIImage(named: "doneButton"), for: .normal)
+        button.layer.cornerRadius = 8
+        button.layer.borderWidth = 1.5
+        button.layer.borderColor = UIColor.gray.cgColor
+        button.backgroundColor = .clear
+        button.adjustsImageWhenHighlighted = false
+        button.layer.masksToBounds = true
         return button
     }()
     
     var markAsTakenButtonAction: (() -> Void)?
     
     @objc private func didTapMarkAsTaken() {
-        
         markAsTakenButtonAction?()
     }
     
@@ -66,8 +71,6 @@ class PillTableViewCell: UITableViewCell {
     
     private func setupView() {
         self.backgroundColor = UIColor.white
-
-        self.applyShadow()
         
         self.selectionStyle = .none
         
@@ -106,8 +109,8 @@ class PillTableViewCell: UITableViewCell {
             
             markAsTakenButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
             markAsTakenButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            markAsTakenButton.widthAnchor.constraint(equalToConstant: 50),
-            markAsTakenButton.heightAnchor.constraint(equalToConstant: 50)
+            markAsTakenButton.widthAnchor.constraint(equalToConstant: 25),
+            markAsTakenButton.heightAnchor.constraint(equalToConstant: 25)
         ])
     }
     
@@ -117,14 +120,5 @@ class PillTableViewCell: UITableViewCell {
         pillNameLabel.text = pill.name
         dosageLabel.text = "\(pill.dosage) \(pill.unit)"
         howToTakeLabel.text = "\(pill.howToTake)"
-    }
-    
-    func setTaken(_ taken: Bool) {
-        let imageName = taken ? "doneButtonTap" : "doneButton"
-        let newImage = UIImage(named: imageName)
-        
-        UIView.transition(with: markAsTakenButton, duration: 0.3, options: .transitionCrossDissolve, animations: {
-            self.markAsTakenButton.setImage(newImage, for: .normal)
-        }, completion: nil)
     }
 }

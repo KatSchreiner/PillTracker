@@ -24,7 +24,9 @@ class MyPillsViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = .clear
-        tableView.separatorStyle = .none
+        tableView.separatorStyle = .singleLine
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
+        tableView.separatorColor = UIColor.lightGray.withAlphaComponent(0.5)
         return tableView
     }()
     
@@ -50,7 +52,7 @@ class MyPillsViewController: UIViewController {
     lazy var dateLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 20)
+        label.font = UIFont.systemFont(ofSize: 18)
         return label
     }()
     
@@ -143,7 +145,6 @@ class MyPillsViewController: UIViewController {
         dateLabel.text = formatDate(selectedDate)
         
         addConstraint()
-        addSwipeGestures()
     }
     
     private func addConstraint() {
@@ -182,16 +183,6 @@ class MyPillsViewController: UIViewController {
         dateFormatter.dateStyle = .medium
         dateFormatter.locale = Locale(identifier: "ru_RU")
         return dateFormatter.string(from: date)
-    }
-    
-    private func addSwipeGestures() {
-        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleDaySwipe(_:)))
-        swipeLeft.direction = .left
-        view.addGestureRecognizer(swipeLeft)
-        
-        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleDaySwipe(_:)))
-        swipeRight.direction = .right
-        view.addGestureRecognizer(swipeRight)
     }
     
     private func loadPills() {
@@ -238,76 +229,94 @@ extension MyPillsViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: PillTableViewCell.identifier, for: indexPath) as! PillTableViewCell
-
+        
         let pills = filteredPills()
         let times = allTimes(for: pills)
         let currentTime = times[indexPath.row]
-        var currentPill: Pill?
+        guard let currentPill = getPill(for: indexPath.row, from: pills) else {
+            return cell
+        }
+        
+        configureCell(cell, with: currentPill, time: currentTime)
+        setupMarkAsTakenButton(cell, for: currentPill, time: currentTime, indexPath: indexPath)
+        
+        return cell
+    }
+    
+    private func getPill(for rowIndex: Int, from pills: [Pill]) -> Pill? {
         var timeIndex = 0
-
         for pill in pills {
-            if timeIndex + pill.times.count > indexPath.row {
-                currentPill = pill
-                break
+            if timeIndex + pill.times.count > rowIndex {
+                return pill
             }
             timeIndex += pill.times.count
         }
-
-        if let pill = currentPill {
-            cell.configure(with: pill, time: currentTime)
-
-            let isTaken = takenPills.contains(where: { $0.pill.name == pill.name && $0.time.hour == currentTime.hour && $0.time.minute == currentTime.minute && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) })
-
-            let checkmarkImage = UIImage(systemName: "checkmark")
-            let tintColor: UIColor = isTaken ? UIColor.gray : .clear
-            let backgroundColor: UIColor = isTaken ? UIColor.lGray : UIColor.white
-
-            let textColor: UIColor = isTaken ? UIColor.gray : UIColor.black
-
-            cell.contentView.backgroundColor = backgroundColor
-            cell.pillNameLabel.textColor = textColor
-            cell.pillTimeLabel.textColor = textColor
-            cell.markAsTakenButton.tintColor = tintColor
-            cell.markAsTakenButton.setImage(isTaken ? checkmarkImage : nil, for: .normal)
-
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateStyle = .medium
-            dateFormatter.locale = Locale(identifier: "ru_RU")
-
-            cell.markAsTakenButtonAction = { [weak self] in
-                guard let self = self else { return }
-
-                let isTaken = self.takenPills.contains(where: { $0.pill.name == pill.name && $0.time.hour == currentTime.hour && $0.time.minute == currentTime.minute && Calendar.current.isDate($0.date, inSameDayAs: self.selectedDate) })
-
-                let newTintColor: UIColor = isTaken ? .clear : .gray
-                let newBackgroundColor: UIColor = isTaken ? UIColor.white : UIColor.lGray
-
-                UIView.animate(withDuration: 0.3, animations: {
-                    cell.contentView.backgroundColor = newBackgroundColor
-                    cell.markAsTakenButton.tintColor = newTintColor
-                }) { _ in
-                    UIView.transition(with: cell.markAsTakenButton, duration: 0.3, options: [.transitionCrossDissolve], animations: {
-                        cell.markAsTakenButton.setImage(isTaken ? nil : checkmarkImage, for: .normal)
-                    }, completion: nil)
-                }
-
-                if isTaken {
-                    self.takenPills.removeAll(where: { $0.pill.name == pill.name && $0.time.hour == currentTime.hour && $0.time.minute == currentTime.minute && Calendar.current.isDate($0.date, inSameDayAs: self.selectedDate) })
-                    print("❌ Отмена отметки: \(pill.name) в \(currentTime.hour):\(currentTime.minute) на \(dateFormatter.string(from: self.selectedDate))")
-                } else {
-                    let newTakenPill = TakenPills(pill: pill, time: currentTime, date: self.selectedDate)
-                    self.takenPills.append(newTakenPill)
-                    print("✅ Отметка как выпитое: \(pill.name) в \(currentTime.hour):\(currentTime.minute) на \(dateFormatter.string(from: self.selectedDate))")
-                }
-
-                tableView.reloadRows(at: [indexPath], with: .automatic)
-                print("⚠️ Текущие отмеченные лекарства: \(self.takenPills.map { $0.pill.name }) на \(dateFormatter.string(from: self.selectedDate))")
-            }
-        }
-
-        return cell
+        return nil
     }
-
+    
+    private func configureCell(_ cell: PillTableViewCell, with pill: Pill, time: (hour: String, minute: String)) {
+        cell.configure(with: pill, time: time)
+        
+        let isTaken = takenPills.contains(where: { $0.pill.name == pill.name && $0.time.hour == time.hour && $0.time.minute == time.minute && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) })
+        
+        let checkmarkImage = UIImage(systemName: "checkmark")
+        let tintColor: UIColor = isTaken ? UIColor.gray : .clear
+        let textColor: UIColor = isTaken ? UIColor.gray : UIColor.black
+        
+        cell.pillNameLabel.textColor = textColor
+        cell.pillTimeLabel.textColor = textColor
+        cell.markAsTakenButton.tintColor = tintColor
+        cell.markAsTakenButton.setImage(isTaken ? checkmarkImage : nil, for: .normal)
+        
+        if isTaken {
+                cell.pillImageView.alpha = 0.5
+                cell.pillImageView.tintColor = UIColor.gray
+            } else {
+                cell.pillImageView.alpha = 1.0
+                cell.pillImageView.tintColor = nil
+            }
+    }
+    
+    private func setupMarkAsTakenButton(_ cell: PillTableViewCell, for pill: Pill, time: (hour: String, minute: String), indexPath: IndexPath) {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        
+        cell.markAsTakenButtonAction = { [weak self] in
+            guard let self = self else { return }
+            
+            let isTaken = self.takenPills.contains(where: { $0.pill.name == pill.name && $0.time.hour == time.hour && $0.time.minute == time.minute && Calendar.current.isDate($0.date, inSameDayAs: self.selectedDate) })
+            
+            let newTintColor: UIColor = isTaken ? .clear : .gray
+            let newImage: UIImage? = isTaken ? nil : UIImage(systemName: "checkmark")
+            
+            if isTaken {
+                self.takenPills.removeAll(where: { $0.pill.name == pill.name && $0.time.hour == time.hour && $0.time.minute == time.minute && Calendar.current.isDate($0.date, inSameDayAs: self.selectedDate) })
+                print("❌ Отмена отметки: \(pill.name) в \(time.hour):\(time.minute) на \(dateFormatter.string(from: self.selectedDate))")
+            } else {
+                let newTakenPill = TakenPills(pill: pill, time: time, date: self.selectedDate)
+                self.takenPills.append(newTakenPill)
+                print("✅ Отметка как выпитое: \(pill.name) в \(time.hour):\(time.minute) на \(dateFormatter.string(from: self.selectedDate))")
+            }
+            
+            UIView.animate(withDuration: 0.3, animations: {
+                cell.markAsTakenButton.tintColor = newTintColor
+            }) { _ in
+                UIView.transition(with: cell.markAsTakenButton, duration: 0.3, options: [.transitionCrossDissolve], animations: {
+                    cell.markAsTakenButton.setImage(newImage, for: .normal)
+                }, completion: nil)
+            }
+            
+            self.tableView.reloadRows(at: [indexPath], with: .automatic)
+            print("⚠️ Текущие отмеченные лекарства: \(self.takenPills.map { $0.pill.name }) на \(dateFormatter.string(from: self.selectedDate))")
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let isLastRow = indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1
+        cell.separatorInset = isLastRow ? UIEdgeInsets(top: 0, left: tableView.bounds.width, bottom: 0, right: 0) : .zero
+    }
+    
 }
 
 // MARK: – UITableViewDelegate
@@ -345,7 +354,7 @@ extension MyPillsViewController: UITableViewDelegate {
         action.backgroundColor = (style == .destructive) ? .lRed : .dBlue
         return action
     }
-    
+
     private func handleDeleteAction(at indexPath: IndexPath, in tableView: UITableView, completionHandler: @escaping (Bool) -> Void) {
         let weekDay = (Calendar.current.component(.weekday, from: selectedDate) + 5) % 7 + 1
         let filteredPills = pills.filter { $0.selectedDays.contains(weekDay) }
@@ -355,21 +364,69 @@ extension MyPillsViewController: UITableViewDelegate {
             return
         }
         
-        if let indexInPills = pills.firstIndex(where: { $0.name == pillToRemove.name }) {
-            tableView.beginUpdates()
-            if timesCount > 1 {
-                pills[indexInPills].times.remove(at: indexPath.row - timeIndex)
-                tableView.deleteRows(at: [indexPath], with: .automatic)
-            } else {
-                pills.remove(at: indexInPills)
-                let indexPathsToDelete = (0..<timesCount).map { IndexPath(row: timeIndex + $0, section: 0) }
-                tableView.deleteRows(at: indexPathsToDelete, with: .automatic)
-            }
-            tableView.endUpdates()
+        guard timesCount <= pillToRemove.times.count else {
+            print("Error: timesCount \(timesCount) exceeds pillToRemove.times.count \(pillToRemove.times.count)")
+            completionHandler(false)
+            return
         }
         
-        completionHandler(true)
+        let timesSlice = pillToRemove.times[0..<timesCount]
+        let formattedTimes = timesSlice.map { "\($0.hour):\($0.minute)" }.joined(separator: ", ")
+        
+        let relativeIndex = indexPath.row - timeIndex
+        guard relativeIndex >= 0, relativeIndex < pillToRemove.times.count else {
+            print("Error: relativeIndex \(relativeIndex) out of bounds for times.count: \(pillToRemove.times.count)")
+            completionHandler(false)
+            return
+        }
+        
+        let deleteAlertView = DeleteAlertViewController()
+        deleteAlertView.titleText = "Удалить \(pillToRemove.name)"
+        deleteAlertView.tableView = tableView
+        
+        deleteAlertView.onDeleteSingleDose = { [weak self] in
+            guard let self = self else { return }
+            if let indexInPills = self.pills.firstIndex(where: { $0.name == pillToRemove.name }) {
+                self.tableView.beginUpdates()
+                if relativeIndex < self.pills[indexInPills].times.count {
+                    self.pills[indexInPills].times.remove(at: relativeIndex)
+                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                } else {
+                    print("Error: relativeIndex \(relativeIndex) out of bounds for pills[indexInPills].times")
+                }
+                self.tableView.endUpdates()
+                completionHandler(true)
+            } else {
+                completionHandler(false)
+            }
+        }
+        
+        deleteAlertView.onDeleteFutureDoses = { [weak self] in
+            guard let self = self else { return }
+            if let indexInPills = self.pills.firstIndex(where: { $0.name == pillToRemove.name }) {
+                self.tableView.beginUpdates()
+                self.pills.remove(at: indexInPills)
+                let indexPathsToDelete = (0..<timesCount).map { IndexPath(row: timeIndex + $0, section: 0) }
+                self.tableView.deleteRows(at: indexPathsToDelete, with: .automatic)
+                self.tableView.endUpdates()
+                completionHandler(true)
+            } else {
+                completionHandler(false)
+            }
+        }
+        
+        deleteAlertView.onCancel = { [weak self] in
+            guard let self = self else { return }
+            self.tableView.setEditing(false, animated: true)
+            completionHandler(false)
+        }
+        
+        deleteAlertView.modalPresentationStyle = .custom
+        deleteAlertView.transitioningDelegate = self
+        
+        present(deleteAlertView, animated: true, completion: nil)
     }
+
     
     private func handleEditAction(at indexPath: IndexPath) {
         let weekDay = (Calendar.current.component(.weekday, from: selectedDate) + 5) % 7 + 1
@@ -399,11 +456,21 @@ extension MyPillsViewController: UITableViewDelegate {
 }
 
 
+
+
 // MARK: - AddNewPillDelegate
 extension MyPillsViewController: AddNewPillDelegate {
     func didAddPill(_ pill: Pill) {
         pills.append(pill)
         pillStore.savePill(pill: pill)
         tableView.reloadData()
+    }
+}
+
+extension MyPillsViewController: UIViewControllerTransitioningDelegate {
+    func presentationController(forPresented presented: UIViewController,
+                                presenting: UIViewController?,
+                                source: UIViewController) -> UIPresentationController? {
+        return CustomPresentationController(presentedViewController: presented, presenting: presenting)
     }
 }

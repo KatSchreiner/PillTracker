@@ -9,21 +9,21 @@ import UIKit
 
 class PillTableViewCell: UITableViewCell {
     static let identifier = "PillTableViewCell"
-    
-    private let pillTimeLabel: UILabel = {
+        
+    let pillTimeLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.textAlignment = .center
         return label
     }()
     
-    private let pillImageView: UIImageView = {
+    let pillImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
-    private let pillNameLabel: UILabel = {
+    let pillNameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 16)
         return label
@@ -73,7 +73,7 @@ class PillTableViewCell: UITableViewCell {
         self.backgroundColor = UIColor.white
         
         self.selectionStyle = .none
-        
+                
         [pillTimeLabel, pillImageView, pillNameLabel, dosageLabel, howToTakeLabel, markAsTakenButton].forEach { contentView in
             self.contentView.addSubview(contentView)
             contentView.translatesAutoresizingMaskIntoConstraints = false
@@ -86,7 +86,7 @@ class PillTableViewCell: UITableViewCell {
     
     private func addConstraint() {
         NSLayoutConstraint.activate([
-            pillTimeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
+            pillTimeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             pillTimeLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             pillTimeLabel.widthAnchor.constraint(equalToConstant: 80),
             
@@ -107,7 +107,7 @@ class PillTableViewCell: UITableViewCell {
             howToTakeLabel.trailingAnchor.constraint(equalTo: pillNameLabel.trailingAnchor),
             howToTakeLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
             
-            markAsTakenButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
+            markAsTakenButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             markAsTakenButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             markAsTakenButton.widthAnchor.constraint(equalToConstant: 25),
             markAsTakenButton.heightAnchor.constraint(equalToConstant: 25)

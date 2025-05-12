@@ -64,6 +64,9 @@ class CustomPresentationController: UIPresentationController {
     
     @objc
     private func dimmingViewTapped() {
+        if let deleteAlertVC = presentedViewController as? DeleteAlertViewController {
+            deleteAlertVC.onCancel?()
+        }
         presentedViewController.dismiss(animated: true, completion: nil)
     }
 }

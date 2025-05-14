@@ -34,6 +34,14 @@ final class AddNewPillViewController: UIViewController {
         return container
     }()
     
+    private lazy var buttonStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.distribution = .fillEqually
+        stackView.spacing = 20
+        return stackView
+    }()
+    
     lazy var nextButton: UIButton = createControlButton(title: "Далее", action: #selector(goToNextStep))
     private lazy var backButton: UIButton = createControlButton(title: "Назад", action: #selector(goToPreviousStep))
     lazy var doneButton: UIButton = createControlButton(title: "Готово", action: #selector(didTapDoneButton))
@@ -56,12 +64,14 @@ final class AddNewPillViewController: UIViewController {
         
         moveToStepThree()
         
+        let formattedUnitTitle = String.getUnitTitle(for: pillStepOneModel.dosage ?? 0.0, unit: pillStepOneModel.selectedUnit ?? "")
+
         let pill = Pill(
             id: UUID(),
             icon: pillStepOneModel.selectedIcon,
             name: pillStepOneModel.title ?? "",
             dosage: pillStepOneModel.dosage ?? 0.0,
-            unit: pillStepOneModel.selectedUnit ?? "",
+            unit: formattedUnitTitle,
             howToTake: pillStepTwoModel.selectedOption ?? "",
             times: pillStepTwoModel.selectedTimes,
             selectedDays: pillStepThreeModel.selectedDays
@@ -142,7 +152,10 @@ final class AddNewPillViewController: UIViewController {
         nextButton.alpha = 0.5
         nextButton.isEnabled = false
         
-        [progressView, containerView, backButton, nextButton, cancelButton, doneButton].forEach { [weak self] view in
+        buttonStackView.addArrangedSubview(cancelButton)
+        buttonStackView.addArrangedSubview(nextButton)
+        
+        [progressView, containerView, buttonStackView].forEach { [weak self] view in
             guard let self = self else { return }
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
@@ -171,25 +184,11 @@ final class AddNewPillViewController: UIViewController {
             containerView.bottomAnchor.constraint(equalTo: nextButton.topAnchor, constant: -20),
             containerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 100),
             
-            backButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            backButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            backButton.widthAnchor.constraint(equalToConstant: 150),
-            backButton.heightAnchor.constraint(equalToConstant: 60),
-            
-            nextButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            nextButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            nextButton.widthAnchor.constraint(equalToConstant: 150),
-            nextButton.heightAnchor.constraint(equalToConstant: 60),
-            
-            cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            cancelButton.widthAnchor.constraint(equalToConstant: 150),
-            cancelButton.heightAnchor.constraint(equalToConstant: 60),
-            
-            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            doneButton.widthAnchor.constraint(equalToConstant: 150),
-            doneButton.heightAnchor.constraint(equalToConstant: 60),
+            buttonStackView.topAnchor.constraint(equalTo: containerView.bottomAnchor, constant: 20),
+            buttonStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            buttonStackView.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
     
@@ -295,6 +294,10 @@ private extension AddNewPillViewController {
             nextButton.isEnabled = pillStepOneModel.isValid()
             nextButton.alpha = nextButton.isEnabled ? 1.0 : 0.5
             
+            buttonStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            buttonStackView.addArrangedSubview(cancelButton)
+            buttonStackView.addArrangedSubview(nextButton)
+            
             UIView.animate(withDuration: duration) {
                 self.backButton.alpha = 0.0
                 self.cancelButton.alpha = 1.0
@@ -310,6 +313,10 @@ private extension AddNewPillViewController {
             
             nextButton.isEnabled = pillStepTwoModel.isValid()
             nextButton.alpha = nextButton.isEnabled ? 1.0 : 0.5
+            
+            buttonStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            buttonStackView.addArrangedSubview(backButton)
+            buttonStackView.addArrangedSubview(nextButton)
             
             UIView.animate(withDuration: duration) {
                 self.cancelButton.alpha = 0.0
@@ -327,6 +334,10 @@ private extension AddNewPillViewController {
             
             doneButton.isEnabled = pillStepThreeModel.isValid()
             doneButton.alpha = doneButton.isEnabled ? 1.0 : 0.5
+            
+            buttonStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            buttonStackView.addArrangedSubview(backButton)
+            buttonStackView.addArrangedSubview(doneButton)
             
             UIView.animate(withDuration: duration) {
                 self.nextButton.alpha = 0.0

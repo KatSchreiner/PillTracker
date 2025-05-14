@@ -118,7 +118,13 @@ class PillTableViewCell: UITableViewCell {
         pillTimeLabel.text = "\(time.hour):\(time.minute)"
         pillImageView.image = pill.icon
         pillNameLabel.text = pill.name
-        dosageLabel.text = "\(pill.dosage) \(pill.unit)"
+        
+        if pill.dosage.truncatingRemainder(dividingBy: 1) == 0 {
+            dosageLabel.text = "\(Int(pill.dosage)) \(pill.unit)"
+        } else {
+            dosageLabel.text = "\(pill.dosage) \(pill.unit)"
+        }
+        
         howToTakeLabel.text = "\(pill.howToTake)"
     }
 }

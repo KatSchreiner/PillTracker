@@ -61,44 +61,16 @@ final class AddNewPillViewController: UIViewController {
     @objc
     private func didTapDoneButton() {
         doneButton.animatePress()
-        
         moveToStepThree()
-        
-        let formattedUnitTitle = String.getUnitTitle(for: pillStepOneModel.dosage ?? 0.0, unit: pillStepOneModel.selectedUnit ?? "")
-
-        let pill = Pill(
-            id: UUID(),
-            icon: pillStepOneModel.selectedIcon,
-            name: pillStepOneModel.title ?? "",
-            dosage: pillStepOneModel.dosage ?? 0.0,
-            unit: formattedUnitTitle,
-            howToTake: pillStepTwoModel.selectedOption ?? "",
-            times: pillStepTwoModel.selectedTimes,
-            selectedDays: pillStepThreeModel.selectedDays
-        )
-        
+        let pill = createPill()
         delegate?.didAddPill(pill)
-        
-        print("Данные переданы:")
-        print("ID лекарства: \(pill.id)")
-        print("Иконка: \(pillStepOneModel.selectedIcon?.description ?? "nil")")
-        print("Название лекарства: \(pillStepOneModel.title ?? "nil")")
-        print("Дозировка: \(pillStepOneModel.dosage ?? 0.0)")
-        print("Единица измерения: \(pillStepOneModel.selectedUnit ?? "nil")")
-        
-        print("Время приема: \(String(describing: pillStepTwoModel.selectedTimes))")
-        print("Как принимать: \(pillStepTwoModel.selectedOption ?? "nil")")
-        
-        print("Выбранные дни: \(pillStepThreeModel.selectedDays)")
-        print("Напомнить: \(pillStepThreeModel.isReminderEnabled)")
-        
+        printPillDetails(pill)
         navigationController?.popViewController(animated: true)
     }
     
     @objc
     private func didTapCancelButton() {
         cancelButton.animatePress()
-        
         navigationController?.popViewController(animated: true)
     }
     
@@ -106,18 +78,9 @@ final class AddNewPillViewController: UIViewController {
     private func goToNextStep() {
         nextButton.animatePress()
         
-        guard let currentIndex = AddPillStep.allCases.firstIndex(of: currentStep),
-              currentIndex < AddPillStep.allCases.count - 1 else { return }
+        guard let currentIndex = AddPillStep.allCases.firstIndex(of: currentStep), currentIndex < AddPillStep.allCases.count - 1 else { return }
         
-        if currentStep == .stepOne {
-            moveToStepOne()
-        } else if currentStep == .stepTwo {
-            moveToStepTwo()
-        }
-        
-        currentStep = AddPillStep.allCases[currentIndex + 1]
-        showStepViewController(for: currentStep, isMovingForward: true)
-        updateProgress()
+        updateCurrentStep(to: currentIndex + 1)
     }
     
     @objc
@@ -126,17 +89,7 @@ final class AddNewPillViewController: UIViewController {
         
         guard let currentIndex = AddPillStep.allCases.firstIndex(of: currentStep), currentIndex > 0 else { return }
         
-        if currentStep == .stepThree {
-            moveToStepThree()
-        }
-        
-        if currentStep == .stepTwo {
-            moveToStepTwo()
-        }
-        
-        currentStep = AddPillStep.allCases[currentIndex - 1]
-        showStepViewController(for: currentStep, isMovingForward: false)
-        updateProgress()
+        updateCurrentStep(to: currentIndex - 1)
     }
     
     @objc
@@ -149,18 +102,13 @@ final class AddNewPillViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setupNavigation()
         
-        nextButton.alpha = 0.5
-        nextButton.isEnabled = false
-        
-        buttonStackView.addArrangedSubview(cancelButton)
-        buttonStackView.addArrangedSubview(nextButton)
-        
         [progressView, containerView, buttonStackView].forEach { [weak self] view in
             guard let self = self else { return }
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
         
+        configureButtons()
         addConstraint()
         updateProgress()
     }
@@ -192,6 +140,18 @@ final class AddNewPillViewController: UIViewController {
         ])
     }
     
+    private func configureButtons() {
+        buttonStackView.addArrangedSubview(cancelButton)
+        buttonStackView.addArrangedSubview(backButton)
+        buttonStackView.addArrangedSubview(nextButton)
+        buttonStackView.addArrangedSubview(doneButton)
+        
+        cancelButton.isHidden = true
+        backButton.isHidden = true
+        nextButton.isHidden = true
+        doneButton.isHidden = true
+    }
+    
     private func createControlButton(title: String, action: Selector) -> UIButton {
         let button = UIButton()
         button.setTitle(title, for: .normal)
@@ -201,36 +161,80 @@ final class AddNewPillViewController: UIViewController {
         return button
     }
     
-    private func moveToStepOne() {
-        if let stepOneVC = currentChildVC as? NewPillStepOneViewController {
-            pillStepOneModel.title = stepOneVC.titleTextField.text
-            if let dosageText = stepOneVC.dosageTextField.text, let dosageValue = Double(dosageText) {
-                pillStepOneModel.dosage = dosageValue
-            } else {
-                pillStepOneModel.dosage = nil
-            }
-            pillStepOneModel.selectedIcon = stepOneVC.formTypesButton.image(for: .normal)
-            pillStepOneModel.selectedUnit = stepOneVC.selectedUnit
+    private func updateCurrentStep(to newIndex: Int) {
+        switch currentStep {
+        case .stepOne:
+            moveToStepOne()
+        case .stepTwo:
+            moveToStepTwo()
+        case .stepThree:
+            moveToStepThree()
         }
+        
+        let isMovingForward = newIndex > AddPillStep.allCases.firstIndex(of: currentStep)!
+        currentStep = AddPillStep.allCases[newIndex]
+        showStepViewController(for: currentStep, isMovingForward: isMovingForward)
+        updateProgress()
+    }
+    
+    private func moveToStepOne() {
+        guard let stepOneVC = currentChildVC as? NewPillStepOneViewController else { return }
+        pillStepOneModel.title = stepOneVC.titleTextField.text
+        
+        if let dosageText = stepOneVC.dosageTextField.text, let dosageValue = Double(dosageText) {
+            pillStepOneModel.dosage = dosageValue
+        } else {
+            pillStepOneModel.dosage = nil
+        }
+        pillStepOneModel.selectedIcon = stepOneVC.formTypesButton.image(for: .normal)
+        pillStepOneModel.selectedUnit = stepOneVC.selectedUnit
     }
     
     private func moveToStepTwo() {
-        if let stepTwoVC = currentChildVC as? NewPillStepTwoViewController {
-            stepTwoVC.updateSelectedTimes()
-            pillStepTwoModel.selectedTimes = stepTwoVC.selectedTimes
-            pillStepTwoModel.selectedIcon = stepTwoVC.model?.selectedIcon
-            pillStepTwoModel.selectedOption = stepTwoVC.model?.selectedOption
-            
-            stepTwoVC.selectedTimes = pillStepTwoModel.selectedTimes
-            stepTwoVC.selectedOption = pillStepTwoModel.selectedOption
-        }
+        guard let stepTwoVC = currentChildVC as? NewPillStepTwoViewController else { return }
+        stepTwoVC.updateSelectedTimes()
+        pillStepTwoModel.selectedTimes = stepTwoVC.selectedTimes
+        pillStepTwoModel.selectedIcon = stepTwoVC.model?.selectedIcon
+        pillStepTwoModel.selectedOption = stepTwoVC.model?.selectedOption
+        
+        stepTwoVC.selectedTimes = pillStepTwoModel.selectedTimes
+        stepTwoVC.selectedOption = pillStepTwoModel.selectedOption
     }
     
     private func moveToStepThree() {
-        if let stepThreeVC = currentChildVC as? NewPillStepThreeViewController {
-            pillStepThreeModel.selectedDays = stepThreeVC.model.selectedDays
-            pillStepThreeModel.isReminderEnabled = stepThreeVC.model.isReminderEnabled
-        }
+        guard let stepThreeVC = currentChildVC as? NewPillStepThreeViewController else { return }
+        pillStepThreeModel.selectedDays = stepThreeVC.model.selectedDays
+        pillStepThreeModel.isReminderEnabled = stepThreeVC.model.isReminderEnabled
+    }
+    
+    private func createPill() -> Pill {
+        let formattedUnitTitle = String.getUnitTitle(
+            for: pillStepOneModel.dosage ?? 0.0,
+            unit: pillStepOneModel.selectedUnit ?? ""
+        )
+        return Pill(
+            id: UUID(),
+            icon: pillStepOneModel.selectedIcon,
+            name: pillStepOneModel.title ?? "",
+            dosage: pillStepOneModel.dosage ?? 0.0,
+            unit: formattedUnitTitle,
+            howToTake: pillStepTwoModel.selectedOption ?? "",
+            times: pillStepTwoModel.selectedTimes,
+            selectedDays: pillStepThreeModel.selectedDays
+        )
+    }
+    
+    private func printPillDetails(_ pill: Pill) {
+        print("Данные переданы:")
+        print("ID лекарства: \(pill.id)")
+        print("Иконка: \(pillStepOneModel.selectedIcon?.description ?? "nil")")
+        print("Название лекарства: \(pillStepOneModel.title ?? "nil")")
+        print("Дозировка: \(pillStepOneModel.dosage ?? 0.0)")
+        print("Единица измерения: \(pillStepOneModel.selectedUnit ?? "nil")")
+        print("Время приема: \(String(describing: pillStepTwoModel.selectedTimes))")
+        print("Как принимать: \(pillStepTwoModel.selectedOption ?? "nil")")
+        print("Выбранные дни: \(pillStepThreeModel.selectedDays)")
+        print("Напомнить: \(pillStepThreeModel.isReminderEnabled)")
     }
 }
 
@@ -283,29 +287,18 @@ private extension AddNewPillViewController {
     }
     
     private func updateControlsButton() {
-        let duration: TimeInterval = 0.3
+        cancelButton.isHidden = true
+        backButton.isHidden = true
+        nextButton.isHidden = true
+        doneButton.isHidden = true
         
         switch currentStep {
         case .stepOne:
             cancelButton.isHidden = false
-            
             nextButton.isHidden = false
             
             nextButton.isEnabled = pillStepOneModel.isValid()
             nextButton.alpha = nextButton.isEnabled ? 1.0 : 0.5
-            
-            buttonStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-            buttonStackView.addArrangedSubview(cancelButton)
-            buttonStackView.addArrangedSubview(nextButton)
-            
-            UIView.animate(withDuration: duration) {
-                self.backButton.alpha = 0.0
-                self.cancelButton.alpha = 1.0
-            } completion: { _ in
-                self.backButton.isHidden = true
-            }
-            
-            doneButton.isHidden = true
             
         case .stepTwo:
             backButton.isHidden = false
@@ -314,39 +307,17 @@ private extension AddNewPillViewController {
             nextButton.isEnabled = pillStepTwoModel.isValid()
             nextButton.alpha = nextButton.isEnabled ? 1.0 : 0.5
             
-            buttonStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-            buttonStackView.addArrangedSubview(backButton)
-            buttonStackView.addArrangedSubview(nextButton)
-            
-            UIView.animate(withDuration: duration) {
-                self.cancelButton.alpha = 0.0
-                self.backButton.alpha = 1.0
-                self.doneButton.alpha = 0.0
-            } completion: { _ in
-                self.cancelButton.isHidden = true
-            }
-            
-            doneButton.isHidden = true
-            
         case .stepThree:
             backButton.isHidden = false
             doneButton.isHidden = false
             
             doneButton.isEnabled = pillStepThreeModel.isValid()
             doneButton.alpha = doneButton.isEnabled ? 1.0 : 0.5
-            
-            buttonStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-            buttonStackView.addArrangedSubview(backButton)
-            buttonStackView.addArrangedSubview(doneButton)
-            
-            UIView.animate(withDuration: duration) {
-                self.nextButton.alpha = 0.0
-                self.doneButton.alpha = 0.5
-            } completion: { _ in
-                self.nextButton.isHidden = true
-                
-            }
         }
+        
+        UIView.transition(with: buttonStackView, duration: 0.5, options: .transitionCrossDissolve, animations: {
+            self.buttonStackView.layoutIfNeeded()
+        }, completion: nil)
     }
     
     func updateProgress() {

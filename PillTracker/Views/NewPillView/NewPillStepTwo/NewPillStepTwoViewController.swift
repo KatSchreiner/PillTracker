@@ -40,12 +40,17 @@ class NewPillStepTwoViewController: UIViewController {
         return label
     }()
     
-    private lazy var timeStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 8
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        return stackView
+    private lazy var timesTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.register(TimeCell.self, forCellReuseIdentifier: TimeCell.identifier)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.separatorStyle = .none
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.backgroundColor = .clear
+        tableView.isScrollEnabled = true
+        tableView.tableFooterView = UIView()
+        return tableView
     }()
     
     private lazy var addTimePickerButton: UIButton = {
@@ -98,9 +103,12 @@ class NewPillStepTwoViewController: UIViewController {
         
         return stackView
     }()
-
-    private var timeLabels: [UILabel] = []
+    
     private var addTimePickerButtonTopConstraint: NSLayoutConstraint!
+    private var timesTableViewHeightConstraint: NSLayoutConstraint!
+    private var maxTimesTableHeight: CGFloat {
+        return view.frame.height - (buttonStackView.frame.height + 40 + 120)
+    }
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -110,42 +118,6 @@ class NewPillStepTwoViewController: UIViewController {
     }
     
     // MARK: - IB Actions
-    @objc
-    private func didTapAddTimePicker() {
-        addTimePickerButton.animatePress()
-        
-        let timePickerView = TimePickerViewController()
-        timePickerView.delegate = self
-        timePickerView.presentAsBottomSheet(on: self)
-    }
-    
-    @objc
-    private func didTapRemoveTimePicker(_ sender: UIButton) {
-        let index = sender.tag
-        
-        guard index < timeLabels.count, index < timeStackView.arrangedSubviews.count else {
-            return
-        }
-        
-        let viewToRemove = timeStackView.arrangedSubviews[index]
-        
-        UIView.animate(withDuration: 0.3, animations: {
-            viewToRemove.alpha = 0
-        }) { _ in
-            self.timeLabels[index].removeFromSuperview()
-            self.timeLabels.remove(at: index)
-            viewToRemove.removeFromSuperview()
-            
-            for i in index..<self.timeStackView.arrangedSubviews.count {
-                if let button = self.timeStackView.arrangedSubviews[i].subviews.last as? UIButton {
-                    button.tag = i
-                }
-            }
-            self.updateSelectedTimes()
-            self.updateNextButtonStateStepTwo()
-        }
-    }
-    
     @objc
     private func optionButtonTapped(_ sender: UIButton) {
         selectedOption = optionData[sender.tag]
@@ -172,27 +144,61 @@ class NewPillStepTwoViewController: UIViewController {
         updateNextButtonStateStepTwo()
     }
     
-    // MARK: - Public Methods
+    @objc
+    private func didTapAddTimePicker() {
+        addTimePickerButton.animatePress()
+        
+        let timePickerView = TimePickerViewController()
+        timePickerView.delegate = self
+        timePickerView.presentAsBottomSheet(on: self)
+    }
     
+    @objc
+    private func didTapRemoveTimeCell(_ sender: UIButton) {
+        let index = sender.tag
+        guard index < selectedTimes.count else { return }
+        selectedTimes.remove(at: index)
+        updateSelectedTimes()
+        updateNextButtonStateStepTwo()
+    }
+    
+    // MARK: - Public Methods
     func updateSelectedTimes() {
-        selectedTimes = []
-        for label in timeLabels {
-            if let timeText = label.text, !timeText.isEmpty {
-                let components = timeText.split(separator: ":")
-                if components.count == 2 {
-                    let hour = String(components[0])
-                    let minute = String(components[1])
-                    selectedTimes.append((hour: hour, minute: minute))
+        selectedTimes = selectedTimes.sorted { (time1, time2) -> Bool in
+            if let hour1 = Int(time1.hour), let hour2 = Int(time2.hour) {
+                if hour1 != hour2 {
+                    return hour1 < hour2
+                }
+                if let minute1 = Int(time1.minute), let minute2 = Int(time2.minute) {
+                    return minute1 < minute2
                 }
             }
+            return false
         }
+        model?.selectedTimes = selectedTimes
+        
+        let rowCount = selectedTimes.count
+        let calculatedHeight = CGFloat(rowCount * 60)
+        
+        timesTableViewHeightConstraint.constant = min(calculatedHeight, maxTimesTableHeight)
+        timesTableView.isScrollEnabled = calculatedHeight > maxTimesTableHeight
+
+        if rowCount > 0 {
+            addTimePickerButtonTopConstraint.constant = 16
+        } else {
+            addTimePickerButtonTopConstraint.constant = 0
+        }
+        
+        timesTableView.reloadData()
+        view.layoutIfNeeded()
     }
+
     
     // MARK: - Private Methods
     private func setupView() {
         view.backgroundColor = .white
         
-        [buttonStackView, timePickerLabel, timeStackView, addTimePickerButton].forEach { view in
+        [buttonStackView, timePickerLabel, timesTableView, addTimePickerButton].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -206,20 +212,24 @@ class NewPillStepTwoViewController: UIViewController {
             buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
             
-            timePickerLabel.topAnchor.constraint(equalTo: buttonStackView.bottomAnchor, constant: 60),
+            timePickerLabel.topAnchor.constraint(equalTo: buttonStackView.bottomAnchor, constant: 40),
             timePickerLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-    
-            timeStackView.topAnchor.constraint(equalTo: timePickerLabel.bottomAnchor, constant: 20),
-            timeStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            timeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            
+            timesTableView.topAnchor.constraint(equalTo: timePickerLabel.bottomAnchor, constant: 20),
+            timesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            timesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
             
             addTimePickerButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             addTimePickerButton.widthAnchor.constraint(equalToConstant: 40),
             addTimePickerButton.heightAnchor.constraint(equalToConstant: 40),
         ])
         
-        addTimePickerButtonTopConstraint = addTimePickerButton.topAnchor.constraint(equalTo: timeStackView.bottomAnchor)
+        addTimePickerButtonTopConstraint = addTimePickerButton.topAnchor.constraint(equalTo: timesTableView.bottomAnchor)
         addTimePickerButtonTopConstraint.isActive = true
+        
+        timesTableViewHeightConstraint = timesTableView.heightAnchor.constraint(equalToConstant: 0)
+        timesTableViewHeightConstraint.isActive = true
+
     }
     
     private func loadData() {
@@ -237,38 +247,13 @@ class NewPillStepTwoViewController: UIViewController {
             }
         }
         
-        timeLabels.forEach { $0.removeFromSuperview() }
-        timeLabels.removeAll()
-        for time in model?.selectedTimes ?? [] {
-            let timeLabel = UILabel()
-            timeLabel.text = "\(time.hour):\(time.minute)"
-            timeLabel.font = UIFont.systemFont(ofSize: 18)
-            timeLabel.textColor = .dGray
-            timeLabel.textAlignment = .center
-            timeLabel.backgroundColor = .lGray
-            timeLabel.layer.cornerRadius = 8
-            timeLabel.layer.masksToBounds = true
-            timeLabel.translatesAutoresizingMaskIntoConstraints = false
-            
-            timeLabel.heightAnchor.constraint(equalToConstant: 60).isActive = true
-            
-            let removeButton = UIButton(type: .system)
-            removeButton.setImage(UIImage(systemName: "minus"), for: .normal)
-            removeButton.tintColor = .dGray
-            removeButton.addTarget(self, action: #selector(didTapRemoveTimePicker(_:)), for: .touchUpInside)
-            removeButton.tag = timeLabels.count;
-            
-            let timeContainer = UIStackView(arrangedSubviews: [timeLabel, removeButton])
-            timeContainer.axis = .horizontal
-            timeContainer.spacing = 15
-            timeContainer.translatesAutoresizingMaskIntoConstraints = false
-            
-            timeStackView.addArrangedSubview(timeContainer)
-            timeLabels.append(timeLabel)
-            
-            addTimePickerButtonTopConstraint.constant = 20
-            
+        selectedTimes.removeAll()
+        if let times = model?.selectedTimes {
+            selectedTimes = times
         }
+        
+        timesTableView.reloadData()
+        updateNextButtonStateStepTwo()
     }
     
     func updateNextButtonStateStepTwo() {
@@ -284,40 +269,44 @@ class NewPillStepTwoViewController: UIViewController {
     }
 }
 
+// MARK: - UITableViewDataSource, UITableViewDelegate
+extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return selectedTimes.count
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 60
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TimeCell.identifier, for: indexPath) as? TimeCell else {
+            return UITableViewCell()
+        }
+        let time = selectedTimes[indexPath.row]
+        cell.configure(with: "\(time.hour):\(time.minute)")
+        cell.removeButton.tag = indexPath.row
+        cell.removeButton.addTarget(self, action: #selector(didTapRemoveTimeCell(_:)), for: .touchUpInside)
+        return cell
+    }
+    
+
+}
+
+// MARK: - TimePickerDelegate
 extension NewPillStepTwoViewController: TimePickerDelegate {
     func didSelectTime(selectedTime: String) {
-        let timeLabel = UILabel()
-        timeLabel.text = selectedTime
-        timeLabel.font = UIFont.systemFont(ofSize: 18)
-        timeLabel.textColor = .dGray
-        timeLabel.textAlignment = .center
-        timeLabel.backgroundColor = .lGray
-        timeLabel.layer.cornerRadius = 8
-        timeLabel.layer.masksToBounds = true
-        timeLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        timeLabel.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        
-        let removeButton = UIButton(type: .system)
-        removeButton.setImage(UIImage(systemName: "minus"), for: .normal)
-        removeButton.tintColor = .dGray
-        removeButton.addTarget(self, action: #selector(didTapRemoveTimePicker(_:)), for: .touchUpInside)
-        removeButton.tag = timeLabels.count
-        
-        let timeContainer = UIStackView(arrangedSubviews: [timeLabel, removeButton])
-        timeContainer.axis = .horizontal
-        timeContainer.spacing = 15
-        timeContainer.translatesAutoresizingMaskIntoConstraints = false
-        
-        timeStackView.addArrangedSubview(timeContainer)
-        timeLabels.append(timeLabel)
-        
-        updateSelectedTimes()
-        
-        addTimePickerButtonTopConstraint.constant = 20
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
+        print("Selected time: \(selectedTime)")
+
+        let components = selectedTime.split(separator: ":")
+        if components.count == 2 {
+            let hour = String(components[0])
+            let minute = String(components[1])
+            selectedTimes.append((hour: hour, minute: minute))
+            print("Current selected times: \(selectedTimes)")
+            updateSelectedTimes()
+            updateNextButtonStateStepTwo()
         }
-        updateNextButtonStateStepTwo()
     }
 }

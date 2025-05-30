@@ -24,7 +24,7 @@ class TimePickerViewController: UIViewController {
     
     private lazy var doneButton: UIButton = {
         let doneButton = UIButton(type: .system)
-        doneButton.setTitle("Готово", for: .normal)
+        doneButton.setTitle("Добавить", for: .normal)
         doneButton.backgroundColor = .lBlue
         doneButton.titleLabel?.textColor = .white
         doneButton.tintColor = .white
@@ -33,6 +33,28 @@ class TimePickerViewController: UIViewController {
         doneButton.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
         doneButton.translatesAutoresizingMaskIntoConstraints = false
         return doneButton
+    }()
+    
+    private lazy var cancelButton: UIButton = {
+        let cancelButton = UIButton(type: .system)
+        cancelButton.setTitle("Закрыть", for: .normal)
+        cancelButton.backgroundColor = .dBlue
+        cancelButton.titleLabel?.textColor = .white
+        cancelButton.tintColor = .white
+        cancelButton.layer.cornerRadius = 8
+        cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        cancelButton.addTarget(self, action: #selector(didTapCancelButton), for: .touchUpInside)
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        return cancelButton
+    }()
+    
+    private lazy var buttonStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [cancelButton, doneButton])
+        stackView.axis = .horizontal
+        stackView.distribution = .fillEqually
+        stackView.spacing = 10
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
     }()
     
     override func viewDidLoad() {
@@ -47,7 +69,10 @@ class TimePickerViewController: UIViewController {
         let selectedTime = dateFormatter.string(from: timePicker.date)
         
         delegate?.didSelectTime(selectedTime: selectedTime)
-        
+    }
+    
+    @objc
+    private func didTapCancelButton() {
         dismiss(animated: true, completion: nil)
     }
     
@@ -55,7 +80,7 @@ class TimePickerViewController: UIViewController {
         view.backgroundColor = .systemBackground
         view.layer.cornerRadius = 16
 
-        [timePicker, doneButton].forEach { view.addSubview($0) }
+        [timePicker, buttonStackView].forEach { view.addSubview($0) }
         
         addConstraints()
     }
@@ -65,12 +90,11 @@ class TimePickerViewController: UIViewController {
             timePicker.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             timePicker.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
             
-            doneButton.topAnchor.constraint(equalTo: timePicker.bottomAnchor, constant: 10),
-            doneButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            doneButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
-            doneButton.heightAnchor.constraint(equalToConstant: 60),
-            doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            buttonStackView.topAnchor.constraint(equalTo: timePicker.bottomAnchor, constant: 10),
+            buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            buttonStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
+            buttonStackView.heightAnchor.constraint(equalToConstant: 60) 
         ])
     }
 }

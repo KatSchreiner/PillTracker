@@ -36,7 +36,7 @@ class PillTableViewCell: UITableViewCell {
         return label
     }()
     
-    private let howToTakeLabel: UILabel = {
+    let howToTakeLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12)
         label.textColor = .gray

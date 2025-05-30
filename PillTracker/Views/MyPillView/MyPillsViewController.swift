@@ -197,6 +197,7 @@ class MyPillsViewController: UIViewController {
         }
         userNameLabel.text = "Привет, \(existingUser .name ?? "друг")!"
     }
+    
 }
 
 // MARK: - WeeklyCalendarViewDelegate
@@ -256,6 +257,12 @@ extension MyPillsViewController: UITableViewDataSource {
     
     private func configureCell(_ cell: PillTableViewCell, with pill: Pill, time: (hour: String, minute: String)) {
         cell.configure(with: pill, time: time)
+        
+        if pill.howToTake == "Не важно" {
+            cell.howToTakeLabel.text = "Не зависит от приема пищи"
+        } else {
+            cell.howToTakeLabel.text = pill.howToTake
+        }
         
         let isTaken = takenPills.contains(where: { $0.pill.name == pill.name && $0.time.hour == time.hour && $0.time.minute == time.minute && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) })
         

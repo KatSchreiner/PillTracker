@@ -18,6 +18,7 @@ class TimePickerViewController: UIViewController {
         let timePicker = UIDatePicker()
         timePicker.datePickerMode = .time
         timePicker.preferredDatePickerStyle = .wheels
+        timePicker.minuteInterval = 5
         timePicker.translatesAutoresizingMaskIntoConstraints = false
         return timePicker
     }()
@@ -60,6 +61,7 @@ class TimePickerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
+        setCurrentTime()
     }
     
     @objc
@@ -96,6 +98,22 @@ class TimePickerViewController: UIViewController {
             buttonStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
             buttonStackView.heightAnchor.constraint(equalToConstant: 60) 
         ])
+    }
+    
+    private func setCurrentTime() {
+        let currentDate = Date()
+        let calendar = Calendar.current
+        
+        let currentHour = calendar.component(.hour, from: currentDate)
+        let currentMinute = 0
+        
+        var dateComponents = DateComponents()
+        dateComponents.hour = currentHour
+        dateComponents.minute = currentMinute
+        
+        if let date = calendar.date(from: dateComponents) {
+            timePicker.setDate(date, animated: false)
+        }
     }
 }
 

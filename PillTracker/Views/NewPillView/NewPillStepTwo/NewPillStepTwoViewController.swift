@@ -233,29 +233,29 @@ class NewPillStepTwoViewController: UIViewController {
     }
     
     private func loadData() {
-        if let selectedOption = model?.selectedOption, let index = optionData.firstIndex(of: selectedOption) {
-            
-            for (i, subview) in buttonStackView.arrangedSubviews.enumerated() {
+        guard let model = model else { return }
+        
+        selectedOption = model.selectedOption
+        if let selectedOption = selectedOption, let index = optionData.firstIndex(of: selectedOption) {
+            for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
                 if let buttonContainer = subview as? UIStackView,
                    let button = buttonContainer.arrangedSubviews.first as? UIButton {
-                    if i == index {
-                        button.setImage(optionImagesColor[i], for: .normal)
-                    } else {
-                        button.setImage(optionImages[i], for: .normal)
-                    }
+                    button.setImage(optionImages[index], for: .normal) 
                 }
+            }
+            
+            if let buttonContainer = buttonStackView.arrangedSubviews[index] as? UIStackView,
+               let button = buttonContainer.arrangedSubviews.first as? UIButton {
+                button.setImage(optionImagesColor[index], for: .normal) // Set highlighted image
             }
         }
         
-        selectedTimes.removeAll()
-        if let times = model?.selectedTimes {
-            selectedTimes = times
-        }
+        selectedTimes = model.selectedTimes
+        updateSelectedTimes()
         
-        timesTableView.reloadData()
         updateNextButtonStateStepTwo()
     }
-    
+
     func updateNextButtonStateStepTwo() {
         model?.selectedTimes = selectedTimes
         model?.selectedOption = selectedOption

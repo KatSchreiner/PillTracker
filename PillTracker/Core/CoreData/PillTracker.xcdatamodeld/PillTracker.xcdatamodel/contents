@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24B2082" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24F74" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
     <entity name="PillCoreData" representedClassName="PillCoreData" syncable="YES" codeGenerationType="class">
         <attribute name="dosage" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="howToTake" optional="YES" attributeType="String"/>
@@ -7,6 +7,8 @@
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="selectedDays" optional="YES" attributeType="Transformable"/>
+        <attribute name="selectedEndDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="selectedStartDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="times" optional="YES" attributeType="Transformable"/>
         <attribute name="unit" optional="YES" attributeType="String"/>
         <relationship name="users" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserCoreData" inverseName="pills" inverseEntity="UserCoreData"/>

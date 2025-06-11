@@ -123,7 +123,7 @@ class MyPillsViewController: UIViewController {
             self.tableView.transform = .identity
         }, completion: nil)
         
-        dateLabel.text = formatDate(selectedDate)
+        dateLabel.text = formattedDateString(for: selectedDate)
         weeklyCalendarView.updateSelectedDate(selectedDate)
         
         
@@ -142,8 +142,8 @@ class MyPillsViewController: UIViewController {
         
         selectedDate = Calendar.current.startOfDay(for: Date())
         weeklyCalendarView.currentDate = selectedDate
-        dateLabel.text = formatDate(selectedDate)
-        
+        dateLabel.text = formattedDateString(for: selectedDate)
+
         addConstraint()
     }
     
@@ -178,15 +178,17 @@ class MyPillsViewController: UIViewController {
         ])
     }
     
-    private func formatDate(_ date: Date) -> String {
+    private func formattedDateString(for date: Date) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
         dateFormatter.locale = Locale(identifier: "ru_RU")
         return dateFormatter.string(from: date)
     }
+
     
     private func loadPills() {
         pills = pillStore.fetchPills()
+
         tableView.reloadData()
     }
     
@@ -204,7 +206,7 @@ class MyPillsViewController: UIViewController {
 extension MyPillsViewController: WeeklyCalendarViewDelegate {
     func didSelectDate(_ date: Date) {
         selectedDate = date
-        dateLabel.text = formatDate(selectedDate)
+        dateLabel.text = formattedDateString(for: selectedDate)
         tableView.reloadData()
     }
 }
@@ -213,9 +215,12 @@ extension MyPillsViewController: WeeklyCalendarViewDelegate {
 extension MyPillsViewController: UITableViewDataSource {
     private func filteredPills() -> [Pill] {
         let weekDay = (Calendar.current.component(.weekday, from: selectedDate) + 5) % 7 + 1
-        return pills.filter { $0.selectedDays.contains(weekDay) }
+        return pills.filter { pill in
+            pill.selectedDays.contains(weekDay) &&
+            (selectedDate >= pill.selectedStartDate && selectedDate <= pill.selectedEndDate)
+        }
     }
-    
+
     private func allTimes(for pills: [Pill]) -> [(hour: String, minute: String)] {
         return pills.flatMap { $0.times }
     }

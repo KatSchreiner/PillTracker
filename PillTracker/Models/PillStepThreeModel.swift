@@ -9,11 +9,12 @@ import UIKit
 
 struct PillStepThreeModel {
     var selectedDays: Set<Int> = []
+    var startDate: Date?
+    var endDate: Date?
     var isReminderEnabled: Bool = false
     
     func isValid() -> Bool {
-        let isValid = !selectedDays.isEmpty
-        print("isValid: \(isValid), selectedDays: \(selectedDays)") 
+        let isValid = !selectedDays.isEmpty && (startDate != nil || endDate != nil)
         return isValid
     }
 }

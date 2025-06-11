@@ -57,13 +57,6 @@ class NewPillStepThreeViewController: UIViewController {
         return label
     }()
     
-    private lazy var durationSegmentedControl: UISegmentedControl = {
-        let segmentedControl = UISegmentedControl(items: ["1 неделя", "2 недели", "1 месяц", "Другое"])
-        segmentedControl.selectedSegmentIndex = 0
-        segmentedControl.addTarget(self, action: #selector(didChangeDuration), for: .valueChanged)
-        return segmentedControl
-    }()
-    
     private lazy var startDateLabel: UILabel = {
         let label = UILabel()
         label.text = "Начало лечения:"
@@ -77,6 +70,7 @@ class NewPillStepThreeViewController: UIViewController {
         datePicker.preferredDatePickerStyle = .compact
         datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.tintColor = .dBlue
+        datePicker.addTarget(self, action: #selector(startDateChanged), for: .valueChanged)
         return datePicker
     }()
     
@@ -93,6 +87,7 @@ class NewPillStepThreeViewController: UIViewController {
         datePicker.preferredDatePickerStyle = .compact
         datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.tintColor = .dBlue
+        datePicker.addTarget(self, action: #selector(endDateChanged), for: .valueChanged)
         return datePicker
     }()
     
@@ -169,23 +164,18 @@ class NewPillStepThreeViewController: UIViewController {
         updateNextButtonStateStepThree()
     }
     
-    @objc
-    private func didChangeDuration(sender: UISegmentedControl) {
-        if sender.selectedSegmentIndex == 3 {
-            if customDateRangeStackView.superview == nil {
-                
-                self.view.addSubview(customDateRangeStackView)
-                customDateRangeStackView.translatesAutoresizingMaskIntoConstraints = false
-                
-                NSLayoutConstraint.activate([
-                    customDateRangeStackView.topAnchor.constraint(equalTo: durationSegmentedControl.bottomAnchor, constant: 20),
-                    customDateRangeStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                    customDateRangeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                ])
-            }
-        } else {
-            customDateRangeStackView.removeFromSuperview()
-        }
+    @objc private func startDateChanged(sender: UIDatePicker) {
+        let localDate = startOfDayInLocalTimeZone(for: sender.date)
+        model.startDate = localDate
+        updateNextButtonStateStepThree()
+        print("Start date updated: \(formattedDateString(for: localDate))")
+    }
+
+    @objc private func endDateChanged(sender: UIDatePicker) {
+        let localDate = startOfDayInLocalTimeZone(for: sender.date)
+        model.endDate = localDate
+        updateNextButtonStateStepThree()
+        print("End date updated: \(formattedDateString(for: localDate))")
     }
     
     @objc
@@ -199,7 +189,7 @@ class NewPillStepThreeViewController: UIViewController {
     private func setupView() {
         view.backgroundColor = .white
         
-        [repeatLabel, dayButtonStackView, durationLabel, durationSegmentedControl,  reminderStackView].forEach { view in
+        [repeatLabel, dayButtonStackView, durationLabel, customDateRangeStackView,   reminderStackView].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -221,10 +211,9 @@ class NewPillStepThreeViewController: UIViewController {
             durationLabel.topAnchor.constraint(equalTo: dayButtonStackView.bottomAnchor, constant: 30),
             durationLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             
-            durationSegmentedControl.topAnchor.constraint(equalTo: durationLabel.bottomAnchor, constant: 10),
-            durationSegmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            durationSegmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            durationSegmentedControl.heightAnchor.constraint(equalToConstant: 35),
+            customDateRangeStackView.topAnchor.constraint(equalTo: durationLabel.bottomAnchor, constant: 10),
+            customDateRangeStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            customDateRangeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
             reminderStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
             reminderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
@@ -242,8 +231,46 @@ class NewPillStepThreeViewController: UIViewController {
                 button.setTitleColor(.dGray, for: .normal)
             }
         }
-        
+
         reminderSwitch.isOn = model.isReminderEnabled
+
+        if model.startDate == nil {
+            model.startDate = startOfDayInLocalTimeZone(for: Date())
+        }
+        startDatePicker.date = model.startDate ?? startOfDayInLocalTimeZone(for: Date())
+        print("Loaded Start Date: \(formattedDateString(for: startDatePicker.date))")
+
+        if let endDate = model.endDate {
+            endDatePicker.date = startOfDayInLocalTimeZone(for: endDate)
+            print("Loaded End Date: \(formattedDateString(for: endDatePicker.date))")
+        } else {
+            endDatePicker.date = startOfDayInLocalTimeZone(for: Date())
+            print("Loaded Default End Date: \(formattedDateString(for: endDatePicker.date))")
+        }
+    }
+
+    func startOfDayInLocalTimeZone(for date: Date) -> Date {
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone.current
+        return calendar.startOfDay(for: date)
+    }
+    
+    func formattedStartDate() -> String {
+        guard let startDate = model.startDate else { return "Не указано" }
+        return formattedDateString(for: startDate)
+    }
+    func formattedEndDate() -> String {
+        guard let endDate = model.endDate else { return "Не указано" }
+        return formattedDateString(for: endDate)
+    }
+    
+    private func formattedDateString(for date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .none
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        dateFormatter.timeZone = TimeZone.current
+        return dateFormatter.string(from: date)
     }
     
     func updateNextButtonStateStepThree() {
@@ -252,7 +279,6 @@ class NewPillStepThreeViewController: UIViewController {
         if let addNewPillView = parent as? AddNewPillViewController {
             addNewPillView.doneButton.isEnabled = isEnabled
             addNewPillView.doneButton.alpha = isEnabled ? 1.0 : 0.5
-            print("Done button state updated: \(isEnabled)")
         }
     }
 }

@@ -55,6 +55,8 @@ final class PillStore: NSObject {
         myPill.icon = pill.icon?.pngData()
         myPill.selectedDays = selectedDaysTransformer.transformedValue(pill.selectedDays) as? NSObject
         myPill.times = timesTransformer.transformedValue(pill.times) as? NSObject
+        myPill.selectedStartDate = pill.selectedStartDate
+        myPill.selectedEndDate = pill.selectedEndDate
         
         
         do {
@@ -81,7 +83,10 @@ final class PillStore: NSObject {
                 unit: PillCoreData.unit ?? "",
                 howToTake: PillCoreData.howToTake ?? "",
                 times: timesTransformer.reverseTransformedValue(PillCoreData.times) as? [(hour: String, minute: String)] ?? [],
-                selectedDays: selectedDaysTransformer.reverseTransformedValue(PillCoreData.selectedDays) as? Set<Int> ?? Set())
+                selectedDays: selectedDaysTransformer.reverseTransformedValue(PillCoreData.selectedDays) as? Set<Int> ?? Set(),
+                selectedStartDate: PillCoreData.selectedStartDate ?? Date(),
+                selectedEndDate: PillCoreData.selectedEndDate ?? Date()
+            )
         }
     }
 }

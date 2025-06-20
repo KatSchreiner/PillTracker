@@ -11,7 +11,14 @@
         <attribute name="selectedStartDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="times" optional="YES" attributeType="Transformable"/>
         <attribute name="unit" optional="YES" attributeType="String"/>
+        <relationship name="taken" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TakenPillsCoreData" inverseName="takenPills" inverseEntity="TakenPillsCoreData"/>
         <relationship name="users" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserCoreData" inverseName="pills" inverseEntity="UserCoreData"/>
+    </entity>
+    <entity name="TakenPillsCoreData" representedClassName="TakenPillsCoreData" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="pillId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="time" optional="YES" attributeType="Transformable"/>
+        <relationship name="takenPills" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PillCoreData" inverseName="taken" inverseEntity="PillCoreData"/>
     </entity>
     <entity name="UserCoreData" representedClassName="UserCoreData" syncable="YES" codeGenerationType="class">
         <attribute name="name" optional="YES" attributeType="String"/>

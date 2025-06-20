@@ -8,6 +8,7 @@
 import Foundation
 
 struct TakenPills {
+    let pillId: UUID
     let pill: Pill
     let time: (hour: String, minute: String)
     let date: Date

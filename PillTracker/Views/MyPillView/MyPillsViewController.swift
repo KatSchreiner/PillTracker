@@ -15,6 +15,7 @@ class MyPillsViewController: UIViewController {
     private var pills: [Pill] = []
     private let pillStore = PillStore()
     private let userStore = UserStore()
+    private let takenPillsStore = TakenPillsStore()
     
     private var takenPills: [TakenPills] = []
     
@@ -82,6 +83,7 @@ class MyPillsViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         loadPills()
+        loadTakenPills()
         loadUser()
     }
     
@@ -192,6 +194,11 @@ class MyPillsViewController: UIViewController {
         tableView.reloadData()
     }
     
+    private func loadTakenPills() {
+        takenPills = takenPillsStore.fetchTakenPills() 
+        tableView.reloadData()
+    }
+    
     private func loadUser() {
         guard let existingUser  = userStore.fetchUser () else {
             userNameLabel.text = "Привет, друг!"
@@ -269,7 +276,7 @@ extension MyPillsViewController: UITableViewDataSource {
             cell.howToTakeLabel.text = pill.howToTake
         }
         
-        let isTaken = takenPills.contains(where: { $0.pill.name == pill.name && $0.time.hour == time.hour && $0.time.minute == time.minute && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) })
+        let isTaken = takenPills.contains(where: { $0.pillId == pill.id && $0.time.hour == time.hour && $0.time.minute == time.minute && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) })
         
         let checkmarkImage = UIImage(systemName: "checkmark")
         let tintColor: UIColor = isTaken ? UIColor.gray : .clear
@@ -297,6 +304,11 @@ extension MyPillsViewController: UITableViewDataSource {
         cell.markAsTakenButtonAction = { [weak self] in
             guard let self = self else { return }
             
+            let currentDate = Date()
+            let currentHour = Calendar.current.component(.hour, from: currentDate)
+            let currentMinute = Calendar.current.component(.minute, from: currentDate)
+            let currentTime = (hour: String(currentHour), minute: String(currentMinute))
+            
             let isTaken = self.takenPills.contains(where: { $0.pill.name == pill.name && $0.time.hour == time.hour && $0.time.minute == time.minute && Calendar.current.isDate($0.date, inSameDayAs: self.selectedDate) })
             
             let newTintColor: UIColor = isTaken ? .clear : .gray
@@ -304,11 +316,13 @@ extension MyPillsViewController: UITableViewDataSource {
             
             if isTaken {
                 self.takenPills.removeAll(where: { $0.pill.name == pill.name && $0.time.hour == time.hour && $0.time.minute == time.minute && Calendar.current.isDate($0.date, inSameDayAs: self.selectedDate) })
-                print("❌ Отмена отметки: \(pill.name) в \(time.hour):\(time.minute) на \(dateFormatter.string(from: self.selectedDate))")
+                self.takenPillsStore.removeTakenPill(pillId: pill.id, pill: pill, time: time, date: self.selectedDate)
+                print("❌ Лекарство '\(pill.name)' не выпито \(dateFormatter.string(from: self.selectedDate)) в \(currentTime.hour):\(currentTime.minute)")
             } else {
-                let newTakenPill = TakenPills(pill: pill, time: time, date: self.selectedDate)
+                let newTakenPill = TakenPills(pillId: pill.id, pill: pill, time: time, date: self.selectedDate)
                 self.takenPills.append(newTakenPill)
-                print("✅ Отметка как выпитое: \(pill.name) в \(time.hour):\(time.minute) на \(dateFormatter.string(from: self.selectedDate))")
+                self.takenPillsStore.addTakenPill(pill: pill, pillId: pill.id, time: time, date: self.selectedDate)
+                print("✅ Лекарство '\(pill.name)' выпито \(dateFormatter.string(from: self.selectedDate)) в \(currentTime.hour):\(currentTime.minute)")
             }
             
             UIView.animate(withDuration: 0.3, animations: {

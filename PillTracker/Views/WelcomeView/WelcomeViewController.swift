@@ -10,7 +10,7 @@ import UIKit
 class WelcomeViewController: UIViewController {
     // MARK: - Private Properties
     private let userStore = UserStore()
-    
+        
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.borderStyle = .roundedRect
@@ -60,7 +60,7 @@ class WelcomeViewController: UIViewController {
             showMessage("Пожалуйста, введите имя")
             return
         }
-        userStore.saveUser (name: name)
+        userStore.saveUser (name: name) 
         navigateToMyPillsView()
     }
     
@@ -88,8 +88,12 @@ class WelcomeViewController: UIViewController {
     }
     
     private func navigateToMyPillsView() {
-        let myPillsViewController = MyPillsViewController()
-        navigationController?.pushViewController(myPillsViewController, animated: true)
+        if let existingUser  = userStore.fetchUser () {
+            let myPillsViewController = MyPillsViewController(userName: existingUser .name)
+            navigationController?.pushViewController(myPillsViewController, animated: true)
+        } else {
+            print("Пользователь не найден.")
+        }
     }
     
     private func showMessage(_ message: String) {

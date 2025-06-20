@@ -87,6 +87,14 @@ class MyPillsViewController: UIViewController {
         loadUser()
     }
     
+    init(userName: String?) {
+        self.userName = userName
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - IB Actions
     @objc
     private func didTapAddPillButton() {
@@ -199,14 +207,13 @@ class MyPillsViewController: UIViewController {
         tableView.reloadData()
     }
     
-    private func loadUser() {
-        guard let existingUser  = userStore.fetchUser () else {
+    private func loadUser () {
+        if let userName = self.userName {
+            userNameLabel.text = "Привет, \(userName)!"
+        } else {
             userNameLabel.text = "Привет, друг!"
-            return
         }
-        userNameLabel.text = "Привет, \(existingUser .name ?? "друг")!"
     }
-    
 }
 
 // MARK: - WeeklyCalendarViewDelegate

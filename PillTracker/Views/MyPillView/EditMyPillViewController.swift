@@ -12,39 +12,51 @@ final class EditMyPillViewController: UIViewController {
     
     var pill: Pill?
     weak var delegate: AddNewPillDelegate?
-
+    private let addNewPillVC: AddNewPillViewController
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
     }
-
+    
+    init(addNewPillVC: AddNewPillViewController) {
+        self.addNewPillVC = addNewPillVC
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     private func setupView() {
         view.backgroundColor = .systemBackground
         
-        let addNewPillVC = AddNewPillViewController()
         addNewPillVC.delegate = self
         
-        if let pill = pill {
-            addNewPillVC.isEditingPill = true
-            addNewPillVC.editedPillId = pill.id
-            
-            addNewPillVC.pillStepOneModel.title = pill.name
-            addNewPillVC.pillStepOneModel.dosage = pill.dosage
-            addNewPillVC.pillStepOneModel.selectedIcon = pill.icon
-            addNewPillVC.pillStepOneModel.selectedUnit = pill.unit
-            
-            addNewPillVC.pillStepTwoModel.selectedTimes = pill.times
-            addNewPillVC.pillStepTwoModel.selectedOption = pill.howToTake
-            
-            addNewPillVC.pillStepThreeModel.selectedDays = pill.selectedDays
-            addNewPillVC.pillStepThreeModel.startDate = pill.selectedStartDate
-            addNewPillVC.pillStepThreeModel.endDate = pill.selectedEndDate
-        }
+        guard let pill = pill else { return }
+        
+        configurePillData(with: pill)
         
         addChild(addNewPillVC)
         view.addSubview(addNewPillVC.view)
         addNewPillVC.view.frame = view.bounds
         addNewPillVC.didMove(toParent: self)
+    }
+    
+    private func configurePillData(with pill: Pill) {
+        addNewPillVC.isEditingPill = true
+        addNewPillVC.editedPillId = pill.id
+        
+        addNewPillVC.pillStepOneModel.title = pill.name
+        addNewPillVC.pillStepOneModel.dosage = pill.dosage
+        addNewPillVC.pillStepOneModel.selectedIcon = pill.icon
+        addNewPillVC.pillStepOneModel.selectedUnit = pill.unit
+        
+        addNewPillVC.pillStepTwoModel.selectedTimes = pill.times
+        addNewPillVC.pillStepTwoModel.selectedOption = pill.howToTake
+        
+        addNewPillVC.pillStepThreeModel.selectedDays = pill.selectedDays
+        addNewPillVC.pillStepThreeModel.startDate = pill.selectedStartDate
+        addNewPillVC.pillStepThreeModel.endDate = pill.selectedEndDate
     }
 }
 
@@ -53,12 +65,12 @@ extension EditMyPillViewController: AddNewPillDelegate {
     func didAddPill(_ pill: Pill) {
         delegate?.didAddPill(pill)
         
-        if let existingUser  = userStore.fetchUser () {
-            let myPillsViewController = MyPillsViewController(userName: existingUser .name)
-
-            navigationController?.setViewControllers([myPillsViewController], animated: true)
-        } else {
+        guard let existingUser  = userStore.fetchUser () else {
             print("Пользователь не найден.")
+            return
         }
+        
+        let myPillsViewController = MyPillsViewController(userName: existingUser .name)
+        navigationController?.setViewControllers([myPillsViewController], animated: true)
     }
 }

@@ -467,7 +467,7 @@ extension MyPillsViewController: UITableViewDelegate {
         
         guard let (pillToEdit, _, _) = findPillAndCount(for: filteredPills, at: indexPath.row) else { return }
         
-        let editMyPillView = EditMyPillViewController()
+        let editMyPillView = EditMyPillViewController(addNewPillVC: AddNewPillViewController())
         editMyPillView.pill = pillToEdit
         editMyPillView.delegate = self
         navigationController?.pushViewController(editMyPillView, animated: true)

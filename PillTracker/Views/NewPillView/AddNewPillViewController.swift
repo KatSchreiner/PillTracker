@@ -20,6 +20,9 @@ final class AddNewPillViewController: UIViewController {
     
     weak var delegate: AddNewPillDelegate?
     
+    var isEditingPill = false
+    var editedPillId: UUID?
+    
     // MARK: - Private Properties
     private lazy var progressView: UIProgressView = {
         let progressView = UIProgressView(progressViewStyle: .default)
@@ -46,6 +49,12 @@ final class AddNewPillViewController: UIViewController {
     private lazy var backButton: UIButton = createControlButton(title: "Назад", action: #selector(goToPreviousStep))
     lazy var doneButton: UIButton = createControlButton(title: "Готово", action: #selector(didTapDoneButton))
     private lazy var cancelButton: UIButton = createControlButton(title: "Отмена", action: #selector(didTapCancelButton))
+    
+    var doneButtonTitle: String = "Готово" {
+        didSet {
+            doneButton.setTitle(doneButtonTitle, for: .normal)
+        }
+    }
     
     private var currentStep: AddPillStep = .stepOne
     private var currentChildVC: UIViewController?
@@ -102,6 +111,8 @@ final class AddNewPillViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setupNavigation()
         
+        doneButtonTitle = isEditingPill ? "Обновить" : "Готово"
+
         [progressView, containerView, buttonStackView].forEach { [weak self] view in
             guard let self = self else { return }
             self.view.addSubview(view)
@@ -214,8 +225,11 @@ final class AddNewPillViewController: UIViewController {
             for: pillStepOneModel.dosage ?? 0.0,
             unit: pillStepOneModel.selectedUnit ?? ""
         )
+        
+        let pillId = isEditingPill ? editedPillId ?? UUID() : UUID()
+        
         return Pill(
-            id: UUID(),
+            id: pillId,
             icon: pillStepOneModel.selectedIcon,
             name: pillStepOneModel.title ?? "",
             dosage: pillStepOneModel.dosage ?? 0.0,

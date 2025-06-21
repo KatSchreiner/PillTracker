@@ -468,6 +468,8 @@ extension MyPillsViewController: UITableViewDelegate {
         guard let (pillToEdit, _, _) = findPillAndCount(for: filteredPills, at: indexPath.row) else { return }
         
         let editMyPillView = EditMyPillViewController()
+        editMyPillView.pill = pillToEdit
+        editMyPillView.delegate = self
         navigationController?.pushViewController(editMyPillView, animated: true)
     }
     
@@ -494,8 +496,13 @@ extension MyPillsViewController: UITableViewDelegate {
 // MARK: - AddNewPillDelegate
 extension MyPillsViewController: AddNewPillDelegate {
     func didAddPill(_ pill: Pill) {
-        pills.append(pill)
-        pillStore.savePill(pill: pill)
+        if let index = pills.firstIndex(where: { $0.id == pill.id }) {
+            pills[index] = pill
+            pillStore.updatePill(pill)
+        } else {
+            pills.append(pill)
+            pillStore.savePill(pill: pill)
+        }
         tableView.reloadData()
     }
 }

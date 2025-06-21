@@ -68,6 +68,36 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
         print("✅ Лекарство '\(pill.name)' успешно сохранено.")
     }
     
+    func updatePill(_ pill: Pill) {
+        let fetchRequest: NSFetchRequest<PillCoreData> = PillCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", pill.id as CVarArg)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let pillCoreData = results.first {
+                // Обновляем свойства существующего объекта
+                pillCoreData.name = pill.name
+                pillCoreData.dosage = pill.dosage
+                pillCoreData.unit = pill.unit
+                pillCoreData.howToTake = pill.howToTake
+                pillCoreData.icon = pill.icon?.pngData()
+                pillCoreData.selectedDays = selectedDaysTransformer.transformedValue(pill.selectedDays) as? NSObject
+                pillCoreData.times = timesTransformer.transformedValue(pill.times) as? NSObject
+                pillCoreData.selectedStartDate = pill.selectedStartDate
+                pillCoreData.selectedEndDate = pill.selectedEndDate
+                
+                // Сохраняем изменения в контексте
+                try context.save()
+                print("✅ Лекарство '\(pill.name)' успешно обновлено.")
+            } else {
+                print("❌ Лекарство с ID '\(pill.id)' не найдено.")
+            }
+        } catch {
+            print("❌ Ошибка при обновлении лекарства: \(error.localizedDescription)")
+        }
+    }
+
+    
     func fetchPillById(_ pillId: UUID) -> Pill? {
         let fetchRequest: NSFetchRequest<PillCoreData> = PillCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@", pillId as CVarArg)

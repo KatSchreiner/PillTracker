@@ -234,9 +234,24 @@ extension MyPillsViewController: UITableViewDataSource {
             (selectedDate >= pill.selectedStartDate && selectedDate <= pill.selectedEndDate)
         }
     }
-
-    private func allTimes(for pills: [Pill]) -> [(hour: String, minute: String)] {
-        return pills.flatMap { $0.times }
+    
+    private func sortedPillsWithTimes() -> [(pill: Pill, time: (hour: String, minute: String))] {
+        let filtered = filteredPills()
+        var pillsWithTimes: [(pill: Pill, time: (hour: String, minute: String))] = []
+        
+        for pill in filtered {
+            for time in pill.times {
+                pillsWithTimes.append((pill: pill, time: time))
+            }
+        }
+        
+        pillsWithTimes.sort { (first, second) -> Bool in
+            let firstTime = "\(first.time.hour):\(first.time.minute)"
+            let secondTime = "\(second.time.hour):\(second.time.minute)"
+            return firstTime < secondTime
+        }
+        
+        return pillsWithTimes
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -244,18 +259,16 @@ extension MyPillsViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return allTimes(for: filteredPills()).count
+        return sortedPillsWithTimes().count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: PillTableViewCell.identifier, for: indexPath) as! PillTableViewCell
         
-        let pills = filteredPills()
-        let times = allTimes(for: pills)
-        let currentTime = times[indexPath.row]
-        guard let currentPill = getPill(for: indexPath.row, from: pills) else {
-            return cell
-        }
+        let pillsWithTimes = sortedPillsWithTimes()
+        let currentPillWithTime = pillsWithTimes[indexPath.row]
+        let currentPill = currentPillWithTime.pill
+        let currentTime = currentPillWithTime.time
         
         configureCell(cell, with: currentPill, time: currentTime)
         setupMarkAsTakenButton(cell, for: currentPill, time: currentTime, indexPath: indexPath)

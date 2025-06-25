@@ -312,6 +312,13 @@ extension MyPillsViewController: UITableViewDataSource {
             guard let self = self else { return }
             
             let currentDate = Date()
+            let isToday = Calendar.current.isDate(currentDate, inSameDayAs: self.selectedDate)
+            
+            if !isToday {
+                print("❌ Нельзя отметить лекарство, так как это не текущая дата.")
+                return
+            }
+            
             let currentHour = Calendar.current.component(.hour, from: currentDate)
             let currentMinute = Calendar.current.component(.minute, from: currentDate)
             let currentTime = (hour: String(currentHour), minute: String(currentMinute))

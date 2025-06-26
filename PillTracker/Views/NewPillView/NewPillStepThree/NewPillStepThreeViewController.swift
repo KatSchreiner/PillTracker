@@ -23,6 +23,34 @@ class NewPillStepThreeViewController: UIViewController {
         return label
     }()
     
+    private lazy var presetButtonStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.distribution = .fillEqually
+        stackView.spacing = 10
+        
+        let everyDayButton = createPresetButton(title: "Каждый день", action: #selector(didTapEveryDayButton))
+        let everyOtherDayButton = createPresetButton(title: "Через день", action: #selector(didTapEveryOtherDayButton))
+        let everyTwoDaysButton = createPresetButton(title: "Через 2 дня", action: #selector(didTapEveryTwoDaysButton))
+        
+        stackView.addArrangedSubview(everyDayButton)
+        stackView.addArrangedSubview(everyOtherDayButton)
+        stackView.addArrangedSubview(everyTwoDaysButton)
+        
+        return stackView
+    }()
+
+    private func createPresetButton(title: String, action: Selector) -> UIButton {
+        let button = UIButton()
+        button.setTitle(title, for: .normal)
+        button.setTitleColor(.dGray, for: .normal)
+        button.backgroundColor = .lGray
+        button.layer.cornerRadius = 8
+        button.addTarget(self, action: action, for: .touchUpInside)
+        return button
+    }
+
+    
     private lazy var dayButtons: [UIButton] = []
     private let daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
     
@@ -148,6 +176,24 @@ class NewPillStepThreeViewController: UIViewController {
     }
     
     // MARK: - IB Actions
+    @objc private func didTapEveryDayButton() {
+        model.selectedDays = Set(1...7)
+        updatePresetButtonStates(selectedButton: "Каждый день")
+        updateNextButtonStateStepThree()
+    }
+
+    @objc private func didTapEveryOtherDayButton() {
+        model.selectedDays = [1, 3, 5, 7]
+        updatePresetButtonStates(selectedButton: "Через день")
+        updateNextButtonStateStepThree()
+    }
+
+    @objc private func didTapEveryTwoDaysButton() {
+        model.selectedDays = [1, 4, 7]
+        updatePresetButtonStates(selectedButton: "Через 2 дня")
+        updateNextButtonStateStepThree()
+    }
+
     @objc
     private func didTapDayButton(sender: UIButton) {
         let index = sender.tag + 1
@@ -189,7 +235,7 @@ class NewPillStepThreeViewController: UIViewController {
     private func setupView() {
         view.backgroundColor = .white
         
-        [repeatLabel, dayButtonStackView, durationLabel, customDateRangeStackView,   reminderStackView].forEach { view in
+        [repeatLabel, presetButtonStackView, dayButtonStackView, durationLabel, customDateRangeStackView,   reminderStackView].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -202,7 +248,12 @@ class NewPillStepThreeViewController: UIViewController {
             repeatLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             repeatLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             
-            dayButtonStackView.topAnchor.constraint(equalTo: repeatLabel.bottomAnchor, constant: 20),
+            presetButtonStackView.topAnchor.constraint(equalTo: repeatLabel.bottomAnchor, constant: 20),
+            presetButtonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            presetButtonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            presetButtonStackView.heightAnchor.constraint(equalToConstant: 35),
+            
+            dayButtonStackView.topAnchor.constraint(equalTo: presetButtonStackView.bottomAnchor, constant: 20),
             dayButtonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             dayButtonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             dayButtonStackView.heightAnchor.constraint(equalToConstant: 35),
@@ -246,6 +297,33 @@ class NewPillStepThreeViewController: UIViewController {
         } else {
             endDatePicker.date = startOfDayInLocalTimeZone(for: Date())
             print("Loaded Default End Date: \(formattedDateString(for: endDatePicker.date))")
+        }
+    }
+
+    private func updateDayButtonStates() {
+        for button in dayButtons {
+            let index = button.tag + 1
+            if model.selectedDays.contains(index) {
+                button.backgroundColor = .dBlue
+                button.setTitleColor(.lGray, for: .normal)
+            } else {
+                button.backgroundColor = .lGray
+                button.setTitleColor(.dGray, for: .normal)
+            }
+        }
+    }
+    
+    private func updatePresetButtonStates(selectedButton: String) {
+        for button in presetButtonStackView.arrangedSubviews {
+            if let presetButton = button as? UIButton {
+                if presetButton.title(for: .normal) == selectedButton {
+                    presetButton.backgroundColor = .dBlue
+                    presetButton.setTitleColor(.white, for: .normal)
+                } else {
+                    presetButton.backgroundColor = .lGray
+                    presetButton.setTitleColor(.dGray, for: .normal)
+                }
+            }
         }
     }
 

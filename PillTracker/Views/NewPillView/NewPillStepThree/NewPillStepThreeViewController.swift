@@ -25,20 +25,23 @@ class NewPillStepThreeViewController: UIViewController {
     
     private lazy var presetButtonStackView: UIStackView = {
         let stackView = UIStackView()
-        stackView.axis = .horizontal
+        stackView.axis = .vertical
         stackView.distribution = .fillEqually
         stackView.spacing = 10
         
         let everyDayButton = createPresetButton(title: "Каждый день", action: #selector(didTapEveryDayButton))
         let everyOtherDayButton = createPresetButton(title: "Через день", action: #selector(didTapEveryOtherDayButton))
         let everyTwoDaysButton = createPresetButton(title: "Через 2 дня", action: #selector(didTapEveryTwoDaysButton))
+        let customOptionButton = createPresetButton(title: "Свой вариант", action: #selector(didTapCustomOptionButton))
         
         stackView.addArrangedSubview(everyDayButton)
         stackView.addArrangedSubview(everyOtherDayButton)
         stackView.addArrangedSubview(everyTwoDaysButton)
+        stackView.addArrangedSubview(customOptionButton)
         
         return stackView
     }()
+
 
     private func createPresetButton(title: String, action: Selector) -> UIButton {
         let button = UIButton()
@@ -163,6 +166,8 @@ class NewPillStepThreeViewController: UIViewController {
         return reminderStackView
     }()
     
+    private var dayButtonStackViewHeightConstraint: NSLayoutConstraint!
+    
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -179,19 +184,59 @@ class NewPillStepThreeViewController: UIViewController {
     @objc private func didTapEveryDayButton() {
         model.selectedDays = Set(1...7)
         updatePresetButtonStates(selectedButton: "Каждый день")
+        hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
-
+    
     @objc private func didTapEveryOtherDayButton() {
-        model.selectedDays = [1, 3, 5, 7]
+        guard let startDate = model.startDate, let endDate = model.endDate else { return }
+
+        var selectedDays = [Int]()
+        var currentDate = startDate
+
+        while currentDate <= endDate {
+            let weekday = Calendar.current.component(.weekday, from: currentDate)
+            selectedDays.append(weekday)
+            currentDate = Calendar.current.date(byAdding: .day, value: 2, to: currentDate)!
+        }
+
+        model.selectedDays = Set(selectedDays)
+        
+        print("Выбранные дни через 1 день: \(selectedDays)")
+
         updatePresetButtonStates(selectedButton: "Через день")
+        hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
 
     @objc private func didTapEveryTwoDaysButton() {
-        model.selectedDays = [1, 4, 7]
+        guard let startDate = model.startDate, let endDate = model.endDate else { return }
+
+        var selectedDays = [Int]()
+        var currentDate = startDate
+
+        while currentDate <= endDate {
+            let weekday = Calendar.current.component(.weekday, from: currentDate)
+            selectedDays.append(weekday)
+            currentDate = Calendar.current.date(byAdding: .day, value: 3, to: currentDate)!
+        }
+
+        model.selectedDays = Set(selectedDays)
+        
+        print("Выбранные дни через 2 дня: \(selectedDays)")
         updatePresetButtonStates(selectedButton: "Через 2 дня")
+        hideDayButtonStackView()
         updateNextButtonStateStepThree()
+    }
+
+    @objc private func didTapCustomOptionButton() {
+        if dayButtonStackView.isHidden {
+            showDayButtonStackView()
+        } else {
+            hideDayButtonStackView()
+        }
+        
+        updatePresetButtonStates(selectedButton: "Свой вариант")
     }
 
     @objc
@@ -235,6 +280,9 @@ class NewPillStepThreeViewController: UIViewController {
     private func setupView() {
         view.backgroundColor = .white
         
+        dayButtonStackView.isHidden = true
+        dayButtonStackView.alpha = 0
+
         [repeatLabel, presetButtonStackView, dayButtonStackView, durationLabel, customDateRangeStackView,   reminderStackView].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
@@ -244,27 +292,28 @@ class NewPillStepThreeViewController: UIViewController {
     }
     
     private func addConstraint() {
+        dayButtonStackViewHeightConstraint = dayButtonStackView.heightAnchor.constraint(equalToConstant: 0)
+        dayButtonStackViewHeightConstraint.isActive = true
+        
         NSLayoutConstraint.activate([
-            repeatLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            
+            durationLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            durationLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            
+            customDateRangeStackView.topAnchor.constraint(equalTo: durationLabel.bottomAnchor, constant: 20),
+            customDateRangeStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            customDateRangeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            repeatLabel.topAnchor.constraint(equalTo: customDateRangeStackView.bottomAnchor, constant: 30),
             repeatLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             
             presetButtonStackView.topAnchor.constraint(equalTo: repeatLabel.bottomAnchor, constant: 20),
             presetButtonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             presetButtonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            presetButtonStackView.heightAnchor.constraint(equalToConstant: 35),
             
             dayButtonStackView.topAnchor.constraint(equalTo: presetButtonStackView.bottomAnchor, constant: 20),
             dayButtonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             dayButtonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            dayButtonStackView.heightAnchor.constraint(equalToConstant: 35),
-            
-            
-            durationLabel.topAnchor.constraint(equalTo: dayButtonStackView.bottomAnchor, constant: 30),
-            durationLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            
-            customDateRangeStackView.topAnchor.constraint(equalTo: durationLabel.bottomAnchor, constant: 10),
-            customDateRangeStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            customDateRangeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
             reminderStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
             reminderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
@@ -326,6 +375,11 @@ class NewPillStepThreeViewController: UIViewController {
             }
         }
     }
+    
+    private func weekdayNumber(from date: Date) -> Int {
+        let calendar = Calendar.current
+        return (calendar.component(.weekday, from: date) + 5) % 7 + 1
+    }
 
     func startOfDayInLocalTimeZone(for date: Date) -> Date {
         var calendar = Calendar.current
@@ -358,5 +412,26 @@ class NewPillStepThreeViewController: UIViewController {
             addNewPillView.doneButton.isEnabled = isEnabled
             addNewPillView.doneButton.alpha = isEnabled ? 1.0 : 0.5
         }
+    }
+    
+    private func showDayButtonStackView() {
+        dayButtonStackView.isHidden = false
+        dayButtonStackView.alpha = 0
+        dayButtonStackViewHeightConstraint.constant = 35
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            self.dayButtonStackView.alpha = 1
+            self.view.layoutIfNeeded()
+        })
+    }
+    private func hideDayButtonStackView() {
+        dayButtonStackViewHeightConstraint.constant = 0
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            self.dayButtonStackView.alpha = 0
+            self.view.layoutIfNeeded()
+        }, completion: { _ in
+            self.dayButtonStackView.isHidden = true
+        })
     }
 }

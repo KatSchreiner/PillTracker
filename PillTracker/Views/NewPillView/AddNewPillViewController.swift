@@ -215,6 +215,7 @@ final class AddNewPillViewController: UIViewController {
     private func moveToStepThree() {
         guard let stepThreeVC = currentChildVC as? NewPillStepThreeViewController else { return }
         pillStepThreeModel.selectedDays = stepThreeVC.model.selectedDays
+        pillStepThreeModel.interval = stepThreeVC.model.interval
         pillStepThreeModel.startDate = stepThreeVC.model.startDate
         pillStepThreeModel.endDate = stepThreeVC.model.endDate
         pillStepThreeModel.isReminderEnabled = stepThreeVC.model.isReminderEnabled
@@ -237,6 +238,7 @@ final class AddNewPillViewController: UIViewController {
             howToTake: pillStepTwoModel.selectedOption ?? "",
             times: pillStepTwoModel.selectedTimes,
             selectedDays: pillStepThreeModel.selectedDays,
+            selectedInterval: pillStepThreeModel.interval ?? 0,
             selectedStartDate: pillStepThreeModel.startDate ?? Date(),
             selectedEndDate: pillStepThreeModel.endDate ?? Date()
         )
@@ -252,6 +254,7 @@ final class AddNewPillViewController: UIViewController {
         print("Время приема: \(String(describing: pillStepTwoModel.selectedTimes))")
         print("Как принимать: \(pillStepTwoModel.selectedOption ?? "nil")")
         print("Выбранные дни: \(pillStepThreeModel.selectedDays)")
+        print("Интервал: через \(String(describing: pillStepThreeModel.interval))")
         print("Напомнить: \(pillStepThreeModel.isReminderEnabled)")
         
         if let stepThreeVC = currentChildVC as? NewPillStepThreeViewController {

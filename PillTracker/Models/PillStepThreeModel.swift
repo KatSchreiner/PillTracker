@@ -8,7 +8,8 @@
 import UIKit
 
 struct PillStepThreeModel {
-    var selectedDays: Set<Int> = []
+    var selectedDays: [Int] = []
+    var interval: Int?
     var startDate: Date?
     var endDate: Date?
     var isReminderEnabled: Bool = false

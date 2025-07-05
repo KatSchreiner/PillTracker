@@ -15,7 +15,8 @@ struct Pill {
     let unit: String
     let howToTake: String
     var times: [(hour: String, minute: String)]
-    var selectedDays: Set<Int>
+    var selectedDays: [Int]
+    var selectedInterval: Int?
     var selectedStartDate: Date
     var selectedEndDate: Date
 }

@@ -6,21 +6,50 @@
 //
 
 import Foundation
+//
+//final class SelectedDaysTransformer: ValueTransformer {
+//    
+//    override class func transformedValueClass() -> AnyClass { NSData.self }
+//    override class func allowsReverseTransformation() -> Bool {
+//        true
+//    }
+//    
+//    override func transformedValue(_ value: Any?) -> Any? {
+//        guard let days = value as? Set<Int> else { return nil }
+//        return Array(days)
+//    }
+//
+//    override func reverseTransformedValue(_ value: Any?) -> Any? {
+//        guard let daysArray = value as? [Int] else { return nil }
+//        return Set(daysArray)
+//    }
+//}
 
 final class SelectedDaysTransformer: ValueTransformer {
-    
-    override class func transformedValueClass() -> AnyClass { NSData.self }
-    override class func allowsReverseTransformation() -> Bool {
-        true
-    }
-    
+
+    override class func transformedValueClass() -> AnyClass { return NSData.self }
+
+    override class func allowsReverseTransformation() -> Bool { return true }
+
     override func transformedValue(_ value: Any?) -> Any? {
-        guard let days = value as? Set<Int> else { return nil }
-        return Array(days)
+        guard let days = value as? [Int] else { return nil }
+        do {
+            let data = try JSONEncoder().encode(days)
+            return data as NSData
+        } catch {
+            print("Ошибка при кодировании selectedDays: \(error)")
+            return nil
+        }
     }
 
     override func reverseTransformedValue(_ value: Any?) -> Any? {
-        guard let daysArray = value as? [Int] else { return nil }
-        return Set(daysArray)
+        guard let data = value as? Data else { return nil }
+        do {
+            let days = try JSONDecoder().decode([Int].self, from: data)
+            return days
+        } catch {
+            print("Ошибка при декодировании selectedDays: \(error)")
+            return nil
+        }
     }
 }

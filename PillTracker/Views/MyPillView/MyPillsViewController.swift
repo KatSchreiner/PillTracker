@@ -228,13 +228,43 @@ extension MyPillsViewController: WeeklyCalendarViewDelegate {
 // MARK: - UITableViewDataSource
 extension MyPillsViewController: UITableViewDataSource {
     private func filteredPills() -> [Pill] {
-        let weekDay = (Calendar.current.component(.weekday, from: selectedDate) + 5) % 7 + 1
+        let calendar = Calendar.current
+        let currentDate = Calendar.current.startOfDay(for: selectedDate)
+        print("Текущая дата: \(formattedDateString(for: currentDate))")
+
         return pills.filter { pill in
-            pill.selectedDays.contains(weekDay) &&
-            (selectedDate >= pill.selectedStartDate && selectedDate <= pill.selectedEndDate)
+            if pill.selectedStartDate == nil || pill.selectedEndDate == nil {
+                print("Пропускаем \(pill.name): даты начала и окончания не установлены.")
+                return false
+            }
+            let startDate = pill.selectedStartDate
+            let endDate = pill.selectedEndDate
+            print("Проверяем \(pill.name): Начало - \(formattedDateString(for: startDate)), Окончание - \(formattedDateString(for: endDate))")
+        
+            guard currentDate >= startDate && currentDate <= endDate else {
+                print("Пропускаем \(pill.name): текущая дата не в периоде лечения.")
+                return false
+            }
+
+            if let interval = pill.selectedInterval {
+                let daysSinceStart = calendar.dateComponents([.day], from: startDate, to: currentDate).day ?? 0
+                print("Для \(pill.name): дней с начала лечения = \(daysSinceStart), интервал = \(interval)")
+
+                if interval == 0 {
+                    print("Показываем \(pill.name): каждый день.")
+                    return true
+                } else {
+                    let isDisplayed = daysSinceStart % (interval + 1) == 0
+                    print("Показываем \(pill.name): \(isDisplayed ? "да" : "нет").")
+                    return isDisplayed
+                }
+            }
+
+            print("Пропускаем \(pill.name): интервал не установлен.")
+            return false
         }
     }
-    
+
     private func sortedPillsWithTimes() -> [(pill: Pill, time: (hour: String, minute: String))] {
         let filtered = filteredPills()
         var pillsWithTimes: [(pill: Pill, time: (hour: String, minute: String))] = []

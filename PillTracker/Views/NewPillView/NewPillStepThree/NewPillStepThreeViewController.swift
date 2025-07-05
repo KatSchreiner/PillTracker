@@ -182,7 +182,8 @@ class NewPillStepThreeViewController: UIViewController {
     
     // MARK: - IB Actions
     @objc private func didTapEveryDayButton() {
-        model.selectedDays = Set(1...7)
+        model.selectedDays = Array(1...7)
+        model.interval = 0
         updatePresetButtonStates(selectedButton: "Каждый день")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
@@ -190,20 +191,20 @@ class NewPillStepThreeViewController: UIViewController {
     
     @objc private func didTapEveryOtherDayButton() {
         guard let startDate = model.startDate, let endDate = model.endDate else { return }
-
         var selectedDays = [Int]()
         var currentDate = startDate
-
+        
         while currentDate <= endDate {
-            let weekday = Calendar.current.component(.weekday, from: currentDate)
+            let weekday = (Calendar.current.component(.weekday, from: currentDate) + 5) % 7 + 1
             selectedDays.append(weekday)
             currentDate = Calendar.current.date(byAdding: .day, value: 2, to: currentDate)!
         }
-
-        model.selectedDays = Set(selectedDays)
+        
+        model.selectedDays = selectedDays
+        model.interval = 1
         
         print("Выбранные дни через 1 день: \(selectedDays)")
-
+        print("Текущие выбранные дни: \(model.selectedDays)")
         updatePresetButtonStates(selectedButton: "Через день")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
@@ -216,14 +217,17 @@ class NewPillStepThreeViewController: UIViewController {
         var currentDate = startDate
 
         while currentDate <= endDate {
-            let weekday = Calendar.current.component(.weekday, from: currentDate)
+            let weekday = (Calendar.current.component(.weekday, from: currentDate) + 5) % 7 + 1
             selectedDays.append(weekday)
             currentDate = Calendar.current.date(byAdding: .day, value: 3, to: currentDate)!
         }
 
-        model.selectedDays = Set(selectedDays)
+        model.selectedDays = selectedDays
+        model.interval = 2
         
         print("Выбранные дни через 2 дня: \(selectedDays)")
+        print("Текущие выбранные дни: \(model.selectedDays)")
+
         updatePresetButtonStates(selectedButton: "Через 2 дня")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
@@ -242,12 +246,12 @@ class NewPillStepThreeViewController: UIViewController {
     @objc
     private func didTapDayButton(sender: UIButton) {
         let index = sender.tag + 1
-        if model.selectedDays.contains(index) {
-            model.selectedDays.remove(index)
+        if let itemIndex = model.selectedDays.firstIndex(of: index) {
+            model.selectedDays.remove(at: itemIndex)
             sender.backgroundColor = .lGray
             sender.setTitleColor(.dGray, for: .normal)
         } else {
-            model.selectedDays.insert(index)
+            model.selectedDays.append(index)
             sender.backgroundColor = .dBlue
             sender.setTitleColor(.lGray, for: .normal)
         }

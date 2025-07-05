@@ -55,6 +55,7 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
         myPill.howToTake = pill.howToTake
         myPill.icon = pill.icon?.pngData()
         myPill.selectedDays = selectedDaysTransformer.transformedValue(pill.selectedDays) as? NSObject
+        myPill.selectedInterval = Int32(pill.selectedInterval ?? 0)
         myPill.times = timesTransformer.transformedValue(pill.times) as? NSObject
         myPill.selectedStartDate = pill.selectedStartDate
         myPill.selectedEndDate = pill.selectedEndDate
@@ -82,6 +83,7 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
                 pillCoreData.howToTake = pill.howToTake
                 pillCoreData.icon = pill.icon?.pngData()
                 pillCoreData.selectedDays = selectedDaysTransformer.transformedValue(pill.selectedDays) as? NSObject
+                pillCoreData.selectedInterval = Int32(pill.selectedInterval ?? 0)
                 pillCoreData.times = timesTransformer.transformedValue(pill.times) as? NSObject
                 pillCoreData.selectedStartDate = pill.selectedStartDate
                 pillCoreData.selectedEndDate = pill.selectedEndDate
@@ -96,7 +98,6 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
             print("❌ Ошибка при обновлении лекарства: \(error.localizedDescription)")
         }
     }
-
     
     func fetchPillById(_ pillId: UUID) -> Pill? {
         let fetchRequest: NSFetchRequest<PillCoreData> = PillCoreData.fetchRequest()
@@ -134,7 +135,8 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
             unit: pillCoreData.unit ?? "",
             howToTake: pillCoreData.howToTake ?? "",
             times: timesTransformer.reverseTransformedValue(pillCoreData.times) as? [(hour: String, minute: String)] ?? [],
-            selectedDays: selectedDaysTransformer.reverseTransformedValue(pillCoreData.selectedDays) as? Set<Int> ?? Set(),
+            selectedDays: selectedDaysTransformer.reverseTransformedValue(pillCoreData.selectedDays) as? [Int] ?? [],
+            selectedInterval: Int(pillCoreData.selectedInterval),
             selectedStartDate: pillCoreData.selectedStartDate ?? Date(),
             selectedEndDate: pillCoreData.selectedEndDate ?? Date()
         )

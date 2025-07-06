@@ -186,10 +186,6 @@ class NewPillStepThreeViewController: UIViewController {
     
     // MARK: - IB Actions
     @objc private func didTapEveryDayButton() {
-        guard isDurationSet else {
-            showMessage("Сначала нужно установить продолжительность лечения")
-            return
-        }
         model.selectedDays = Array(1...7)
         model.interval = 0
         updatePresetButtonStates(selectedButton: "Каждый день")
@@ -198,15 +194,10 @@ class NewPillStepThreeViewController: UIViewController {
     }
     
     @objc private func didTapEveryOtherDayButton() {
-        guard isDurationSet else {
-            showMessage("Сначала нужно установить продолжительность лечения")
-            return
-        }
-        guard let startDate = model.startDate, let endDate = model.endDate else { return }
         var selectedDays = [Int]()
-        var currentDate = startDate
+        var currentDate = model.startDate ?? Date()
         
-        while currentDate <= endDate {
+        while currentDate <= (model.endDate ?? Date()) {
             let weekday = (Calendar.current.component(.weekday, from: currentDate) + 5) % 7 + 1
             selectedDays.append(weekday)
             currentDate = Calendar.current.date(byAdding: .day, value: 2, to: currentDate)!
@@ -223,37 +214,25 @@ class NewPillStepThreeViewController: UIViewController {
     }
 
     @objc private func didTapEveryTwoDaysButton() {
-        guard isDurationSet else {
-            showMessage("Сначала нужно установить продолжительность лечения")
-            return
-        }
-        guard let startDate = model.startDate, let endDate = model.endDate else { return }
-
         var selectedDays = [Int]()
-        var currentDate = startDate
-
-        while currentDate <= endDate {
+        var currentDate = model.startDate ?? Date()
+        
+        while currentDate <= (model.endDate ?? Date()) {
             let weekday = (Calendar.current.component(.weekday, from: currentDate) + 5) % 7 + 1
             selectedDays.append(weekday)
             currentDate = Calendar.current.date(byAdding: .day, value: 3, to: currentDate)!
         }
-
         model.selectedDays = selectedDays
         model.interval = 2
         
         print("Выбранные дни через 2 дня: \(selectedDays)")
         print("Текущие выбранные дни: \(model.selectedDays)")
-
         updatePresetButtonStates(selectedButton: "Через 2 дня")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
 
     @objc private func didTapCustomOptionButton() {
-        guard isDurationSet else {
-            showMessage("Сначала нужно установить продолжительность лечения")
-            return
-        }
         if dayButtonStackView.isHidden {
             showDayButtonStackView()
         } else {
@@ -282,7 +261,6 @@ class NewPillStepThreeViewController: UIViewController {
     @objc private func startDateChanged(sender: UIDatePicker) {
         let localDate = startOfDayInLocalTimeZone(for: sender.date)
         model.startDate = localDate
-        checkDurationSet()
         updateNextButtonStateStepThree()
         print("Start date updated: \(formattedDateString(for: localDate))")
     }
@@ -290,7 +268,6 @@ class NewPillStepThreeViewController: UIViewController {
     @objc private func endDateChanged(sender: UIDatePicker) {
         let localDate = startOfDayInLocalTimeZone(for: sender.date)
         model.endDate = localDate
-        checkDurationSet()
         updateNextButtonStateStepThree()
         print("End date updated: \(formattedDateString(for: localDate))")
     }
@@ -314,7 +291,6 @@ class NewPillStepThreeViewController: UIViewController {
             view.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        disablePresetButtons()
         addConstraint()
     }
     
@@ -460,42 +436,5 @@ class NewPillStepThreeViewController: UIViewController {
         }, completion: { _ in
             self.dayButtonStackView.isHidden = true
         })
-    }
-    
-    private func checkDurationSet() {
-        if model.startDate != nil && model.endDate != nil {
-            isDurationSet = true
-            enablePresetButtons()
-        } else {
-            isDurationSet = false
-            disablePresetButtons()
-        }
-    }
-    
-    private func enablePresetButtons() {
-        for button in presetButtonStackView.arrangedSubviews {
-            if let presetButton = button as? UIButton {
-                presetButton.alpha = 1.0
-            }
-        }
-    }
-    private func disablePresetButtons() {
-        for button in presetButtonStackView.arrangedSubviews {
-            if let presetButton = button as? UIButton {
-                presetButton.alpha = 0.5
-            }
-        }
-    }
-
-    private func showMessage(_ message: String) {
-        currentAlertController?.dismiss(animated: false, completion: nil)
-        
-        let alertController = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        alertController.addAction(UIAlertAction(title: "Ок", style: .default, handler: { _ in
-            self.currentAlertController = nil
-        }))
-        
-        currentAlertController = alertController
-        present(alertController, animated: true, completion: nil)
     }
 }

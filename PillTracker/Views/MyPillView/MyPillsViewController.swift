@@ -251,8 +251,15 @@ extension MyPillsViewController: UITableViewDataSource {
                 print("Для \(pill.name): дней с начала лечения = \(daysSinceStart), интервал = \(interval)")
 
                 if interval == 0 {
-                    print("Показываем \(pill.name): каждый день.")
-                    return true
+                    let weekday = (calendar.component(.weekday, from: currentDate) + 5) % 7 + 1
+                    if pill.selectedDays.contains(weekday) {
+                        print("Показываем \(pill.name): в выбранный день.")
+                        return true
+                    } else {
+                        print("Пропускаем \(pill.name): текущий день не выбран.")
+                        return false
+                    }
+                    
                 } else {
                     let isDisplayed = daysSinceStart % (interval + 1) == 0
                     print("Показываем \(pill.name): \(isDisplayed ? "да" : "нет").")

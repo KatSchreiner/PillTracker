@@ -186,14 +186,32 @@ class NewPillStepThreeViewController: UIViewController {
     
     // MARK: - IB Actions
     @objc private func didTapEveryDayButton() {
-        model.selectedDays = Array(1...7)
+        model.selectedDays = []
+        resetDayButtons()
+        
+        var selectedDays = [Int]()
+        var currentDate = model.startDate ?? Date()
+        
+        while currentDate <= (model.endDate ?? Date()) {
+            let weekday = (Calendar.current.component(.weekday, from: currentDate) + 5) % 7 + 1
+            selectedDays.append(weekday)
+            currentDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
+        }
+        
+        model.selectedDays = selectedDays
         model.interval = 0
+        
+        print("Лекарство отображается каждый день: \(selectedDays)")
+        
         updatePresetButtonStates(selectedButton: "Каждый день")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
     
     @objc private func didTapEveryOtherDayButton() {
+        model.selectedDays = []
+        resetDayButtons()
+        
         var selectedDays = [Int]()
         var currentDate = model.startDate ?? Date()
         
@@ -206,14 +224,17 @@ class NewPillStepThreeViewController: UIViewController {
         model.selectedDays = selectedDays
         model.interval = 1
         
-        print("Выбранные дни через 1 день: \(selectedDays)")
-        print("Текущие выбранные дни: \(model.selectedDays)")
+        print("Лекарство отображается через 1 день: \(selectedDays)")
+
         updatePresetButtonStates(selectedButton: "Через день")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
 
     @objc private func didTapEveryTwoDaysButton() {
+        model.selectedDays = []
+        resetDayButtons()
+        
         var selectedDays = [Int]()
         var currentDate = model.startDate ?? Date()
         
@@ -225,26 +246,40 @@ class NewPillStepThreeViewController: UIViewController {
         model.selectedDays = selectedDays
         model.interval = 2
         
-        print("Выбранные дни через 2 дня: \(selectedDays)")
-        print("Текущие выбранные дни: \(model.selectedDays)")
+        print("Лекарство отображается через 2 дня: \(selectedDays)")
+
         updatePresetButtonStates(selectedButton: "Через 2 дня")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
 
     @objc private func didTapCustomOptionButton() {
+        model.selectedDays = []
+        model.interval = nil
+        
+        resetDayButtons()
+        print("Переход в режим 'Свой вариант'. Сброшены: дни=\(model.selectedDays), интервал=\(String(describing: model.interval))")
+
         if dayButtonStackView.isHidden {
             showDayButtonStackView()
         } else {
             hideDayButtonStackView()
         }
         
+        for button in presetButtonStackView.arrangedSubviews {
+            if let presetButton = button as? UIButton {
+                presetButton.backgroundColor = .lGray
+                presetButton.setTitleColor(.dGray, for: .normal)
+            }
+        }
+        
         updatePresetButtonStates(selectedButton: "Свой вариант")
     }
-
+    
     @objc
     private func didTapDayButton(sender: UIButton) {
         let index = sender.tag + 1
+        
         if let itemIndex = model.selectedDays.firstIndex(of: index) {
             model.selectedDays.remove(at: itemIndex)
             sender.backgroundColor = .lGray
@@ -255,6 +290,10 @@ class NewPillStepThreeViewController: UIViewController {
             sender.setTitleColor(.lGray, for: .normal)
         }
         
+        model.interval = nil
+        
+        print("Лекарство отображается по выбранным дням: \(model.selectedDays)")
+        
         updateNextButtonStateStepThree()
     }
     
@@ -262,14 +301,14 @@ class NewPillStepThreeViewController: UIViewController {
         let localDate = startOfDayInLocalTimeZone(for: sender.date)
         model.startDate = localDate
         updateNextButtonStateStepThree()
-        print("Start date updated: \(formattedDateString(for: localDate))")
+        print("Дата начала лечения обновлена: \(formattedDateString(for: localDate))")
     }
 
     @objc private func endDateChanged(sender: UIDatePicker) {
         let localDate = startOfDayInLocalTimeZone(for: sender.date)
         model.endDate = localDate
         updateNextButtonStateStepThree()
-        print("End date updated: \(formattedDateString(for: localDate))")
+        print("Дата окончания лечения обновлена: \(formattedDateString(for: localDate))")
     }
     
     @objc
@@ -341,14 +380,14 @@ class NewPillStepThreeViewController: UIViewController {
             model.startDate = startOfDayInLocalTimeZone(for: Date())
         }
         startDatePicker.date = model.startDate ?? startOfDayInLocalTimeZone(for: Date())
-        print("Loaded Start Date: \(formattedDateString(for: startDatePicker.date))")
+        print("Начало лечения: \(formattedDateString(for: startDatePicker.date))")
 
         if let endDate = model.endDate {
             endDatePicker.date = startOfDayInLocalTimeZone(for: endDate)
-            print("Loaded End Date: \(formattedDateString(for: endDatePicker.date))")
+            print("Окончание лечения: \(formattedDateString(for: endDatePicker.date))")
         } else {
             endDatePicker.date = startOfDayInLocalTimeZone(for: Date())
-            print("Loaded Default End Date: \(formattedDateString(for: endDatePicker.date))")
+            print("Окончание лечения: \(formattedDateString(for: endDatePicker.date))")
         }
     }
 
@@ -362,6 +401,13 @@ class NewPillStepThreeViewController: UIViewController {
                 button.backgroundColor = .lGray
                 button.setTitleColor(.dGray, for: .normal)
             }
+        }
+    }
+    
+    private func resetDayButtons() {
+        for button in dayButtons {
+            button.backgroundColor = .lGray
+            button.setTitleColor(.dGray, for: .normal)
         }
     }
     

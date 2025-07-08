@@ -256,9 +256,7 @@ class NewPillStepThreeViewController: UIViewController {
     @objc private func didTapCustomOptionButton() {
         model.selectedDays = []
         model.interval = nil
-        
         resetDayButtons()
-        print("Переход в режим 'Свой вариант'. Сброшены: дни=\(model.selectedDays), интервал=\(String(describing: model.interval))")
 
         if dayButtonStackView.isHidden {
             showDayButtonStackView()

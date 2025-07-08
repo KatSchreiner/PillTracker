@@ -446,109 +446,95 @@ extension MyPillsViewController: UITableViewDelegate {
     }
 
     private func handleDeleteAction(at indexPath: IndexPath, in tableView: UITableView, completionHandler: @escaping (Bool) -> Void) {
-        let weekDay = (Calendar.current.component(.weekday, from: selectedDate) + 5) % 7 + 1
-        let filteredPills = pills.filter { $0.selectedDays.contains(weekDay) }
+        let sortedPills = sortedPillsWithTimes()
         
-        guard let (pillToRemove, timeIndex, timesCount) = findPillAndCount(for: filteredPills, at: indexPath.row) else {
+        guard indexPath.row < sortedPills.count else {
+            print("Индекс за пределами массива sortedPills")
             completionHandler(false)
             return
         }
+
+        let pillWithTime = sortedPills[indexPath.row]
+        let pillToDelete = pillWithTime.pill
+        let timeToDelete = pillWithTime.time
         
-        guard timesCount <= pillToRemove.times.count else {
-            print("Error: timesCount \(timesCount) exceeds pillToRemove.times.count \(pillToRemove.times.count)")
+        guard let indexInPills = pills.firstIndex(where: { $0.id == pillToDelete.id }) else {
+            print("Не удалось найти лекарство с ID: \(pillToDelete.id) в pills")
             completionHandler(false)
             return
         }
-        
-        let timesSlice = pillToRemove.times[0..<timesCount]
-        let formattedTimes = timesSlice.map { "\($0.hour):\($0.minute)" }.joined(separator: ", ")
-        
-        let relativeIndex = indexPath.row - timeIndex
-        guard relativeIndex >= 0, relativeIndex < pillToRemove.times.count else {
-            print("Error: relativeIndex \(relativeIndex) out of bounds for times.count: \(pillToRemove.times.count)")
-            completionHandler(false)
-            return
-        }
-        
+
         let deleteAlertView = DeleteAlertViewController()
-        deleteAlertView.titleText = "Удалить \(pillToRemove.name)"
+        deleteAlertView.titleText = "Удалить \(pillToDelete.name)"
         deleteAlertView.tableView = tableView
-        
+
         deleteAlertView.onDeleteSingleDose = { [weak self] in
             guard let self = self else { return }
-            if let indexInPills = self.pills.firstIndex(where: { $0.name == pillToRemove.name }) {
-                self.tableView.beginUpdates()
-                if relativeIndex < self.pills[indexInPills].times.count {
-                    self.pills[indexInPills].times.remove(at: relativeIndex)
-                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
-                } else {
-                    print("Error: relativeIndex \(relativeIndex) out of bounds for pills[indexInPills].times")
-                }
-                self.tableView.endUpdates()
-                completionHandler(true)
+            self.tableView.beginUpdates()
+            
+            if let timeIndex = self.pills[indexInPills].times.firstIndex(where: {
+                $0.hour == timeToDelete.hour && $0.minute == timeToDelete.minute
+            }) {
+                self.pills[indexInPills].times.remove(at: timeIndex)
+                self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                pillStore.updatePill(self.pills[indexInPills])
             } else {
-                completionHandler(false)
+                print("Error: time not found in pill's times")
             }
+            
+            self.tableView.endUpdates()
+            completionHandler(true)
         }
-        
+
         deleteAlertView.onDeleteFutureDoses = { [weak self] in
             guard let self = self else { return }
-            if let indexInPills = self.pills.firstIndex(where: { $0.name == pillToRemove.name }) {
-                self.tableView.beginUpdates()
-                self.pills.remove(at: indexInPills)
-                let indexPathsToDelete = (0..<timesCount).map { IndexPath(row: timeIndex + $0, section: 0) }
-                self.tableView.deleteRows(at: indexPathsToDelete, with: .automatic)
-                self.tableView.endUpdates()
-                completionHandler(true)
-            } else {
-                completionHandler(false)
-            }
+            self.tableView.beginUpdates()
+            
+            let indexesToDelete = sortedPills
+                .enumerated()
+                .filter { $0.element.pill.id == pillToDelete.id }
+                .map { IndexPath(row: $0.offset, section: 0) }
+            
+            self.pills.removeAll(where: { $0.id == pillToDelete.id })
+            self.tableView.deleteRows(at: indexesToDelete, with: .automatic)
+            //pillStore.deletePill(pillToDelete.id)
+            
+            self.tableView.endUpdates()
+            completionHandler(true)
         }
-        
+
         deleteAlertView.onCancel = { [weak self] in
             guard let self = self else { return }
             self.tableView.setEditing(false, animated: true)
             completionHandler(false)
         }
-        
+
         deleteAlertView.modalPresentationStyle = .custom
         deleteAlertView.transitioningDelegate = self
-        
+
         present(deleteAlertView, animated: true, completion: nil)
     }
 
-    
     private func handleEditAction(at indexPath: IndexPath) {
-        let weekDay = (Calendar.current.component(.weekday, from: selectedDate) + 5) % 7 + 1
-        let filteredPills = pills.filter { $0.selectedDays.contains(weekDay) }
+        let sortedPills = sortedPillsWithTimes()
+        guard indexPath.row < sortedPills.count else {
+            print("Индекс за пределами массива")
+            return
+        }
         
-        guard let (pillToEdit, _, _) = findPillAndCount(for: filteredPills, at: indexPath.row) else { return }
+        let pillToEdit = sortedPills[indexPath.row].pill
+        print("Редактируемое лекарство: \(pillToEdit.name)")
         
         let editMyPillView = EditMyPillViewController(addNewPillVC: AddNewPillViewController())
         editMyPillView.pill = pillToEdit
         editMyPillView.delegate = self
         navigationController?.pushViewController(editMyPillView, animated: true)
     }
-    
-    private func findPillAndCount(for filteredPills: [Pill], at index: Int) -> (pill: Pill, timeIndex: Int, timesCount: Int)? {
-        var timeIndex = 0
-        for pill in filteredPills {
-            let count = pill.times.count
-            if timeIndex + count > index {
-                return (pill, timeIndex, count)
-            }
-            timeIndex += count
-        }
-        return nil
-    }
-    
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 80
     }
 }
-
-
-
 
 // MARK: - AddNewPillDelegate
 extension MyPillsViewController: AddNewPillDelegate {

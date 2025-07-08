@@ -99,6 +99,42 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
         }
     }
     
+    func deletePill(_ pillId: UUID) {
+        let fetchRequest: NSFetchRequest<PillCoreData> = PillCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", pillId as CVarArg)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let pillToDelete = results.first {
+                deleteTakenPills(for: pillId)
+                
+                context.delete(pillToDelete)
+                try context.save()
+                print("✅ Лекарство с ID '\(pillId)' успешно удалено.")
+            } else {
+                print("❌ Лекарство с ID '\(pillId)' не найдено для удаления.")
+            }
+        } catch {
+            print("❌ Ошибка при удалении лекарства: \(error.localizedDescription)")
+            context.rollback()
+        }
+    }
+
+    private func deleteTakenPills(for pillId: UUID) {
+        let fetchRequest: NSFetchRequest<TakenPillsCoreData> = TakenPillsCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "pillId == %@", pillId as CVarArg)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            for takenPill in results {
+                context.delete(takenPill)
+            }
+            print("✅ Удалено \(results.count) записей о принятии лекарства с ID '\(pillId)'")
+        } catch {
+            print("❌ Ошибка при удалении записей о принятии лекарства: \(error.localizedDescription)")
+        }
+    }
+    
     func fetchPillById(_ pillId: UUID) -> Pill? {
         let fetchRequest: NSFetchRequest<PillCoreData> = PillCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@", pillId as CVarArg)

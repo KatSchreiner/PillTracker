@@ -9,6 +9,7 @@ import UIKit
 
 struct PillStepThreeModel {
     var selectedDays: [Int] = []
+    var selectedPreset: String?
     var interval: Int?
     var startDate: Date?
     var endDate: Date?

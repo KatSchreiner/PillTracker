@@ -215,6 +215,7 @@ final class AddNewPillViewController: UIViewController {
     private func moveToStepThree() {
         guard let stepThreeVC = currentChildVC as? NewPillStepThreeViewController else { return }
         pillStepThreeModel.selectedDays = stepThreeVC.model.selectedDays
+        pillStepThreeModel.selectedPreset = stepThreeVC.model.selectedPreset
         pillStepThreeModel.interval = stepThreeVC.model.interval
         pillStepThreeModel.startDate = stepThreeVC.model.startDate
         pillStepThreeModel.endDate = stepThreeVC.model.endDate

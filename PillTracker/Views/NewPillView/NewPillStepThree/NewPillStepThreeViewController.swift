@@ -189,6 +189,8 @@ class NewPillStepThreeViewController: UIViewController {
         model.selectedDays = []
         resetDayButtons()
         
+        model.selectedPreset = "Каждый день"
+        
         var selectedDays = [Int]()
         var currentDate = model.startDate ?? Date()
         
@@ -211,6 +213,8 @@ class NewPillStepThreeViewController: UIViewController {
     @objc private func didTapEveryOtherDayButton() {
         model.selectedDays = []
         resetDayButtons()
+        
+        model.selectedPreset = "Через день"
         
         var selectedDays = [Int]()
         var currentDate = model.startDate ?? Date()
@@ -235,6 +239,8 @@ class NewPillStepThreeViewController: UIViewController {
         model.selectedDays = []
         resetDayButtons()
         
+        model.selectedPreset = "Через 2 дня"
+        
         var selectedDays = [Int]()
         var currentDate = model.startDate ?? Date()
         
@@ -257,6 +263,7 @@ class NewPillStepThreeViewController: UIViewController {
         model.selectedDays = []
         model.interval = nil
         resetDayButtons()
+        model.selectedPreset = "Свой вариант"
 
         if dayButtonStackView.isHidden {
             showDayButtonStackView()
@@ -387,8 +394,16 @@ class NewPillStepThreeViewController: UIViewController {
             endDatePicker.date = startOfDayInLocalTimeZone(for: Date())
             print("Окончание лечения: \(formattedDateString(for: endDatePicker.date))")
         }
+        
+        if let selectedPreset = model.selectedPreset {
+            updatePresetButtonStates(selectedButton: selectedPreset)
+            
+            if selectedPreset == "Свой вариант" && !model.selectedDays.isEmpty {
+                showDayButtonStackView()
+            }
+        }
     }
-
+    
     private func updateDayButtonStates() {
         for button in dayButtons {
             let index = button.tag + 1

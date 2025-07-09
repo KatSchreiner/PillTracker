@@ -86,7 +86,7 @@ class MyPillsViewController: UIViewController {
         loadTakenPills()
         loadUser()
     }
-    
+
     init(userName: String?) {
         self.userName = userName
         super.init(nibName: nil, bundle: nil)
@@ -230,44 +230,35 @@ extension MyPillsViewController: UITableViewDataSource {
     private func filteredPills() -> [Pill] {
         let calendar = Calendar.current
         let currentDate = Calendar.current.startOfDay(for: selectedDate)
-        print("Текущая дата: \(formattedDateString(for: currentDate))")
 
         return pills.filter { pill in
             if pill.selectedStartDate == nil || pill.selectedEndDate == nil {
-                print("Пропускаем \(pill.name): даты начала и окончания не установлены.")
                 return false
             }
             let startDate = pill.selectedStartDate
             let endDate = pill.selectedEndDate
-            print("Проверяем \(pill.name): Начало - \(formattedDateString(for: startDate)), Окончание - \(formattedDateString(for: endDate))")
         
             guard currentDate >= startDate && currentDate <= endDate else {
-                print("Пропускаем \(pill.name): текущая дата не в периоде лечения.")
                 return false
             }
 
             if let interval = pill.selectedInterval {
                 let daysSinceStart = calendar.dateComponents([.day], from: startDate, to: currentDate).day ?? 0
-                print("Для \(pill.name): дней с начала лечения = \(daysSinceStart), интервал = \(interval)")
 
                 if interval == 0 {
                     let weekday = (calendar.component(.weekday, from: currentDate) + 5) % 7 + 1
                     if pill.selectedDays.contains(weekday) {
-                        print("Показываем \(pill.name): в выбранный день.")
                         return true
                     } else {
-                        print("Пропускаем \(pill.name): текущий день не выбран.")
                         return false
                     }
                     
                 } else {
                     let isDisplayed = daysSinceStart % (interval + 1) == 0
-                    print("Показываем \(pill.name): \(isDisplayed ? "да" : "нет").")
                     return isDisplayed
                 }
             }
 
-            print("Пропускаем \(pill.name): интервал не установлен.")
             return false
         }
     }
@@ -472,15 +463,17 @@ extension MyPillsViewController: UITableViewDelegate {
             guard let self = self else { return }
             self.tableView.beginUpdates()
             
-            if let timeIndex = self.pills[indexInPills].times.firstIndex(where: {
-                $0.hour == timeToDelete.hour && $0.minute == timeToDelete.minute
-            }) {
-                self.pills[indexInPills].times.remove(at: timeIndex)
-                self.tableView.deleteRows(at: [indexPath], with: .automatic)
-                pillStore.updatePill(self.pills[indexInPills])
-            } else {
-                print("Error: time not found in pill's times")
-            }
+            let indexesToDelete = sortedPills
+                .enumerated()
+                .filter { $0.element.pill.id == pillToDelete.id }
+                .map { IndexPath(row: $0.offset, section: 0) }
+            
+            self.pills.removeAll(where: { $0.id == pillToDelete.id })
+            self.tableView.deleteRows(at: indexesToDelete, with: .automatic)
+            pillStore.deletePill(pillToDelete.id)
+            
+            self.pills = self.pillStore.fetchPills()
+            self.tableView.reloadData()
             
             self.tableView.endUpdates()
             completionHandler(true)
@@ -497,7 +490,7 @@ extension MyPillsViewController: UITableViewDelegate {
             
             self.pills.removeAll(where: { $0.id == pillToDelete.id })
             self.tableView.deleteRows(at: indexesToDelete, with: .automatic)
-            //pillStore.deletePill(pillToDelete.id)
+            pillStore.deletePill(pillToDelete.id)
             
             self.tableView.endUpdates()
             completionHandler(true)

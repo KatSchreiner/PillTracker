@@ -76,7 +76,7 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
         do {
             let results = try context.fetch(fetchRequest)
             if let pillCoreData = results.first {
-                // Обновляем свойства существующего объекта
+
                 pillCoreData.name = pill.name
                 pillCoreData.dosage = pill.dosage
                 pillCoreData.unit = pill.unit
@@ -88,7 +88,6 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
                 pillCoreData.selectedStartDate = pill.selectedStartDate
                 pillCoreData.selectedEndDate = pill.selectedEndDate
                 
-                // Сохраняем изменения в контексте
                 try context.save()
                 print("✅ Лекарство '\(pill.name)' успешно обновлено.")
             } else {
@@ -110,6 +109,15 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
                 
                 context.delete(pillToDelete)
                 try context.save()
+                
+                let verifyRequest: NSFetchRequest<PillCoreData> = PillCoreData.fetchRequest()
+                verifyRequest.predicate = NSPredicate(format: "id == %@", pillId as CVarArg)
+                let verifyResults = try context.fetch(verifyRequest)
+                print("🔍 Post-deletion verification: \(verifyResults.count) pills found")
+                
+                NSFetchedResultsController<PillCoreData>.deleteCache(withName: nil)
+                try fetchedResultsController.performFetch()
+                
                 print("✅ Лекарство с ID '\(pillId)' успешно удалено.")
             } else {
                 print("❌ Лекарство с ID '\(pillId)' не найдено для удаления.")
@@ -119,7 +127,7 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
             context.rollback()
         }
     }
-
+    
     private func deleteTakenPills(for pillId: UUID) {
         let fetchRequest: NSFetchRequest<TakenPillsCoreData> = TakenPillsCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "pillId == %@", pillId as CVarArg)
@@ -152,14 +160,25 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
     }
     
     func fetchPills() -> [Pill] {
-        guard let pills = fetchedResultsController.fetchedObjects else {
-            print("❌ Лекарства не найдены.")
+        do {
+            try fetchedResultsController.performFetch()
+            
+            guard let pills = fetchedResultsController.fetchedObjects else {
+                print("❌ Лекарства не найдены.")
+                return []
+            }
+            
+            if pills.isEmpty {
+                print("✅ Список лекарств пуст.")
+                return []
+            }
+            
+            print("✅ Лекарства успешно загружены: \(pills.compactMap { $0.name })")
+            return pills.compactMap { transformToPill($0) }
+        } catch {
+            print("❌ Ошибка при загрузке лекарств: \(error.localizedDescription)")
             return []
         }
-        
-        print("✅ Лекарства успешно загружены: \(pills.map { $0.name ?? "неизвестная таблетка" })")
-        
-        return pills.compactMap { transformToPill($0) }
     }
     
     private func transformToPill(_ pillCoreData: PillCoreData) -> Pill {
@@ -176,5 +195,12 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
             selectedStartDate: pillCoreData.selectedStartDate ?? Date(),
             selectedEndDate: pillCoreData.selectedEndDate ?? Date()
         )
+    }
+}
+
+extension PillStore {
+    func clearCache() {
+        fetchedResultsController.fetchRequest.predicate = nil
+        try? fetchedResultsController.performFetch()
     }
 }

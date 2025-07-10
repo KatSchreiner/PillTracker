@@ -181,7 +181,21 @@ class NewPillStepThreeViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        loadData()
+        UIView.performWithoutAnimation {
+            loadData()
+            self.view.layoutIfNeeded()
+        }
+        if model.selectedPreset == "Свой вариант" && !model.selectedDays.isEmpty {
+            showDayButtonStackView()
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        UIView.animate(withDuration: 0.1) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     // MARK: - IB Actions
@@ -370,36 +384,27 @@ class NewPillStepThreeViewController: UIViewController {
     private func loadData() {
         for button in dayButtons {
             let index = button.tag + 1
-            if model.selectedDays.contains(index) {
-                button.backgroundColor = .dBlue
-                button.setTitleColor(.lGray, for: .normal)
-            } else {
-                button.backgroundColor = .lGray
-                button.setTitleColor(.dGray, for: .normal)
-            }
+            let isSelected = model.selectedDays.contains(index)
+            button.backgroundColor = isSelected ? .dBlue : .lGray
+            button.setTitleColor(isSelected ? .lGray : .dGray, for: .normal)
         }
-
+        
         reminderSwitch.isOn = model.isReminderEnabled
-
-        if model.startDate == nil {
-            model.startDate = startOfDayInLocalTimeZone(for: Date())
-        }
-        startDatePicker.date = model.startDate ?? startOfDayInLocalTimeZone(for: Date())
-        print("Начало лечения: \(formattedDateString(for: startDatePicker.date))")
-
-        if let endDate = model.endDate {
-            endDatePicker.date = startOfDayInLocalTimeZone(for: endDate)
-            print("Окончание лечения: \(formattedDateString(for: endDatePicker.date))")
-        } else {
-            endDatePicker.date = startOfDayInLocalTimeZone(for: Date())
-            print("Окончание лечения: \(formattedDateString(for: endDatePicker.date))")
-        }
+        
+        let currentDate = startOfDayInLocalTimeZone(for: Date())
+        startDatePicker.date = model.startDate ?? currentDate
+        endDatePicker.date = model.endDate ?? currentDate
         
         if let selectedPreset = model.selectedPreset {
             updatePresetButtonStates(selectedButton: selectedPreset)
             
             if selectedPreset == "Свой вариант" && !model.selectedDays.isEmpty {
-                showDayButtonStackView()
+                DispatchQueue.main.async {
+                    self.dayButtonStackView.isHidden = false
+                    self.dayButtonStackViewHeightConstraint.constant = 35
+                    self.dayButtonStackView.alpha = 1
+                    self.view.layoutIfNeeded()
+                }
             }
         }
     }
@@ -477,8 +482,10 @@ class NewPillStepThreeViewController: UIViewController {
     }
     
     private func showDayButtonStackView() {
+        guard dayButtonStackView.isHidden else { return }
+        self.view.layoutIfNeeded()
+        
         dayButtonStackView.isHidden = false
-        dayButtonStackView.alpha = 0
         dayButtonStackViewHeightConstraint.constant = 35
         
         UIView.animate(withDuration: 0.3, animations: {

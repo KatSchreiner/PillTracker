@@ -8,7 +8,7 @@
 import CoreData
 import UIKit
 
-final class UserStore: NSObject {
+final class UserStore: NSObject, NSFetchedResultsControllerDelegate {
     private let context: NSManagedObjectContext
     
     private lazy var fetchedResultsController: NSFetchedResultsController<UserCoreData> = {
@@ -61,30 +61,24 @@ final class UserStore: NSObject {
     }
     
     func fetchUser () -> UserCoreData? {
-        let fetchRequest: NSFetchRequest<UserCoreData> = UserCoreData.fetchRequest()
-        
-        do {
-            let users = try context.fetch(fetchRequest)
-            return users.first 
-        } catch {
-            print("Ошибка при выполнении fetch: \(error.localizedDescription)")
-            return nil
-        }
+        return fetchUsers(with: nil)?.first
     }
     
     private func fetchUserByName(_ name: String) -> UserCoreData? {
-        let fetchRequest: NSFetchRequest<UserCoreData> = UserCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "name == %@", name)
+        let predicate = NSPredicate(format: "name == %@", name)
         
-        do {
-            let users = try context.fetch(fetchRequest)
-            return users.first
-        } catch {
-            print("Ошибка при выполнении fetch: \(error.localizedDescription)")
-            return nil
-        }
+        return fetchUsers(with: predicate)?.first
     }
-}
-
-extension UserStore: NSFetchedResultsControllerDelegate {
+    
+    private func fetchUsers(with predicate: NSPredicate?) -> [UserCoreData]? {
+            let fetchRequest: NSFetchRequest<UserCoreData> = UserCoreData.fetchRequest()
+            fetchRequest.predicate = predicate
+            
+            do {
+                return try context.fetch(fetchRequest)
+            } catch {
+                print("Ошибка при выполнении fetch: \(error.localizedDescription)")
+                return nil
+            }
+        }
 }

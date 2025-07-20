@@ -5,6 +5,7 @@
         <attribute name="howToTake" optional="YES" attributeType="String"/>
         <attribute name="icon" optional="YES" attributeType="Binary"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isReminderEnabled" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="selectedDays" optional="YES" attributeType="Transformable"/>
         <attribute name="selectedEndDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>

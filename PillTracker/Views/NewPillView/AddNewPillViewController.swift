@@ -72,9 +72,18 @@ final class AddNewPillViewController: UIViewController {
         doneButton.animatePress()
         moveToStepThree()
         let pill = createPill()
-        delegate?.didAddPill(pill)
-        printPillDetails(pill)
-        navigationController?.popViewController(animated: true)
+        
+        MedicationNotificationManager.shared.requestAuthorization { [weak self] granted in
+            DispatchQueue.main.async {
+                if granted && pill.isReminderEnabled {
+                    MedicationNotificationManager.shared.scheduleNotification(for: pill)
+                }
+                
+                self?.delegate?.didAddPill(pill)
+                self?.printPillDetails(pill)
+                self?.navigationController?.popViewController(animated: true)
+            }
+        }
     }
     
     @objc
@@ -241,7 +250,9 @@ final class AddNewPillViewController: UIViewController {
             selectedDays: pillStepThreeModel.selectedDays,
             selectedInterval: pillStepThreeModel.interval ?? 0,
             selectedStartDate: pillStepThreeModel.startDate ?? Date(),
-            selectedEndDate: pillStepThreeModel.endDate ?? Date()
+            selectedEndDate: pillStepThreeModel.endDate ?? Date(),
+            isReminderEnabled: pillStepThreeModel.isReminderEnabled
+            
         )
     }
     

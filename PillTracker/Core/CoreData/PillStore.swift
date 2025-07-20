@@ -193,7 +193,8 @@ final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
             selectedDays: selectedDaysTransformer.reverseTransformedValue(pillCoreData.selectedDays) as? [Int] ?? [],
             selectedInterval: Int(pillCoreData.selectedInterval),
             selectedStartDate: pillCoreData.selectedStartDate ?? Date(),
-            selectedEndDate: pillCoreData.selectedEndDate ?? Date()
+            selectedEndDate: pillCoreData.selectedEndDate ?? Date(),
+            isReminderEnabled: pillCoreData.isReminderEnabled
         )
     }
 }

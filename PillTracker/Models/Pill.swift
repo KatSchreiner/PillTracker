@@ -19,4 +19,5 @@ struct Pill {
     var selectedInterval: Int?
     var selectedStartDate: Date
     var selectedEndDate: Date
+    let isReminderEnabled: Bool
 }

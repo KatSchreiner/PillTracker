@@ -334,6 +334,37 @@ class NewPillStepThreeViewController: UIViewController {
     private func didToggleReminderSwitch(sender: UISwitch) {
         model.isReminderEnabled = sender.isOn
         
+//        if sender.isOn {
+//            MedicationNotificationManager.shared.requestAuthorization { [weak self] granted in
+//                guard let self = self else { return }
+//                
+//                DispatchQueue.main.async {
+//                    if !granted {
+//                        self.showNotificationPermissionAlert()
+//                        sender.isOn = false
+//                        self.model.isReminderEnabled = false
+//                    } else {
+//                        self.showReminderActivatedAlert()
+//                    }
+//                }
+//            }
+//        }
+        
+        if sender.isOn {
+            MedicationNotificationManager.shared.requestAuthorization { [weak self] granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        self?.showReminderActivatedAlert()
+                    } else {
+                        self?.showNotificationPermissionAlert()
+                        sender.isOn = false
+                        self?.model.isReminderEnabled = false
+                    }
+                }
+            }
+        }
+
+        
         updateNextButtonStateStepThree()
     }
     
@@ -391,9 +422,16 @@ class NewPillStepThreeViewController: UIViewController {
         
         reminderSwitch.isOn = model.isReminderEnabled
         
-        let currentDate = startOfDayInLocalTimeZone(for: Date())
-        startDatePicker.date = model.startDate ?? currentDate
-        endDatePicker.date = model.endDate ?? currentDate
+        if model.startDate == nil {
+            model.startDate = startOfDayInLocalTimeZone(for: Date())
+        }
+        startDatePicker.date = model.startDate ?? startOfDayInLocalTimeZone(for: Date())
+        
+        if let endDate = model.endDate {
+            endDatePicker.date = startOfDayInLocalTimeZone(for: endDate)
+        } else {
+            endDatePicker.date = startOfDayInLocalTimeZone(for: Date())
+        }
         
         if let selectedPreset = model.selectedPreset {
             updatePresetButtonStates(selectedButton: selectedPreset)
@@ -502,5 +540,35 @@ class NewPillStepThreeViewController: UIViewController {
         }, completion: { _ in
             self.dayButtonStackView.isHidden = true
         })
+    }
+    
+    private func showNotificationPermissionAlert() {
+        let alert = UIAlertController(
+            title: "Разрешение не предоставлено",
+            message: "Пожалуйста, разрешите уведомления в настройках, чтобы получать напоминания о приеме лекарств",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Настройки", style: .default) { _ in
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(settingsURL)
+            }
+        })
+        
+        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+        
+        present(alert, animated: true)
+    }
+
+    private func showReminderActivatedAlert() {
+        let alert = UIAlertController(
+            title: "Напоминания включены",
+            message: "Вы будете получать уведомления о приеме лекарства в установленное время",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        
+        present(alert, animated: true)
     }
 }

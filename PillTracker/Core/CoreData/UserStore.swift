@@ -71,14 +71,14 @@ final class UserStore: NSObject, NSFetchedResultsControllerDelegate {
     }
     
     private func fetchUsers(with predicate: NSPredicate?) -> [UserCoreData]? {
-            let fetchRequest: NSFetchRequest<UserCoreData> = UserCoreData.fetchRequest()
-            fetchRequest.predicate = predicate
-            
-            do {
-                return try context.fetch(fetchRequest)
-            } catch {
-                print("Ошибка при выполнении fetch: \(error.localizedDescription)")
-                return nil
-            }
+        let fetchRequest: NSFetchRequest<UserCoreData> = UserCoreData.fetchRequest()
+        fetchRequest.predicate = predicate
+        
+        do {
+            return try context.fetch(fetchRequest)
+        } catch {
+            print("Ошибка при выполнении fetch: \(error.localizedDescription)")
+            return nil
         }
+    }
 }

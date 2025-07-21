@@ -41,7 +41,7 @@ final class AddNewPillViewController: UIViewController {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
-        stackView.spacing = 20
+        stackView.spacing = Constants.defaultPadding
         return stackView
     }()
     

@@ -15,8 +15,8 @@ final class WelcomeViewController: UIViewController {
         let textField = UITextField()
         textField.borderStyle = .roundedRect
         textField.placeholder = "Как тебя зовут?"
-        textField.textAlignment = Constants.textAlignment
-        textField.layer.cornerRadius = Constants.cornerRadius
+        textField.textAlignment = Constants.centerTextAlignment
+        textField.layer.cornerRadius = Constants.defaultRadius
         textField.delegate = self
         textField.returnKeyType = .done
         textField.autocapitalizationType = .words
@@ -35,7 +35,7 @@ final class WelcomeViewController: UIViewController {
     private lazy var horizontalStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [nameTextField, nextButton])
         stackView.axis = .horizontal
-        stackView.spacing = Constants.spacing
+        stackView.spacing = Constants.defaultPadding
         stackView.distribution = .fill
         return stackView
     }()
@@ -44,8 +44,8 @@ final class WelcomeViewController: UIViewController {
         let label = UILabel()
         label.backgroundColor = .dGray
         label.textColor = .white
-        label.textAlignment = Constants.textAlignment
-        label.layer.cornerRadius = Constants.cornerRadius
+        label.textAlignment = Constants.centerTextAlignment
+        label.layer.cornerRadius = Constants.defaultRadius
         label.clipsToBounds = true
         label.alpha = 0
         label.numberOfLines = 0

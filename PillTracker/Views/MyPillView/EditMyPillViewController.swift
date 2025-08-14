@@ -43,20 +43,20 @@ final class EditMyPillViewController: UIViewController {
     }
     
     private func configurePillData(with pill: Pill) {
-        addNewPillVC.isEditingPill = true
-        addNewPillVC.editedPillId = pill.id
+        addNewPillVC.viewModel.isEditingPill = true
+        addNewPillVC.viewModel.editedPillId = pill.id
         
-        addNewPillVC.pillStepOneModel.title = pill.name
-        addNewPillVC.pillStepOneModel.dosage = pill.dosage
-        addNewPillVC.pillStepOneModel.selectedIcon = pill.icon
-        addNewPillVC.pillStepOneModel.selectedUnit = pill.unit
+        addNewPillVC.viewModel.pillStepOneModel.title = pill.name
+        addNewPillVC.viewModel.pillStepOneModel.dosage = pill.dosage
+        addNewPillVC.viewModel.pillStepOneModel.selectedIcon = pill.icon
+        addNewPillVC.viewModel.pillStepOneModel.selectedUnit = pill.unit
         
-        addNewPillVC.pillStepTwoModel.selectedTimes = pill.times
-        addNewPillVC.pillStepTwoModel.selectedOption = pill.howToTake
+        addNewPillVC.viewModel.pillStepTwoModel.selectedTimes = pill.times
+        addNewPillVC.viewModel.pillStepTwoModel.selectedOption = pill.howToTake
         
-        addNewPillVC.pillStepThreeModel.selectedDays = pill.selectedDays
-        addNewPillVC.pillStepThreeModel.startDate = pill.selectedStartDate
-        addNewPillVC.pillStepThreeModel.endDate = pill.selectedEndDate
+        addNewPillVC.viewModel.pillStepThreeModel.selectedDays = pill.selectedDays
+        addNewPillVC.viewModel.pillStepThreeModel.startDate = pill.selectedStartDate
+        addNewPillVC.viewModel.pillStepThreeModel.endDate = pill.selectedEndDate
     }
 }
 

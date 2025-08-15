@@ -101,7 +101,7 @@ class AddNewPillViewModel {
         }
         
         pillStepOneModel.selectedIcon = stepOneVC.formTypesButton.image(for: .normal)
-        pillStepOneModel.selectedUnit = stepOneVC.selectedUnit
+        pillStepOneModel.selectedUnit = stepOneVC.viewModel.selectedUnit
     }
 
     private func moveToStepTwo() {

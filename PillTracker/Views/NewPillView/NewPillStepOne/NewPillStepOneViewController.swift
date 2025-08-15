@@ -10,16 +10,8 @@ import UIKit
 class NewPillStepOneViewController: UIViewController {
     
     // MARK: - Public Properties
-    static let stepOne = "NewPillStepOneCell"
     
-    var pillStepOneModel: PillStepOneModel?
-    
-    var selectedUnit: String?
-    var dosage: Double = 0 {
-        didSet {
-            updateUnitButtonTitle()
-        }
-    }
+    let viewModel = NewPillStepOneViewModel()
     
     lazy var titleTextField: UITextField = createTextField()
     lazy var dosageTextField: UITextField = createTextField()
@@ -73,41 +65,21 @@ class NewPillStepOneViewController: UIViewController {
     @objc
     private func didTapFormTypesButton() {
         formTypesButton.animatePress()
-        
-        let iconSelectionView = IconSelectionViewController()
-
-        iconSelectionView.selectedIcon = { [weak self] selectedIcon in
-            self?.animateIconChange(to: selectedIcon)
-            self?.pillStepOneModel?.selectedIcon = selectedIcon
-            self?.updateNextButtonStateStepOne()
-        }
-        
-        iconSelectionView.presentAsBottomSheet(on: self)
+        viewModel.handleFormTypesButtonTap(presenter: self)
     }
     
     @objc
     private func didTapUnitButton() {
         unitButton.animatePress()
-        
-        let unitSelectionView = UnitSelectionViewController()
-
-        unitSelectionView.dosage = dosage
-        unitSelectionView.selectedUnit = { [weak self] selectedUnit in
-            self?.selectedUnit = selectedUnit
-            self?.pillStepOneModel?.selectedUnit = selectedUnit
-            self?.updateUnitButtonTitle()
-            self?.updateNextButtonStateStepOne()
-        }
-        
-        unitSelectionView.presentAsBottomSheet(on: self)
+        viewModel.handleUnitButtonTap(presenter: self)
     }
     
     @objc
     private func textFieldDidChange(_ textField: UITextField) {
         if let dosageText = textField.text, let dosageValue = Double(dosageText) {
-            dosage = dosageValue
+            viewModel.dosage = dosageValue
         } else {
-            dosage = 0
+            viewModel.dosage = 0
         }
         updateNextButtonStateStepOne()
     }
@@ -134,7 +106,7 @@ class NewPillStepOneViewController: UIViewController {
         view.backgroundColor = .white
             
         setupTextFields()
-        
+        setupBindings()
         loadData()
 
         view.addSubview(stackView)
@@ -156,6 +128,27 @@ class NewPillStepOneViewController: UIViewController {
             
             unitButton.heightAnchor.constraint(equalToConstant: 60)
         ])
+    }
+    
+    private func setupBindings() {
+        viewModel.updateIconButton = { [weak self] icon in
+            self?.animateIconChange(to: icon)
+        }
+        
+        viewModel.updateUnitButtonTitle = { [weak self] in
+            guard let self = self else { return }
+            
+            if let selectedUnit = self.viewModel.selectedUnit {
+                let unitTitle = String.getUnitTitle(for: self.viewModel.dosage, unit: selectedUnit)
+                self.unitButton.setTitle(unitTitle, for: .normal)
+            } else {
+                self.unitButton.setTitle("Выберите единицу", for: .normal)
+            }
+        }
+        
+        viewModel.updateNextButtonState = { [weak self] in
+            self?.updateNextButtonStateStepOne()
+        }
     }
     
     deinit {
@@ -211,33 +204,33 @@ class NewPillStepOneViewController: UIViewController {
     }
     
     private func loadData() {
-        titleTextField.text = pillStepOneModel?.title
+        titleTextField.text = viewModel.pillStepOneModel?.title
         
-        if let dosage = pillStepOneModel?.dosage {
+        if let dosage = viewModel.pillStepOneModel?.dosage {
             dosageTextField.text = String(format: "%.1f", dosage)
         } else {
             dosageTextField.text = nil
         }
         
-        if let selectedIcon = pillStepOneModel?.selectedIcon {
+        if let selectedIcon = viewModel.pillStepOneModel?.selectedIcon {
             formTypesButton.setImage(selectedIcon, for: .normal)
         }
         
-        if let selectedUnit = pillStepOneModel?.selectedUnit {
-            self.selectedUnit = selectedUnit
+        if let selectedUnit = viewModel.pillStepOneModel?.selectedUnit {
+            self.viewModel.selectedUnit = selectedUnit
             unitButton.setTitle(selectedUnit, for: .normal)
         }
     }
     
     func updateNextButtonStateStepOne() {
-        pillStepOneModel?.title = titleTextField.text
+        viewModel.pillStepOneModel?.title = titleTextField.text
         if let dosageText = dosageTextField.text, let dosageValue = Double(dosageText) {
-            pillStepOneModel?.dosage = dosageValue
+            viewModel.pillStepOneModel?.dosage = dosageValue
         } else {
-            pillStepOneModel?.dosage = nil
+            viewModel.pillStepOneModel?.dosage = nil
         }
         
-        let isEnabled = pillStepOneModel?.isValid() ?? false
+        let isEnabled = viewModel.pillStepOneModel?.isValid() ?? false
         
         if let addNewPillView = parent as? AddNewPillViewController {
             addNewPillView.nextButton.isEnabled = isEnabled
@@ -257,25 +250,13 @@ class NewPillStepOneViewController: UIViewController {
         }) { _ in
         }
     }
-    
-    private func updateUnitButtonTitle() {
-        guard let selectedUnit = selectedUnit else { return }
-        let unitTitle = getUnitTitle(for: dosage, unit: selectedUnit)
-        unitButton.setTitle(unitTitle, for: .normal)
-    }
-    
-    private func getUnitTitle(for dosage: Double, unit: String) -> String {
-        return String.getUnitTitle(for: dosage, unit: unit)
-    }
 }
 
 // MARK: UITextFieldDelegate
 extension NewPillStepOneViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         if textField == dosageTextField {
-            let allowedCharacters = CharacterSet(charactersIn: "0123456789.")
-            let characterSet = CharacterSet(charactersIn: string)
-            return allowedCharacters.isSuperset(of: characterSet)
+            return viewModel.shouldChangeCharactersInDosageField(string)
         }
         return true
     }
@@ -289,5 +270,3 @@ extension NewPillStepOneViewController: UITextFieldDelegate {
         return true
     }
 }
-
-

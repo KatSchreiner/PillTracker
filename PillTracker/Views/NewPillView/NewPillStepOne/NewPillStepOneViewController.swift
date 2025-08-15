@@ -107,7 +107,12 @@ class NewPillStepOneViewController: UIViewController {
             
         setupTextFields()
         setupBindings()
-        loadData()
+        viewModel.loadData(
+            titleTextField: titleTextField,
+            dosageTextField: dosageTextField,
+            unitButton: unitButton,
+            formTypesButton: formTypesButton
+        )
 
         view.addSubview(stackView)
         addConstraint()

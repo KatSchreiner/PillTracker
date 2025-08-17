@@ -11,7 +11,10 @@ final class NewPillStepTwoViewModel {
 
     var selectedTimes: [(hour: String, minute: String)] = [] {
         didSet {
-            onTimesUpdated?()
+            DispatchQueue.main.async { [weak self] in
+                self?.onTimesUpdated?()
+            }
+            
         }
     }
     
@@ -69,5 +72,21 @@ final class NewPillStepTwoViewModel {
         updateNextButtonState()
         
         onTimesUpdated?()
+    }
+    
+    func sortTimes() {
+        guard !selectedTimes.isEmpty else { return }
+        
+        selectedTimes = selectedTimes.sorted { (time1, time2) -> Bool in
+            if let hour1 = Int(time1.hour), let hour2 = Int(time2.hour) {
+                if hour1 != hour2 {
+                    return hour1 < hour2
+                }
+                if let minute1 = Int(time1.minute), let minute2 = Int(time2.minute) {
+                    return minute1 < minute2
+                }
+            }
+            return false
+        }
     }
 }

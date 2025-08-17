@@ -108,12 +108,12 @@ class AddNewPillViewModel {
         guard let stepTwoVC = currentChildVC as? NewPillStepTwoViewController else { return }
         
         stepTwoVC.updateSelectedTimes()
-        pillStepTwoModel.selectedTimes = stepTwoVC.selectedTimes
+        pillStepTwoModel.selectedTimes = stepTwoVC.viewModel.selectedTimes
         pillStepTwoModel.selectedIcon = pillStepOneModel.selectedIcon
-        pillStepTwoModel.selectedOption = stepTwoVC.model?.selectedOption
+        pillStepTwoModel.selectedOption = stepTwoVC.model.selectedOption
         
-        stepTwoVC.selectedTimes = pillStepTwoModel.selectedTimes
-        stepTwoVC.selectedOption = pillStepTwoModel.selectedOption
+        stepTwoVC.viewModel.selectedTimes = pillStepTwoModel.selectedTimes
+        stepTwoVC.viewModel.selectedOption = pillStepTwoModel.selectedOption
     }
 
     private func moveToStepThree() {

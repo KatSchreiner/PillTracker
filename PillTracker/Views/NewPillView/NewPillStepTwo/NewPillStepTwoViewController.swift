@@ -147,18 +147,8 @@ class NewPillStepTwoViewController: UIViewController {
     
     // MARK: - Public Methods
     func updateSelectedTimes() {
-        selectedTimes = selectedTimes.sorted { (time1, time2) -> Bool in
-            if let hour1 = Int(time1.hour), let hour2 = Int(time2.hour) {
-                if hour1 != hour2 {
-                    return hour1 < hour2
-                }
-                if let minute1 = Int(time1.minute), let minute2 = Int(time2.minute) {
-                    return minute1 < minute2
-                }
-            }
-            return false
-        }
-        model?.selectedTimes = selectedTimes
+        viewModel.sortTimes()
+        model.selectedTimes = viewModel.selectedTimes
         
         let rowCount = viewModel.selectedTimes.count
         let calculatedHeight = CGFloat(rowCount * 60)

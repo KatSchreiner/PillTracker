@@ -17,28 +17,11 @@ class NewPillStepOneViewModel {
             updateUnitButtonTitle?()
         }
     }
-    var titleText: String? {
-        didSet {
-            pillStepOneModel?.title = titleText
-        }
-    }
-    var dosageText: String? {
-        didSet {
-            if let dosageText = dosageText, let dosageValue = Double(dosageText) {
-                pillStepOneModel?.dosage = dosageValue
-                dosage = dosageValue
-            } else {
-                pillStepOneModel?.dosage = nil
-                dosage = 0
-            }
-        }
-    }
     
     var updateUnitButtonTitle: (() -> Void)?
     var updateNextButtonState: (() -> Void)?
     var updateIconButton: ((UIImage?) -> Void)?
-    var updateKeyboardPosition: ((CGFloat, Bool) -> Void)?
-        
+    
     // MARK: - Initialization
     
     // MARK: - Button Actions
@@ -67,34 +50,7 @@ class NewPillStepOneViewModel {
         
         unitSelectionView.presentAsBottomSheet(on: presenter)
     }
-    
-    func loadData(titleTextField: UITextField? = nil,
-                     dosageTextField: UITextField? = nil,
-                     unitButton: UIButton? = nil,
-                     formTypesButton: UIButton? = nil) {
-            titleTextField?.text = pillStepOneModel?.title
-            titleText = pillStepOneModel?.title
-            
-            if let dosage = pillStepOneModel?.dosage {
-                dosageTextField?.text = String(format: "%.1f", dosage)
-                dosageText = String(format: "%.1f", dosage)
-            } else {
-                dosageTextField?.text = nil
-                dosageText = nil
-            }
-            
-            if let selectedIcon = pillStepOneModel?.selectedIcon {
-                formTypesButton?.setImage(selectedIcon, for: .normal)
-                updateIconButton?(selectedIcon)
-            }
-            
-            if let selectedUnit = pillStepOneModel?.selectedUnit {
-                self.selectedUnit = selectedUnit
-                let unitTitle = String.getUnitTitle(for: dosage, unit: selectedUnit)
-                unitButton?.setTitle(unitTitle, for: .normal)
-            }
-        }
-
+ 
     // MARK: - TextField Validation
     func shouldChangeCharactersInDosageField(_ string: String) -> Bool {
         let allowedCharacters = CharacterSet(charactersIn: "0123456789.")

@@ -107,12 +107,7 @@ class NewPillStepOneViewController: UIViewController {
             
         setupTextFields()
         setupBindings()
-        viewModel.loadData(
-            titleTextField: titleTextField,
-            dosageTextField: dosageTextField,
-            unitButton: unitButton,
-            formTypesButton: formTypesButton
-        )
+        loadData()
 
         view.addSubview(stackView)
         addConstraint()
@@ -208,7 +203,7 @@ class NewPillStepOneViewController: UIViewController {
         dosageTextField.keyboardType = .numberPad
     }
     
-    private func loadData() {
+    func loadData() {
         titleTextField.text = viewModel.pillStepOneModel?.title
         
         if let dosage = viewModel.pillStepOneModel?.dosage {

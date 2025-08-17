@@ -11,24 +11,7 @@ class NewPillStepTwoViewController: UIViewController {
     // MARK: - Public Properties
     static var stepTwo = "NewPillStepTwoCell"
     
-    var model: PillStepTwoModel?
-    
-    var selectedTimes: [(hour: String, minute: String)] = []
-    
-    var selectedOption: String?
-    let optionData = ["До еды", "Во время еды", "После еды", "Не важно"]
-    let optionImages = [
-        UIImage(named: "beforeEat")?.withRenderingMode(.alwaysOriginal),
-        UIImage(named: "duringEat")?.withRenderingMode(.alwaysOriginal),
-        UIImage(named: "afterEat")?.withRenderingMode(.alwaysOriginal),
-        UIImage(named: "beforeEat")?.withRenderingMode(.alwaysOriginal)
-    ]
-    let optionImagesColor = [
-        UIImage(named: "beforeEatColor")?.withRenderingMode(.alwaysOriginal),
-        UIImage(named: "duringEatColor")?.withRenderingMode(.alwaysOriginal),
-        UIImage(named: "afterEatColor")?.withRenderingMode(.alwaysOriginal),
-        UIImage(named: "beforeEatColor")?.withRenderingMode(.alwaysOriginal)
-    ]
+    let viewModel = NewPillStepTwoViewModel()
     
     // MARK: - Private Properties
     private lazy var timePickerLabel: UILabel = {
@@ -70,7 +53,7 @@ class NewPillStepTwoViewController: UIViewController {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.distribution = .fillEqually
         
-        for (index, option) in optionData.enumerated() {
+        for (index, option) in viewModel.optionData.enumerated() {
             let button = UIButton(type: .custom)
             button.setTitle(option, for: .normal)
             button.titleLabel?.font = UIFont.systemFont(ofSize: 10)
@@ -82,7 +65,7 @@ class NewPillStepTwoViewController: UIViewController {
             
             button.adjustsImageWhenHighlighted = false
             
-            if let image = optionImages[index] {
+            if let image = viewModel.optionImages[index] {
                 button.setImage(image, for: .normal)
                 button.imageView?.contentMode = .scaleAspectFit
             }
@@ -114,6 +97,7 @@ class NewPillStepTwoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
+        setupBindings()
         loadData()
     }
     
@@ -155,9 +139,7 @@ class NewPillStepTwoViewController: UIViewController {
     
     @objc
     private func didTapRemoveTimeCell(_ sender: UIButton) {
-        let index = sender.tag
-        guard index < selectedTimes.count else { return }
-        selectedTimes.remove(at: index)
+        viewModel.removeTime(at: sender.tag)
         updateSelectedTimes()
         updateNextButtonStateStepTwo()
     }

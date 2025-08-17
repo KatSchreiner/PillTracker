@@ -10,7 +10,8 @@ import UIKit
 class NewPillStepTwoViewController: UIViewController {
     // MARK: - Public Properties
     static var stepTwo = "NewPillStepTwoCell"
-    
+    var model = PillStepTwoModel()
+
     let viewModel = NewPillStepTwoViewModel()
     
     // MARK: - Private Properties
@@ -98,7 +99,7 @@ class NewPillStepTwoViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         setupBindings()
-        loadData()
+        viewModel.loadData(from: model)
     }
     
     // MARK: - IB Actions
@@ -107,8 +108,8 @@ class NewPillStepTwoViewController: UIViewController {
         let selectedOption = viewModel.optionData[sender.tag]
         viewModel.setSelectedOption(selectedOption)
         
-        viewModel.model?.selectedIcon =  viewModel.optionImagesColor[sender.tag]
-                
+        model.selectedIcon =  viewModel.optionImagesColor[sender.tag]
+        
         for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
             if let buttonContainer = subview as? UIStackView,
                let button = buttonContainer.arrangedSubviews.first as? UIButton {
@@ -125,7 +126,7 @@ class NewPillStepTwoViewController: UIViewController {
                 }
             }
         }
-        updateNextButtonStateStepTwo()
+        viewModel.updateNextButtonState()
     }
     
     @objc
@@ -141,7 +142,7 @@ class NewPillStepTwoViewController: UIViewController {
     private func didTapRemoveTimeCell(_ sender: UIButton) {
         viewModel.removeTime(at: sender.tag)
         updateSelectedTimes()
-        updateNextButtonStateStepTwo()
+        viewModel.updateNextButtonState()
     }
     
     // MARK: - Public Methods
@@ -164,7 +165,7 @@ class NewPillStepTwoViewController: UIViewController {
         
         timesTableViewHeightConstraint.constant = min(calculatedHeight, maxTimesTableHeight)
         timesTableView.isScrollEnabled = calculatedHeight > maxTimesTableHeight
-
+        
         if rowCount > 0 {
             addTimePickerButtonTopConstraint.constant = 16
         } else {
@@ -174,7 +175,7 @@ class NewPillStepTwoViewController: UIViewController {
         timesTableView.reloadData()
         view.layoutIfNeeded()
     }
-
+    
     
     // MARK: - Private Methods
     private func setupView() {
@@ -211,7 +212,7 @@ class NewPillStepTwoViewController: UIViewController {
         
         timesTableViewHeightConstraint = timesTableView.heightAnchor.constraint(equalToConstant: 0)
         timesTableViewHeightConstraint.isActive = true
-
+        
     }
     
     private func setupBindings() {
@@ -225,31 +226,31 @@ class NewPillStepTwoViewController: UIViewController {
                 addNewPillView.nextButton.alpha = isEnabled ? 1.0 : 0.5
             }
         }
+        
+        viewModel.onLoadData = { [weak self] in
+            self?.loadData()
+        }
     }
     
     private func loadData() {
-        guard let model = model else { return }
-        
-        selectedOption = model.selectedOption
-        if let selectedOption = selectedOption, let index = optionData.firstIndex(of: selectedOption) {
-            for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
-                if let buttonContainer = subview as? UIStackView,
-                   let button = buttonContainer.arrangedSubviews.first as? UIButton {
-                    button.setImage(optionImages[index], for: .normal) 
+        guard let selectedOption = viewModel.selectedOption,
+              let index = viewModel.optionData.firstIndex(of: selectedOption) else { return }
+                
+                for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
+                    if let buttonContainer = subview as? UIStackView,
+                       let button = buttonContainer.arrangedSubviews.first as? UIButton {
+                        button.setImage(viewModel.optionImages[index], for: .normal)
+                    }
                 }
-            }
-            
-            if let buttonContainer = buttonStackView.arrangedSubviews[index] as? UIStackView,
-               let button = buttonContainer.arrangedSubviews.first as? UIButton {
-                button.setImage(optionImagesColor[index], for: .normal)
-            }
+        
+        if let buttonContainer = buttonStackView.arrangedSubviews[index] as? UIStackView,
+           let button = buttonContainer.arrangedSubviews.first as? UIButton {
+            button.setImage(viewModel.optionImagesColor[index], for: .normal)
         }
         
-        selectedTimes = model.selectedTimes
-        updateSelectedTimes()
-        
-        updateNextButtonStateStepTwo()
+        viewModel.updateNextButtonState()
     }
+    
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
@@ -288,7 +289,6 @@ extension NewPillStepTwoViewController: TimePickerDelegate {
             let minute = String(components[1])
             viewModel.addTime(hour: hour, minute: minute)
             updateSelectedTimes()
-            updateNextButtonStateStepTwo()
         }
     }
 }

@@ -8,8 +8,7 @@
 import UIKit
 
 final class NewPillStepTwoViewModel {
-    var model: PillStepTwoModel?
-    
+
     var selectedTimes: [(hour: String, minute: String)] = [] {
         didSet {
             onTimesUpdated?()
@@ -37,7 +36,8 @@ final class NewPillStepTwoViewModel {
     
     var onTimesUpdated: (() -> Void)?
     var onNextButtonStateChanged: ((Bool) -> Void)?
-    
+    var onLoadData: (() -> Void)?
+
     func setSelectedOption(_ option: String?) {
         selectedOption = option
         updateNextButtonState()
@@ -58,8 +58,16 @@ final class NewPillStepTwoViewModel {
         return selectedTimes.count > 0 && selectedOption != nil
     }
     
-    private func updateNextButtonState() {
+    func updateNextButtonState() {
         onNextButtonStateChanged?(isNextButtonEnabled)
     }
     
+    func loadData(from model: PillStepTwoModel) {
+        selectedOption = model.selectedOption
+        selectedTimes = model.selectedTimes
+        
+        updateNextButtonState()
+        
+        onTimesUpdated?()
+    }
 }

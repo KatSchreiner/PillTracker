@@ -104,10 +104,10 @@ class NewPillStepTwoViewController: UIViewController {
     // MARK: - IB Actions
     @objc
     private func optionButtonTapped(_ sender: UIButton) {
-        selectedOption = optionData[sender.tag]
+        let selectedOption = viewModel.optionData[sender.tag]
+        viewModel.setSelectedOption(selectedOption)
         
-        model?.selectedOption = selectedOption
-        model?.selectedIcon = optionImagesColor[sender.tag]
+        viewModel.model?.selectedIcon =  viewModel.optionImagesColor[sender.tag]
                 
         for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
             if let buttonContainer = subview as? UIStackView,
@@ -116,11 +116,11 @@ class NewPillStepTwoViewController: UIViewController {
                 if index == sender.tag {
                     UIView.transition(with: button, duration: 0.3, options: .transitionCrossDissolve, animations: {
                         button.animatePress()
-                        button.setImage(self.optionImagesColor[index], for: .normal)
+                        button.setImage(self.viewModel.optionImagesColor[index], for: .normal)
                     })
                 } else {
                     UIView.transition(with: button, duration: 0.3, options: .transitionCrossDissolve, animations: {
-                        button.setImage(self.optionImages[index], for: .normal)
+                        button.setImage(self.viewModel.optionImages[index], for: .normal)
                     }, completion: nil)
                 }
             }
@@ -159,7 +159,7 @@ class NewPillStepTwoViewController: UIViewController {
         }
         model?.selectedTimes = selectedTimes
         
-        let rowCount = selectedTimes.count
+        let rowCount = viewModel.selectedTimes.count
         let calculatedHeight = CGFloat(rowCount * 60)
         
         timesTableViewHeightConstraint.constant = min(calculatedHeight, maxTimesTableHeight)
@@ -214,6 +214,19 @@ class NewPillStepTwoViewController: UIViewController {
 
     }
     
+    private func setupBindings() {
+        viewModel.onTimesUpdated = { [weak self] in
+            self?.updateSelectedTimes()
+        }
+        
+        viewModel.onNextButtonStateChanged = { [weak self] isEnabled in
+            if let addNewPillView = self?.parent as? AddNewPillViewController {
+                addNewPillView.nextButton.isEnabled = isEnabled
+                addNewPillView.nextButton.alpha = isEnabled ? 1.0 : 0.5
+            }
+        }
+    }
+    
     private func loadData() {
         guard let model = model else { return }
         
@@ -228,7 +241,7 @@ class NewPillStepTwoViewController: UIViewController {
             
             if let buttonContainer = buttonStackView.arrangedSubviews[index] as? UIStackView,
                let button = buttonContainer.arrangedSubviews.first as? UIButton {
-                button.setImage(optionImagesColor[index], for: .normal) // Set highlighted image
+                button.setImage(optionImagesColor[index], for: .normal)
             }
         }
         
@@ -237,24 +250,12 @@ class NewPillStepTwoViewController: UIViewController {
         
         updateNextButtonStateStepTwo()
     }
-
-    func updateNextButtonStateStepTwo() {
-        model?.selectedTimes = selectedTimes
-        model?.selectedOption = selectedOption
-
-        let isEnabled = model?.isValid() ?? false
-
-        if let addNewPillView = parent as? AddNewPillViewController {
-            addNewPillView.nextButton.isEnabled = isEnabled
-            addNewPillView.nextButton.alpha = isEnabled ? 1.0 : 0.5
-        }
-    }
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
 extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return selectedTimes.count
+        return viewModel.selectedTimes.count
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -266,7 +267,7 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TimeCell.identifier, for: indexPath) as? TimeCell else {
             return UITableViewCell()
         }
-        let time = selectedTimes[indexPath.row]
+        let time = viewModel.selectedTimes[indexPath.row]
         cell.configure(with: "\(time.hour):\(time.minute)")
         cell.removeButton.tag = indexPath.row
         cell.removeButton.addTarget(self, action: #selector(didTapRemoveTimeCell(_:)), for: .touchUpInside)
@@ -285,8 +286,7 @@ extension NewPillStepTwoViewController: TimePickerDelegate {
         if components.count == 2 {
             let hour = String(components[0])
             let minute = String(components[1])
-            selectedTimes.append((hour: hour, minute: minute))
-            print("Current selected times: \(selectedTimes)")
+            viewModel.addTime(hour: hour, minute: minute)
             updateSelectedTimes()
             updateNextButtonStateStepTwo()
         }

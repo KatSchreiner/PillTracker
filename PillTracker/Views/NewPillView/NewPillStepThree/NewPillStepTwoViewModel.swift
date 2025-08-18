@@ -43,6 +43,7 @@ final class NewPillStepTwoViewModel {
 
     func setSelectedOption(_ option: String?) {
         selectedOption = option
+
         updateNextButtonState()
     }
     

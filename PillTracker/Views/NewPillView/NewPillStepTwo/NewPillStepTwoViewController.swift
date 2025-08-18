@@ -100,6 +100,7 @@ class NewPillStepTwoViewController: UIViewController {
         setupView()
         setupBindings()
         viewModel.loadData(from: model)
+        loadData()
     }
     
     // MARK: - IB Actions
@@ -109,6 +110,7 @@ class NewPillStepTwoViewController: UIViewController {
         viewModel.setSelectedOption(selectedOption)
         
         model.selectedIcon =  viewModel.optionImagesColor[sender.tag]
+        model.selectedOption = selectedOption
         
         for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
             if let buttonContainer = subview as? UIStackView,
@@ -223,21 +225,24 @@ class NewPillStepTwoViewController: UIViewController {
     }
     
     private func loadData() {
-        guard let selectedOption = viewModel.selectedOption,
-              let index = viewModel.optionData.firstIndex(of: selectedOption) else { return }
-                
-                for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
-                    if let buttonContainer = subview as? UIStackView,
-                       let button = buttonContainer.arrangedSubviews.first as? UIButton {
-                        button.setImage(viewModel.optionImages[index], for: .normal)
+        if let selectedOption = model.selectedOption,
+           let selectedIndex = viewModel.optionData.firstIndex(of: selectedOption) {
+            
+            for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
+                if let buttonContainer = subview as? UIStackView,
+                   let button = buttonContainer.arrangedSubviews.first as? UIButton {
+                    
+                    let image = (index == selectedIndex) ? viewModel.optionImagesColor[index] : viewModel.optionImages[index]
+                    button.setImage(image, for: .normal)
+                    
+                    if index == selectedIndex {
+                        DispatchQueue.main.async {
+                            button.animatePress()
+                        }
                     }
                 }
-        
-        if let buttonContainer = buttonStackView.arrangedSubviews[index] as? UIStackView,
-           let button = buttonContainer.arrangedSubviews.first as? UIButton {
-            button.setImage(viewModel.optionImagesColor[index], for: .normal)
+            }
         }
-        
         viewModel.updateNextButtonState()
     }
     

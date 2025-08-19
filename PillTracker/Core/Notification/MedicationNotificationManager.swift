@@ -40,18 +40,17 @@ class MedicationNotificationManager {
             let components = DateComponents(hour: Int(time.hour), minute: Int(time.minute))
             
             if let interval = pill.selectedInterval, interval > 0 {
-                // Schedule for interval-based medications
                 let startDate = pill.selectedStartDate
                 let endDate = pill.selectedEndDate
                 var currentDate = startDate
                 
                 while currentDate <= endDate {
                     let triggerDate = Calendar.current.date(bySettingHour: components.hour ?? 0,
-                                                             minute: components.minute ?? 0,
-                                                             second: 0,
-                                                             of: currentDate)!
+                                                            minute: components.minute ?? 0,
+                                                            second: 0,
+                                                            of: currentDate)!
                     
-                    if triggerDate >= Date() { // Only schedule future notifications
+                    if triggerDate >= Date() {
                         let trigger = UNCalendarNotificationTrigger(dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate), repeats: false)
                         
                         let request = UNNotificationRequest(
@@ -71,10 +70,8 @@ class MedicationNotificationManager {
                 }
             }
             else if !pill.selectedDays.isEmpty {
-                // Schedule for specific weekday medications
                 for day in pill.selectedDays {
                     var triggerComponents = components
-                    // Убираем преобразование дня недели, используем как есть
                     triggerComponents.weekday = day
                     
                     let trigger = UNCalendarNotificationTrigger(
@@ -98,7 +95,6 @@ class MedicationNotificationManager {
                 }
             }
             else {
-                // Schedule for daily medications
                 let trigger = UNCalendarNotificationTrigger(
                     dateMatching: components,
                     repeats: true
@@ -115,8 +111,6 @@ class MedicationNotificationManager {
                 }
             }
         }
-        
-        printScheduledNotifications()
     }
     
     func cancelNotifications(for pillId: String) {
@@ -128,22 +122,6 @@ class MedicationNotificationManager {
             
             center.removePendingNotificationRequests(withIdentifiers: identifiers)
         }
-    }
-    
-    func printScheduledNotifications() {
-     UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
-         print("--- Scheduled Notifications ---")
-         for request in requests {
-             if let trigger = request.trigger as? UNCalendarNotificationTrigger {
-                 print("ID: \(request.identifier)")
-                 print("Title: \(request.content.title)")
-                 print("Body: \(request.content.body)")
-                 print("Next trigger date: \(trigger.nextTriggerDate()?.description ?? "nil")")
-                 print("Repeat: \(trigger.repeats)")
-                 print("---")
-             }
-         }
-     }
     }
     
     func checkNotificationAuthorization(completion: @escaping (Bool) -> Void) {

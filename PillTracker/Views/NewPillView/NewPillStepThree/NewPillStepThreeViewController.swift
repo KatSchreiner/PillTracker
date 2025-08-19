@@ -11,7 +11,7 @@ class NewPillStepThreeViewController: UIViewController {
     // MARK: - Public Properties
     static var stepThree = "NewPillStepThreeCell"
     let viewModel = NewPillStepThreeViewModel()
-        
+    
     // MARK: - Private Properties
     private lazy var repeatLabel: UILabel = {
         let label = UILabel()
@@ -40,8 +40,8 @@ class NewPillStepThreeViewController: UIViewController {
         
         return stackView
     }()
-
-
+    
+    
     private func createPresetButton(title: String, action: Selector) -> UIButton {
         let button = UIButton()
         button.setTitle(title, for: .normal)
@@ -52,7 +52,7 @@ class NewPillStepThreeViewController: UIViewController {
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }
-
+    
     
     private lazy var dayButtons: [UIButton] = []
     
@@ -62,7 +62,7 @@ class NewPillStepThreeViewController: UIViewController {
         dayButtonStackView.distribution = .fillEqually
         dayButtonStackView.spacing = 10
         
-        for (index, day) in daysOfWeek.enumerated() {
+        for (index, day) in viewModel.daysOfWeek.enumerated() {
             let button = UIButton()
             button.layer.cornerRadius = 8
             button.backgroundColor = .lGray
@@ -168,7 +168,7 @@ class NewPillStepThreeViewController: UIViewController {
     private var dayButtonStackViewHeightConstraint: NSLayoutConstraint!
     private var isDurationSet: Bool = false
     private var currentAlertController: UIAlertController?
-
+    
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -204,7 +204,7 @@ class NewPillStepThreeViewController: UIViewController {
         viewModel.selectedPreset = "Каждый день"
         viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Каждый день")
         viewModel.interval = 0
-                
+        
         updatePresetButtonStates(selectedButton: "Каждый день")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
@@ -216,13 +216,13 @@ class NewPillStepThreeViewController: UIViewController {
         
         viewModel.selectedPreset = "Через день"
         viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Через день")
-        model.interval = 1
+        viewModel.interval = 1
         
         updatePresetButtonStates(selectedButton: "Через день")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
-
+    
     @objc private func didTapEveryTwoDaysButton() {
         viewModel.selectedDays = []
         resetDayButtons()
@@ -235,13 +235,13 @@ class NewPillStepThreeViewController: UIViewController {
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
-
+    
     @objc private func didTapCustomOptionButton() {
         viewModel.selectedDays = []
         viewModel.interval = nil
         resetDayButtons()
         viewModel.selectedPreset = "Свой вариант"
-
+        
         if dayButtonStackView.isHidden {
             showDayButtonStackView()
         } else {
@@ -280,7 +280,7 @@ class NewPillStepThreeViewController: UIViewController {
         viewModel.startDate = viewModel.startOfDayInLocalTimeZone(for: sender.date)
         updateNextButtonStateStepThree()
     }
-
+    
     @objc private func endDateChanged(sender: UIDatePicker) {
         viewModel.endDate = viewModel.startOfDayInLocalTimeZone(for: sender.date)
         updateNextButtonStateStepThree()
@@ -313,7 +313,7 @@ class NewPillStepThreeViewController: UIViewController {
         
         dayButtonStackView.isHidden = true
         dayButtonStackView.alpha = 0
-
+        
         [repeatLabel, presetButtonStackView, dayButtonStackView, durationLabel, customDateRangeStackView, reminderStackView].forEach { view in
             self.view.addSubview(view)
             view.translatesAutoresizingMaskIntoConstraints = false
@@ -354,28 +354,28 @@ class NewPillStepThreeViewController: UIViewController {
     private func loadData() {
         for button in dayButtons {
             let index = button.tag + 1
-            let isSelected = model.selectedDays.contains(index)
+            let isSelected = viewModel.selectedDays.contains(index)
             button.backgroundColor = isSelected ? .dBlue : .lGray
             button.setTitleColor(isSelected ? .lGray : .dGray, for: .normal)
         }
         
-        reminderSwitch.isOn = model.isReminderEnabled
+        reminderSwitch.isOn = viewModel.isReminderEnabled
         
-        if model.startDate == nil {
-            model.startDate = startOfDayInLocalTimeZone(for: Date())
+        if viewModel.startDate == nil {
+            viewModel.startDate = viewModel.startOfDayInLocalTimeZone(for: Date())
         }
-        startDatePicker.date = model.startDate ?? startOfDayInLocalTimeZone(for: Date())
+        startDatePicker.date = viewModel.startDate ?? viewModel.startOfDayInLocalTimeZone(for: Date())
         
-        if let endDate = model.endDate {
-            endDatePicker.date = startOfDayInLocalTimeZone(for: endDate)
+        if let endDate = viewModel.endDate {
+            endDatePicker.date = viewModel.startOfDayInLocalTimeZone(for: endDate)
         } else {
-            endDatePicker.date = startOfDayInLocalTimeZone(for: Date())
+            endDatePicker.date = viewModel.startOfDayInLocalTimeZone(for: Date())
         }
         
-        if let selectedPreset = model.selectedPreset {
+        if let selectedPreset = viewModel.selectedPreset {
             updatePresetButtonStates(selectedButton: selectedPreset)
             
-            if selectedPreset == "Свой вариант" && !model.selectedDays.isEmpty {
+            if selectedPreset == "Свой вариант" && !viewModel.selectedDays.isEmpty {
                 DispatchQueue.main.async {
                     self.dayButtonStackView.isHidden = false
                     self.dayButtonStackViewHeightConstraint.constant = 35
@@ -389,7 +389,7 @@ class NewPillStepThreeViewController: UIViewController {
     private func updateDayButtonStates() {
         for button in dayButtons {
             let index = button.tag + 1
-            if model.selectedDays.contains(index) {
+            if viewModel.selectedDays.contains(index) {
                 button.backgroundColor = .dBlue
                 button.setTitleColor(.lGray, for: .normal)
             } else {
@@ -420,37 +420,8 @@ class NewPillStepThreeViewController: UIViewController {
         }
     }
     
-    private func weekdayNumber(from date: Date) -> Int {
-        let calendar = Calendar.current
-        return (calendar.component(.weekday, from: date) + 5) % 7 + 1
-    }
-
-    func startOfDayInLocalTimeZone(for date: Date) -> Date {
-        var calendar = Calendar.current
-        calendar.timeZone = TimeZone.current
-        return calendar.startOfDay(for: date)
-    }
-    
-    func formattedStartDate() -> String {
-        guard let startDate = model.startDate else { return "Не указано" }
-        return formattedDateString(for: startDate)
-    }
-    func formattedEndDate() -> String {
-        guard let endDate = model.endDate else { return "Не указано" }
-        return formattedDateString(for: endDate)
-    }
-    
-    private func formattedDateString(for date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .none
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        dateFormatter.timeZone = TimeZone.current
-        return dateFormatter.string(from: date)
-    }
-    
     func updateNextButtonStateStepThree() {
-        let isEnabled = model.isValid()
+        let isEnabled = viewModel.isValid()
         
         if let addNewPillView = parent as? AddNewPillViewController {
             addNewPillView.doneButton.isEnabled = isEnabled
@@ -498,7 +469,7 @@ class NewPillStepThreeViewController: UIViewController {
         
         present(alert, animated: true)
     }
-
+    
     private func showReminderActivatedAlert() {
         let alert = UIAlertController(
             title: "Напоминания включены",

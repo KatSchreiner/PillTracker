@@ -119,12 +119,12 @@ class AddNewPillViewModel {
     private func moveToStepThree() {
         guard let stepThreeVC = currentChildVC as? NewPillStepThreeViewController else { return }
         
-        pillStepThreeModel.selectedDays = stepThreeVC.model.selectedDays
-        pillStepThreeModel.selectedPreset = stepThreeVC.model.selectedPreset
-        pillStepThreeModel.interval = stepThreeVC.model.interval
-        pillStepThreeModel.startDate = stepThreeVC.model.startDate
-        pillStepThreeModel.endDate = stepThreeVC.model.endDate
-        pillStepThreeModel.isReminderEnabled = stepThreeVC.model.isReminderEnabled
+        pillStepThreeModel.selectedDays = stepThreeVC.viewModel.selectedDays
+        pillStepThreeModel.selectedPreset = stepThreeVC.viewModel.selectedPreset
+        pillStepThreeModel.interval = stepThreeVC.viewModel.interval
+        pillStepThreeModel.startDate = stepThreeVC.viewModel.startDate
+        pillStepThreeModel.endDate = stepThreeVC.viewModel.endDate
+        pillStepThreeModel.isReminderEnabled = stepThreeVC.viewModel.isReminderEnabled
     }
     
     func updateProgress() {

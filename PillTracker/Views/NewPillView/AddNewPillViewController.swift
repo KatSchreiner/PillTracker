@@ -216,7 +216,7 @@ private extension AddNewPillViewController {
             newPillView = stepTwo
         case .stepThree:
             let stepThree = NewPillStepThreeViewController()
-            stepThree.model = viewModel.pillStepThreeModel
+            stepThree.viewModel.model = viewModel.pillStepThreeModel
             viewModel.currentChildVC = stepThree
             newPillView = stepThree
         }

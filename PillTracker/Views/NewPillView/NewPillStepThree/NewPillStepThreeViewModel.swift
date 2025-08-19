@@ -17,7 +17,7 @@ final class NewPillStepThreeViewModel {
     var endDate: Date?
     var isReminderEnabled: Bool = false
 
-    private let daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+    let daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
     init() {
         startDate = startOfDayInLocalTimeZone(for: Date())
@@ -59,5 +59,19 @@ final class NewPillStepThreeViewModel {
     func weekdayNumber(from date: Date) -> Int {
         let calendar = Calendar.current
         return (calendar.component(.weekday, from: date) + 5) % 7 + 1
+    }
+    
+    func isValid() -> Bool {
+        guard startDate != nil && endDate != nil else { return false }
+        
+        if let end = endDate, let start = startDate, end < start {
+            return false
+        }
+        
+        if selectedPreset != "Свой вариант" {
+            return true
+        }
+        
+        return !selectedDays.isEmpty
     }
 }

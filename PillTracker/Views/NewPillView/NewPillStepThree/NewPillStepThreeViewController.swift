@@ -10,9 +10,8 @@ import UIKit
 class NewPillStepThreeViewController: UIViewController {
     // MARK: - Public Properties
     static var stepThree = "NewPillStepThreeCell"
-    
-    var model = PillStepThreeModel()
-    
+    let viewModel = NewPillStepThreeViewModel()
+        
     // MARK: - Private Properties
     private lazy var repeatLabel: UILabel = {
         let label = UILabel()
@@ -56,7 +55,6 @@ class NewPillStepThreeViewController: UIViewController {
 
     
     private lazy var dayButtons: [UIButton] = []
-    private let daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
     
     private lazy var dayButtonStackView: UIStackView = {
         let dayButtonStackView = UIStackView()
@@ -185,7 +183,7 @@ class NewPillStepThreeViewController: UIViewController {
             loadData()
             self.view.layoutIfNeeded()
         }
-        if model.selectedPreset == "Свой вариант" && !model.selectedDays.isEmpty {
+        if viewModel.selectedPreset == "Свой вариант" && !viewModel.selectedDays.isEmpty {
             showDayButtonStackView()
         }
     }
@@ -200,25 +198,13 @@ class NewPillStepThreeViewController: UIViewController {
     
     // MARK: - IB Actions
     @objc private func didTapEveryDayButton() {
-        model.selectedDays = []
+        viewModel.selectedDays = []
         resetDayButtons()
         
-        model.selectedPreset = "Каждый день"
-        
-        var selectedDays = [Int]()
-        var currentDate = model.startDate ?? Date()
-        
-        while currentDate <= (model.endDate ?? Date()) {
-            let weekday = (Calendar.current.component(.weekday, from: currentDate) + 5) % 7 + 1
-            selectedDays.append(weekday)
-            currentDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
-        }
-        
-        model.selectedDays = selectedDays
-        model.interval = 0
-        
-        print("Лекарство отображается каждый день: \(selectedDays)")
-        
+        viewModel.selectedPreset = "Каждый день"
+        viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Каждый день")
+        viewModel.interval = 0
+                
         updatePresetButtonStates(selectedButton: "Каждый день")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
@@ -333,22 +319,6 @@ class NewPillStepThreeViewController: UIViewController {
     @objc
     private func didToggleReminderSwitch(sender: UISwitch) {
         model.isReminderEnabled = sender.isOn
-        
-//        if sender.isOn {
-//            MedicationNotificationManager.shared.requestAuthorization { [weak self] granted in
-//                guard let self = self else { return }
-//                
-//                DispatchQueue.main.async {
-//                    if !granted {
-//                        self.showNotificationPermissionAlert()
-//                        sender.isOn = false
-//                        self.model.isReminderEnabled = false
-//                    } else {
-//                        self.showReminderActivatedAlert()
-//                    }
-//                }
-//            }
-//        }
         
         if sender.isOn {
             MedicationNotificationManager.shared.requestAuthorization { [weak self] granted in

@@ -19,6 +19,10 @@ final class NewPillStepThreeViewModel {
 
     private let daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
+    init() {
+        startDate = startOfDayInLocalTimeZone(for: Date())
+    }
+    
     func calculateSelectedDaysForPreset(_ preset: String) -> [Int] {
         var selectedDays = [Int]()
         
@@ -44,5 +48,16 @@ final class NewPillStepThreeViewModel {
         }
         
         return selectedDays
+    }
+    
+    func startOfDayInLocalTimeZone(for date: Date) -> Date {
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone.current
+        return calendar.startOfDay(for: date)
+    }
+    
+    func weekdayNumber(from date: Date) -> Int {
+        let calendar = Calendar.current
+        return (calendar.component(.weekday, from: date) + 5) % 7 + 1
     }
 }

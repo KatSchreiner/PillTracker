@@ -262,40 +262,33 @@ class NewPillStepThreeViewController: UIViewController {
     private func didTapDayButton(sender: UIButton) {
         let index = sender.tag + 1
         
-        if let itemIndex = model.selectedDays.firstIndex(of: index) {
-            model.selectedDays.remove(at: itemIndex)
+        if let itemIndex = viewModel.selectedDays.firstIndex(of: index) {
+            viewModel.selectedDays.remove(at: itemIndex)
             sender.backgroundColor = .lGray
             sender.setTitleColor(.dGray, for: .normal)
         } else {
-            model.selectedDays.append(index)
+            viewModel.selectedDays.append(index)
             sender.backgroundColor = .dBlue
             sender.setTitleColor(.lGray, for: .normal)
         }
         
-        model.interval = nil
-        
-        print("Лекарство отображается по выбранным дням: \(model.selectedDays)")
-        
+        viewModel.interval = nil
         updateNextButtonStateStepThree()
     }
     
     @objc private func startDateChanged(sender: UIDatePicker) {
-        let localDate = startOfDayInLocalTimeZone(for: sender.date)
-        model.startDate = localDate
+        viewModel.startDate = viewModel.startOfDayInLocalTimeZone(for: sender.date)
         updateNextButtonStateStepThree()
-        print("Дата начала лечения обновлена: \(formattedDateString(for: localDate))")
     }
 
     @objc private func endDateChanged(sender: UIDatePicker) {
-        let localDate = startOfDayInLocalTimeZone(for: sender.date)
-        model.endDate = localDate
+        viewModel.endDate = viewModel.startOfDayInLocalTimeZone(for: sender.date)
         updateNextButtonStateStepThree()
-        print("Дата окончания лечения обновлена: \(formattedDateString(for: localDate))")
     }
     
     @objc
     private func didToggleReminderSwitch(sender: UISwitch) {
-        model.isReminderEnabled = sender.isOn
+        viewModel.isReminderEnabled = sender.isOn
         
         if sender.isOn {
             MedicationNotificationManager.shared.requestAuthorization { [weak self] granted in
@@ -305,12 +298,11 @@ class NewPillStepThreeViewController: UIViewController {
                     } else {
                         self?.showNotificationPermissionAlert()
                         sender.isOn = false
-                        self?.model.isReminderEnabled = false
+                        self?.viewModel.isReminderEnabled = false
                     }
                 }
             }
         }
-
         
         updateNextButtonStateStepThree()
     }

@@ -211,59 +211,36 @@ class NewPillStepThreeViewController: UIViewController {
     }
     
     @objc private func didTapEveryOtherDayButton() {
-        model.selectedDays = []
+        viewModel.selectedDays = []
         resetDayButtons()
         
-        model.selectedPreset = "Через день"
-        
-        var selectedDays = [Int]()
-        var currentDate = model.startDate ?? Date()
-        
-        while currentDate <= (model.endDate ?? Date()) {
-            let weekday = (Calendar.current.component(.weekday, from: currentDate) + 5) % 7 + 1
-            selectedDays.append(weekday)
-            currentDate = Calendar.current.date(byAdding: .day, value: 2, to: currentDate)!
-        }
-        
-        model.selectedDays = selectedDays
+        viewModel.selectedPreset = "Через день"
+        viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Через день")
         model.interval = 1
         
-        print("Лекарство отображается через 1 день: \(selectedDays)")
-
         updatePresetButtonStates(selectedButton: "Через день")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
 
     @objc private func didTapEveryTwoDaysButton() {
-        model.selectedDays = []
+        viewModel.selectedDays = []
         resetDayButtons()
         
-        model.selectedPreset = "Через 2 дня"
+        viewModel.selectedPreset = "Через 2 дня"
+        viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Через 2 дня")
+        viewModel.interval = 2
         
-        var selectedDays = [Int]()
-        var currentDate = model.startDate ?? Date()
-        
-        while currentDate <= (model.endDate ?? Date()) {
-            let weekday = (Calendar.current.component(.weekday, from: currentDate) + 5) % 7 + 1
-            selectedDays.append(weekday)
-            currentDate = Calendar.current.date(byAdding: .day, value: 3, to: currentDate)!
-        }
-        model.selectedDays = selectedDays
-        model.interval = 2
-        
-        print("Лекарство отображается через 2 дня: \(selectedDays)")
-
         updatePresetButtonStates(selectedButton: "Через 2 дня")
         hideDayButtonStackView()
         updateNextButtonStateStepThree()
     }
 
     @objc private func didTapCustomOptionButton() {
-        model.selectedDays = []
-        model.interval = nil
+        viewModel.selectedDays = []
+        viewModel.interval = nil
         resetDayButtons()
-        model.selectedPreset = "Свой вариант"
+        viewModel.selectedPreset = "Свой вариант"
 
         if dayButtonStackView.isHidden {
             showDayButtonStackView()

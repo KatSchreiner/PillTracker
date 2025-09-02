@@ -174,6 +174,7 @@ class NewPillStepThreeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
+        setupBindings()
         loadData()
     }
     
@@ -349,6 +350,52 @@ class NewPillStepThreeViewController: UIViewController {
             reminderStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
             reminderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
+    }
+    
+    private func setupBindings() {
+        viewModel.onSelectedPresetChanged = { [weak self] preset in
+            DispatchQueue.main.async {
+                self?.updatePresetButtonStates(selectedButton: preset ?? "")
+                if preset == "Свой вариант" && !(self?.viewModel.selectedDays.isEmpty ?? true) {
+                    self?.showDayButtonStackView()
+                } else {
+                    self?.hideDayButtonStackView()
+                }
+                self?.updateNextButtonStateStepThree()
+            }
+        }
+        
+        viewModel.onSelectedDaysChanged = { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.updateDayButtonStates()
+                self?.updateNextButtonStateStepThree()
+            }
+        }
+        
+        viewModel.onStartDateChanged = { [weak self] date in
+            DispatchQueue.main.async {
+                if let date = date {
+                    self?.startDatePicker.date = date
+                }
+                self?.updateNextButtonStateStepThree()
+            }
+        }
+        
+        viewModel.onEndDateChanged = { [weak self] date in
+            DispatchQueue.main.async {
+                if let date = date {
+                    self?.endDatePicker.date = date
+                }
+                self?.updateNextButtonStateStepThree()
+            }
+        }
+        
+        viewModel.onIsReminderEnabledChanged = { [weak self] isEnabled in
+            DispatchQueue.main.async {
+                self?.reminderSwitch.isOn = isEnabled
+                self?.updateNextButtonStateStepThree()
+            }
+        }
     }
     
     private func loadData() {

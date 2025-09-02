@@ -10,13 +10,32 @@ import UIKit
 final class NewPillStepThreeViewModel {
     var model = PillStepThreeModel()
     
-    var selectedPreset: String? = nil
-    var selectedDays: [Int] = []
-    var interval: Int?         
-    var startDate: Date?
-    var endDate: Date?
-    var isReminderEnabled: Bool = false
+    var selectedPreset: String? = nil {
+        didSet { onSelectedPresetChanged?(selectedPreset) }
+    }
+    var selectedDays: [Int] = [] {
+        didSet { onSelectedDaysChanged?(selectedDays) }
+    }
+    var interval: Int? {
+        didSet { onIntervalChanged?(interval) }
+    }
+    var startDate: Date? {
+        didSet { onStartDateChanged?(startDate) }
+    }
+    var endDate: Date? {
+        didSet { onEndDateChanged?(endDate) }
+    }
+    var isReminderEnabled: Bool = false {
+        didSet { onIsReminderEnabledChanged?(isReminderEnabled) }
+    }
 
+    var onSelectedPresetChanged: ((String?) -> Void)?
+    var onSelectedDaysChanged: (([Int]) -> Void)?
+    var onIntervalChanged: ((Int?) -> Void)?
+    var onStartDateChanged: ((Date?) -> Void)?
+    var onEndDateChanged: ((Date?) -> Void)?
+    var onIsReminderEnabledChanged: ((Bool) -> Void)?
+    
     let daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
     init() {
@@ -24,12 +43,10 @@ final class NewPillStepThreeViewModel {
     }
     
     func calculateSelectedDaysForPreset(_ preset: String) -> [Int] {
-        var selectedDays = [Int]()
-        
         guard let start = startDate, let end = endDate else { return [] }
-        var currentDate = start
-        
+        var selectedDays = [Int]()
         var intervalDays: Int = 1
+        
         switch preset {
         case "Каждый день":
             intervalDays = 1
@@ -41,10 +58,14 @@ final class NewPillStepThreeViewModel {
             return []
         }
         
+        var currentDate = start
         while currentDate <= end {
-            let weekday = (Calendar.current.component(.weekday, from: currentDate) + 5) % 7 + 1
-            selectedDays.append(weekday)
-            currentDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
+            let weekday = weekdayNumber(from: currentDate)
+            if !selectedDays.contains(weekday) {
+                selectedDays.append(weekday)
+            }
+            guard let nextDate = Calendar.current.date(byAdding: .day, value: intervalDays, to: currentDate) else { break }
+            currentDate = nextDate
         }
         
         return selectedDays

@@ -11,19 +11,31 @@ final class NewPillStepThreeViewModel {
     var model = PillStepThreeModel()
     
     var selectedPreset: String? = nil {
-        didSet { onSelectedPresetChanged?(selectedPreset) }
+        didSet {
+            onSelectedPresetChanged?(selectedPreset)
+            checkValidity()
+        }
     }
     var selectedDays: [Int] = [] {
-        didSet { onSelectedDaysChanged?(selectedDays) }
+        didSet {
+            onSelectedDaysChanged?(selectedDays)
+            checkValidity()
+        }
     }
     var interval: Int? {
         didSet { onIntervalChanged?(interval) }
     }
     var startDate: Date? {
-        didSet { onStartDateChanged?(startDate) }
+        didSet {
+            onStartDateChanged?(startDate)
+            checkValidity()
+        }
     }
     var endDate: Date? {
-        didSet { onEndDateChanged?(endDate) }
+        didSet {
+            onEndDateChanged?(endDate)
+            checkValidity()
+        }
     }
     var isReminderEnabled: Bool = false {
         didSet { onIsReminderEnabledChanged?(isReminderEnabled) }
@@ -35,6 +47,7 @@ final class NewPillStepThreeViewModel {
     var onStartDateChanged: ((Date?) -> Void)?
     var onEndDateChanged: ((Date?) -> Void)?
     var onIsReminderEnabledChanged: ((Bool) -> Void)?
+    var onValidationChange: ((Bool) -> Void)?
     
     let daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
@@ -94,6 +107,10 @@ final class NewPillStepThreeViewModel {
         }
         
         return !selectedDays.isEmpty
+    }
+    
+    func checkValidity() {
+        onValidationChange?(isValid())
     }
 }
 

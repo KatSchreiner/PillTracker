@@ -200,7 +200,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         
         updatePresetButtonStates(selectedButton: "Каждый день")
         hideDayButtonStackView()
-        updateNextButtonStateStepThree()
+        viewModel.checkValidity()
     }
     
     @objc private func didTapEveryOtherDayButton() {
@@ -213,7 +213,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         
         updatePresetButtonStates(selectedButton: "Через день")
         hideDayButtonStackView()
-        updateNextButtonStateStepThree()
+        viewModel.checkValidity()
     }
     
     @objc private func didTapEveryTwoDaysButton() {
@@ -226,7 +226,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         
         updatePresetButtonStates(selectedButton: "Через 2 дня")
         hideDayButtonStackView()
-        updateNextButtonStateStepThree()
+        viewModel.checkValidity()
     }
     
     @objc private func didTapCustomOptionButton() {
@@ -266,17 +266,17 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         }
         
         viewModel.interval = nil
-        updateNextButtonStateStepThree()
+        viewModel.checkValidity()
     }
     
     @objc private func startDateChanged(sender: UIDatePicker) {
         viewModel.startDate = viewModel.startOfDayInLocalTimeZone(for: sender.date)
-        updateNextButtonStateStepThree()
+        viewModel.checkValidity()
     }
     
     @objc private func endDateChanged(sender: UIDatePicker) {
         viewModel.endDate = viewModel.startOfDayInLocalTimeZone(for: sender.date)
-        updateNextButtonStateStepThree()
+        viewModel.checkValidity()
     }
     
     @objc
@@ -297,7 +297,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
             }
         }
         
-        updateNextButtonStateStepThree()
+        viewModel.checkValidity()
     }
     
     // MARK: - Private Methods
@@ -345,6 +345,10 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     }
     
     private func setupBindings() {
+        viewModel.onValidationChange = { [weak self] isValid in
+            self?.updateButtonState(isEnabled: isValid, isNextButton: false)
+        }
+        
         viewModel.onSelectedPresetChanged = { [weak self] preset in
             DispatchQueue.main.async {
                 self?.updatePresetButtonStates(selectedButton: preset ?? "")
@@ -353,14 +357,12 @@ final class NewPillStepThreeViewController: BaseStepViewController {
                 } else {
                     self?.hideDayButtonStackView()
                 }
-                self?.updateNextButtonStateStepThree()
             }
         }
         
         viewModel.onSelectedDaysChanged = { [weak self] _ in
             DispatchQueue.main.async {
                 self?.updateDayButtonStates()
-                self?.updateNextButtonStateStepThree()
             }
         }
         
@@ -369,7 +371,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
                 if let date = date {
                     self?.startDatePicker.date = date
                 }
-                self?.updateNextButtonStateStepThree()
             }
         }
         
@@ -378,14 +379,12 @@ final class NewPillStepThreeViewController: BaseStepViewController {
                 if let date = date {
                     self?.endDatePicker.date = date
                 }
-                self?.updateNextButtonStateStepThree()
             }
         }
         
         viewModel.onIsReminderEnabledChanged = { [weak self] isEnabled in
             DispatchQueue.main.async {
                 self?.reminderSwitch.isOn = isEnabled
-                self?.updateNextButtonStateStepThree()
             }
         }
     }
@@ -424,7 +423,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
             }
         }
         
-        updateNextButtonStateStepThree()
+        viewModel.checkValidity()
     }
     
     private func updateDayButtonStates() {
@@ -458,15 +457,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
                     presetButton.setTitleColor(.dGray, for: .normal)
                 }
             }
-        }
-    }
-    
-    func updateNextButtonStateStepThree() {
-        let isEnabled = viewModel.isValid()
-        
-        if let addNewPillView = parent as? AddNewPillViewController {
-            addNewPillView.doneButton.isEnabled = isEnabled
-            addNewPillView.doneButton.alpha = isEnabled ? 1.0 : 0.5
         }
     }
     

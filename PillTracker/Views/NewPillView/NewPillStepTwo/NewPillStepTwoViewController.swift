@@ -98,8 +98,8 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         let selectedOption = viewModel.optionData[sender.tag]
         viewModel.setSelectedOption(selectedOption)
         
-        viewModel.model.selectedIcon =  viewModel.optionImagesColor[sender.tag]
-        viewModel.model.selectedOption = viewModel.selectedOption
+        viewModel.pillStepTwoModel.selectedIcon =  viewModel.optionImagesColor[sender.tag]
+        viewModel.pillStepTwoModel.selectedOption = viewModel.selectedOption
         
         for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
             if let buttonContainer = subview as? UIStackView,
@@ -117,7 +117,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
                 }
             }
         }
-        viewModel.updateNextButtonState()
+        viewModel.checkValidity()
     }
     
     @objc
@@ -133,13 +133,13 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     private func didTapRemoveTimeCell(_ sender: UIButton) {
         viewModel.removeTime(at: sender.tag)
         updateSelectedTimes()
-        viewModel.updateNextButtonState()
+        viewModel.checkValidity()
     }
     
     // MARK: - Public Methods
     func updateSelectedTimes() {
         viewModel.sortTimes()
-        viewModel.model.selectedTimes = viewModel.selectedTimes
+        viewModel.pillStepTwoModel.selectedTimes = viewModel.selectedTimes
         
         let rowCount = viewModel.selectedTimes.count
         let calculatedHeight = CGFloat(rowCount * 60)
@@ -201,11 +201,8 @@ final class NewPillStepTwoViewController: BaseStepViewController {
             self?.updateSelectedTimes()
         }
         
-        viewModel.onNextButtonStateChanged = { [weak self] isEnabled in
-            if let addNewPillView = self?.parent as? AddNewPillViewController {
-                addNewPillView.nextButton.isEnabled = isEnabled
-                addNewPillView.nextButton.alpha = isEnabled ? 1.0 : 0.5
-            }
+        viewModel.onValidationChange = { [weak self] isValid in
+            self?.updateButtonState(isEnabled: isValid, isNextButton: true)
         }
         
         viewModel.onLoadData = { [weak self] in
@@ -232,7 +229,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
                 }
             }
         }
-        viewModel.updateNextButtonState()
+        viewModel.checkValidity()
     }
 }
 

@@ -8,7 +8,7 @@
 import UIKit
 
 final class NewPillStepTwoViewModel {
-    var model = PillStepTwoModel()
+    var pillStepTwoModel = PillStepTwoModel()
     
     var selectedTimes: [(hour: String, minute: String)] = [] {
         didSet {
@@ -33,46 +33,41 @@ final class NewPillStepTwoViewModel {
         UIImage(named: "beforeEatColor")?.withRenderingMode(.alwaysOriginal)
     ]
     
-    var isNextButtonEnabled: Bool {
-        return isValid()
-    }
-    
     var onTimesUpdated: (() -> Void)?
-    var onNextButtonStateChanged: ((Bool) -> Void)?
     var onLoadData: (() -> Void)?
-
+    var onValidationChange: ((Bool) -> Void)?
+    
     func setSelectedOption(_ option: String?) {
         selectedOption = option
-
-        updateNextButtonState()
+        pillStepTwoModel.selectedOption = option
+        checkValidity()
     }
     
     func addTime(hour: String, minute: String) {
         selectedTimes.append((hour: hour, minute: minute))
-        updateNextButtonState()
+        pillStepTwoModel.selectedTimes = selectedTimes 
+        checkValidity()
     }
     
     func removeTime(at index: Int) {
         guard index < selectedTimes.count else { return }
         selectedTimes.remove(at: index)
-        updateNextButtonState()
+        pillStepTwoModel.selectedTimes = selectedTimes
+        checkValidity()
     }
-    
-    func isValid() -> Bool {
-        return selectedTimes.count > 0 && selectedOption != nil
-    }
-    
-    func updateNextButtonState() {
-        onNextButtonStateChanged?(isNextButtonEnabled)
+
+    func checkValidity() {
+        let isValid = pillStepTwoModel.isValid()
+        onValidationChange?(isValid)
+        print("Validation check: \(isValid)")
     }
     
     func loadData(from model: PillStepTwoModel) {
         selectedOption = model.selectedOption
         selectedTimes = model.selectedTimes
         
-        updateNextButtonState()
-        
         onTimesUpdated?()
+        checkValidity()
     }
     
     func sortTimes() {
@@ -97,6 +92,6 @@ extension NewPillStepTwoViewModel {
         self.selectedOption = model.selectedOption
         self.selectedTimes = model.selectedTimes
         onTimesUpdated?()
-        updateNextButtonState()
+        checkValidity()
     }
 }

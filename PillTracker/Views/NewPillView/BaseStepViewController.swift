@@ -13,7 +13,7 @@ protocol StepButtonStateHandler {
 
 class BaseStepViewController: UIViewController, StepButtonStateHandler {
     weak var parentStepHandler: AddNewPillViewController?
-
+    
     // MARK: - UI Creation Methods
     func createLabel(text: String, fontSize: CGFloat = 18, textColor: UIColor = .dGray) -> UILabel {
         let label = UILabel()
@@ -67,7 +67,7 @@ class BaseStepViewController: UIViewController, StepButtonStateHandler {
         }
         return textField
     }
-
+    
     func updateButtonState(isEnabled: Bool, isNextButton: Bool) {
         DispatchQueue.main.async { [weak self] in
             if let parent = self?.parentStepHandler ?? self?.parent as? AddNewPillViewController {

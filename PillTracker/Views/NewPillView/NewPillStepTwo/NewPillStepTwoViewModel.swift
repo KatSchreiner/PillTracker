@@ -8,6 +8,7 @@
 import UIKit
 
 final class NewPillStepTwoViewModel {
+    var model = PillStepTwoModel()
 
     var selectedTimes: [(hour: String, minute: String)] = [] {
         didSet {
@@ -89,5 +90,14 @@ final class NewPillStepTwoViewModel {
             }
             return false
         }
+    }
+}
+
+extension NewPillStepTwoViewModel {
+    func configure(with model: PillStepTwoModel) {
+        self.selectedOption = model.selectedOption
+        self.selectedTimes = model.selectedTimes
+        onTimesUpdated?()
+        updateNextButtonState()
     }
 }

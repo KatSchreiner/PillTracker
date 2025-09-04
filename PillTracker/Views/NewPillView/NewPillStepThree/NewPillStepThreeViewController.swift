@@ -7,7 +7,7 @@
 
 import UIKit
 
-class NewPillStepThreeViewController: UIViewController {
+final class NewPillStepThreeViewController: UIViewController {
     // MARK: - Public Properties
     static var stepThree = "NewPillStepThreeCell"
     let viewModel = NewPillStepThreeViewModel()
@@ -431,6 +431,8 @@ class NewPillStepThreeViewController: UIViewController {
                 }
             }
         }
+        
+        updateNextButtonStateStepThree()
     }
     
     private func updateDayButtonStates() {

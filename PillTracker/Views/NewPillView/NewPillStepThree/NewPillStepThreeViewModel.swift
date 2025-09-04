@@ -96,3 +96,15 @@ final class NewPillStepThreeViewModel {
         return !selectedDays.isEmpty
     }
 }
+
+extension NewPillStepThreeViewModel {
+    func configure(with model: PillStepThreeModel) {
+        self.model = model
+        self.selectedPreset = model.selectedPreset
+        self.selectedDays = model.selectedDays
+        self.interval = model.interval
+        self.startDate = model.startDate
+        self.endDate = model.endDate
+        self.isReminderEnabled = model.isReminderEnabled
+    }
+}

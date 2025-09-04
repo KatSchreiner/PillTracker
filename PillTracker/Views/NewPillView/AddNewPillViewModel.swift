@@ -7,7 +7,7 @@
 
 import UIKit
 
-class AddNewPillViewModel {
+final class AddNewPillViewModel {
     
     // MARK: - Public Properties
     var pillStepOneModel = PillStepOneModel()
@@ -110,7 +110,7 @@ class AddNewPillViewModel {
         stepTwoVC.updateSelectedTimes()
         pillStepTwoModel.selectedTimes = stepTwoVC.viewModel.selectedTimes
         pillStepTwoModel.selectedIcon = pillStepOneModel.selectedIcon
-        pillStepTwoModel.selectedOption = stepTwoVC.model.selectedOption
+        pillStepTwoModel.selectedOption = stepTwoVC.viewModel.selectedOption
         
         stepTwoVC.viewModel.selectedTimes = pillStepTwoModel.selectedTimes
         stepTwoVC.viewModel.selectedOption = pillStepTwoModel.selectedOption

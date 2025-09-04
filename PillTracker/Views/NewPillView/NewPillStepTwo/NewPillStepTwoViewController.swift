@@ -10,7 +10,6 @@ import UIKit
 class NewPillStepTwoViewController: UIViewController {
     // MARK: - Public Properties
     static var stepTwo = "NewPillStepTwoCell"
-    var model = PillStepTwoModel()
 
     let viewModel = NewPillStepTwoViewModel()
     
@@ -99,7 +98,7 @@ class NewPillStepTwoViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         setupBindings()
-        viewModel.loadData(from: model)
+        //viewModel.loadData(from: model)
         loadData()
     }
     
@@ -109,8 +108,8 @@ class NewPillStepTwoViewController: UIViewController {
         let selectedOption = viewModel.optionData[sender.tag]
         viewModel.setSelectedOption(selectedOption)
         
-        model.selectedIcon =  viewModel.optionImagesColor[sender.tag]
-        model.selectedOption = selectedOption
+        viewModel.model.selectedIcon =  viewModel.optionImagesColor[sender.tag]
+        viewModel.model.selectedOption = viewModel.selectedOption
         
         for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
             if let buttonContainer = subview as? UIStackView,
@@ -150,7 +149,7 @@ class NewPillStepTwoViewController: UIViewController {
     // MARK: - Public Methods
     func updateSelectedTimes() {
         viewModel.sortTimes()
-        model.selectedTimes = viewModel.selectedTimes
+        viewModel.model.selectedTimes = viewModel.selectedTimes
         
         let rowCount = viewModel.selectedTimes.count
         let calculatedHeight = CGFloat(rowCount * 60)
@@ -225,7 +224,7 @@ class NewPillStepTwoViewController: UIViewController {
     }
     
     private func loadData() {
-        if let selectedOption = model.selectedOption,
+        if let selectedOption = viewModel.selectedOption,
            let selectedIndex = viewModel.optionData.firstIndex(of: selectedOption) {
             
             for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {

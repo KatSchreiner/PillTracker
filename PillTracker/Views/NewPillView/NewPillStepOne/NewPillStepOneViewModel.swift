@@ -58,3 +58,14 @@ class NewPillStepOneViewModel {
         return allowedCharacters.isSuperset(of: characterSet)
     }
 }
+
+extension NewPillStepOneViewModel {
+    func configure(with model: PillStepOneModel) {
+        self.pillStepOneModel = model
+        self.selectedUnit = model.selectedUnit
+        self.dosage = model.dosage ?? 0
+        updateUnitButtonTitle?()
+        updateIconButton?(model.selectedIcon)
+        updateNextButtonState?()
+    }
+}

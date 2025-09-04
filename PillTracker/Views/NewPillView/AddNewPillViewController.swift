@@ -206,17 +206,17 @@ private extension AddNewPillViewController {
         switch step {
         case .stepOne:
             let stepOne = NewPillStepOneViewController()
-            stepOne.viewModel.pillStepOneModel = viewModel.pillStepOneModel
+            stepOne.viewModel.configure(with: viewModel.pillStepOneModel)
             viewModel.currentChildVC = stepOne
             newPillView = stepOne
         case .stepTwo:
             let stepTwo = NewPillStepTwoViewController()
-            stepTwo.model = viewModel.pillStepTwoModel
+            stepTwo.viewModel.configure(with: viewModel.pillStepTwoModel)
             viewModel.currentChildVC = stepTwo
             newPillView = stepTwo
         case .stepThree:
             let stepThree = NewPillStepThreeViewController()
-            stepThree.viewModel.model = viewModel.pillStepThreeModel
+            stepThree.viewModel.configure(with: viewModel.pillStepThreeModel)
             viewModel.currentChildVC = stepThree
             newPillView = stepThree
         }

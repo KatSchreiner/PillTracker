@@ -170,25 +170,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         loadData()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        UIView.performWithoutAnimation {
-            loadData()
-            self.view.layoutIfNeeded()
-        }
-        if viewModel.selectedPreset == "Свой вариант" && !viewModel.selectedDays.isEmpty {
-            showDayButtonStackView()
-        }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        UIView.animate(withDuration: 0.1) {
-            self.view.layoutIfNeeded()
-        }
-    }
-    
     // MARK: - IB Actions
     @objc private func didTapEveryDayButton() {
         viewModel.selectedDays = []
@@ -235,12 +216,8 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         resetDayButtons()
         viewModel.selectedPreset = "Свой вариант"
         
-        if dayButtonStackView.isHidden {
-            showDayButtonStackView()
-        } else {
-            hideDayButtonStackView()
-        }
-        
+        showDayButtonStackView()
+                
         for button in presetButtonStackView.arrangedSubviews {
             if let presetButton = button as? UIButton {
                 presetButton.backgroundColor = .lGray
@@ -352,10 +329,8 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         viewModel.onSelectedPresetChanged = { [weak self] preset in
             DispatchQueue.main.async {
                 self?.updatePresetButtonStates(selectedButton: preset ?? "")
-                if preset == "Свой вариант" && !(self?.viewModel.selectedDays.isEmpty ?? true) {
+                if preset == "Свой вариант" {
                     self?.showDayButtonStackView()
-                } else {
-                    self?.hideDayButtonStackView()
                 }
             }
         }
@@ -413,13 +388,10 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         if let selectedPreset = viewModel.selectedPreset {
             updatePresetButtonStates(selectedButton: selectedPreset)
             
-            if selectedPreset == "Свой вариант" && !viewModel.selectedDays.isEmpty {
-                DispatchQueue.main.async {
-                    self.dayButtonStackView.isHidden = false
-                    self.dayButtonStackViewHeightConstraint.constant = 35
-                    self.dayButtonStackView.alpha = 1
-                    self.view.layoutIfNeeded()
-                }
+            if selectedPreset == "Свой вариант" {
+                showDayButtonStackView()
+            } else {
+                hideDayButtonStackView()
             }
         }
         
@@ -461,26 +433,35 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     }
     
     private func showDayButtonStackView() {
-        guard dayButtonStackView.isHidden else { return }
-        self.view.layoutIfNeeded()
+        guard dayButtonStackView.alpha == 0 else { return }
         
         dayButtonStackView.isHidden = false
+        dayButtonStackView.alpha = 0
         dayButtonStackViewHeightConstraint.constant = 35
+        view.layoutIfNeeded()
         
-        UIView.animate(withDuration: 0.3, animations: {
-            self.dayButtonStackView.alpha = 1
-            self.view.layoutIfNeeded()
-        })
+        UIView.animate(
+            withDuration: 0.3,
+            delay: 0,
+            options: [.curveEaseInOut, .allowUserInteraction],
+            animations: {
+                self.dayButtonStackView.alpha = 1
+                self.view.layoutIfNeeded()
+            },
+            completion: nil
+        )
     }
+    
     private func hideDayButtonStackView() {
-        dayButtonStackViewHeightConstraint.constant = 0
+        guard dayButtonStackView.alpha == 1 else { return }
         
         UIView.animate(withDuration: 0.3, animations: {
             self.dayButtonStackView.alpha = 0
             self.view.layoutIfNeeded()
-        }, completion: { _ in
+        }) { _ in
             self.dayButtonStackView.isHidden = true
-        })
+            self.dayButtonStackViewHeightConstraint.constant = 0
+        }
     }
     
     // MARK: - Notification Alert

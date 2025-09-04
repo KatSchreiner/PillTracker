@@ -77,12 +77,18 @@ class NewPillStepOneViewController: BaseStepViewController {
     
     @objc
     private func textFieldDidChange(_ textField: UITextField) {
-        if let dosageText = textField.text, let dosageValue = Double(dosageText) {
-            viewModel.dosage = dosageValue
-        } else {
-            viewModel.dosage = 0
+        if textField == titleTextField {
+            viewModel.pillStepOneModel.title = textField.text
+        } else if textField == dosageTextField {
+            if let dosageText = textField.text, let dosageValue = Double(dosageText) {
+                viewModel.dosage = dosageValue
+                viewModel.pillStepOneModel.dosage = dosageValue
+            } else {
+                viewModel.dosage = 0
+                viewModel.pillStepOneModel.dosage = nil
+            }
         }
-        updateNextButtonStateStepOne()
+        viewModel.checkValidity()
     }
     
     @objc private func keyboardWillShow(notification: Notification) {
@@ -147,8 +153,8 @@ class NewPillStepOneViewController: BaseStepViewController {
             }
         }
         
-        viewModel.updateNextButtonState = { [weak self] in
-            self?.updateNextButtonStateStepOne()
+        viewModel.onValidationChange = { [weak self] isValid in
+            self?.updateButtonState(isEnabled: isValid, isNextButton: true)
         }
     }
     
@@ -168,6 +174,10 @@ class NewPillStepOneViewController: BaseStepViewController {
     }
     
     func loadData() {
+        if let selectedIcon = viewModel.pillStepOneModel.selectedIcon {
+            formTypesButton.setImage(selectedIcon, for: .normal)
+        }
+        
         titleTextField.text = viewModel.pillStepOneModel.title
         
         if let dosage = viewModel.pillStepOneModel.dosage {
@@ -176,30 +186,12 @@ class NewPillStepOneViewController: BaseStepViewController {
             dosageTextField.text = nil
         }
         
-        if let selectedIcon = viewModel.pillStepOneModel.selectedIcon {
-            formTypesButton.setImage(selectedIcon, for: .normal)
-        }
-        
         if let selectedUnit = viewModel.pillStepOneModel.selectedUnit {
             self.viewModel.selectedUnit = selectedUnit
             unitButton.setTitle(selectedUnit, for: .normal)
         }
-    }
-    
-    func updateNextButtonStateStepOne() {
-        viewModel.pillStepOneModel.title = titleTextField.text
-        if let dosageText = dosageTextField.text, let dosageValue = Double(dosageText) {
-            viewModel.pillStepOneModel.dosage = dosageValue
-        } else {
-            viewModel.pillStepOneModel.dosage = nil
-        }
         
-        let isEnabled = viewModel.pillStepOneModel.isValid() ?? false
-        
-        if let addNewPillView = parent as? AddNewPillViewController {
-            addNewPillView.nextButton.isEnabled = isEnabled
-            addNewPillView.nextButton.alpha = isEnabled ? 1.0 : 0.5
-        }
+        viewModel.checkValidity()
     }
     
     private func animateIconChange(to newIcon: UIImage?) {

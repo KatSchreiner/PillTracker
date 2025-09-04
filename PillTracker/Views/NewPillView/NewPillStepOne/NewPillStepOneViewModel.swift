@@ -24,19 +24,25 @@ class NewPillStepOneViewModel {
     }
     
     var updateUnitButtonTitle: (() -> Void)?
-    var updateNextButtonState: (() -> Void)?
     var updateIconButton: ((UIImage?) -> Void)?
+    var onValidationChange: ((Bool) -> Void)?
     
-    // MARK: - Initialization
+
     
     // MARK: - Button Actions
+    func checkValidity() {
+        let isValid = pillStepOneModel.isValid()
+        onValidationChange?(isValid)
+        print("Validation check: \(isValid)")
+    }
+    
     func handleFormTypesButtonTap(presenter: UIViewController) {
         let iconSelectionView = IconSelectionViewController()
         
         iconSelectionView.selectedIcon = { [weak self] selectedIcon in
             self?.pillStepOneModel.selectedIcon = selectedIcon
             self?.updateIconButton?(selectedIcon)
-            self?.updateNextButtonState?()
+            self?.checkValidity()
         }
         
         iconSelectionView.presentAsBottomSheet(on: presenter)
@@ -50,7 +56,7 @@ class NewPillStepOneViewModel {
             self?.selectedUnit = selectedUnit
             self?.pillStepOneModel.selectedUnit = selectedUnit
             self?.updateUnitButtonTitle?()
-            self?.updateNextButtonState?()
+            self?.checkValidity()
         }
         
         unitSelectionView.presentAsBottomSheet(on: presenter)
@@ -71,6 +77,6 @@ extension NewPillStepOneViewModel {
         self.dosage = model.dosage ?? 0
         updateUnitButtonTitle?()
         updateIconButton?(model.selectedIcon)
-        updateNextButtonState?()
+        checkValidity()
     }
 }

@@ -9,13 +9,12 @@ import UIKit
 
 final class NewPillStepTwoViewModel {
     var model = PillStepTwoModel()
-
+    
     var selectedTimes: [(hour: String, minute: String)] = [] {
         didSet {
             DispatchQueue.main.async { [weak self] in
                 self?.onTimesUpdated?()
             }
-            
         }
     }
     

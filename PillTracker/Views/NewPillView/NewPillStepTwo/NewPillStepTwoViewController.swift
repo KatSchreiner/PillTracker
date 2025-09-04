@@ -7,21 +7,12 @@
 
 import UIKit
 
-class NewPillStepTwoViewController: UIViewController {
+final class NewPillStepTwoViewController: BaseStepViewController {
     // MARK: - Public Properties
-    static var stepTwo = "NewPillStepTwoCell"
-
     let viewModel = NewPillStepTwoViewModel()
     
     // MARK: - Private Properties
-    private lazy var timePickerLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Время приема"
-        label.textAlignment = .left
-        label.font = UIFont.systemFont(ofSize: 18)
-        label.textColor = .dGray
-        return label
-    }()
+    private lazy var timePickerLabel = createLabel(text: "Время приема")
     
     private lazy var timesTableView: UITableView = {
         let tableView = UITableView()
@@ -98,7 +89,6 @@ class NewPillStepTwoViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         setupBindings()
-        //viewModel.loadData(from: model)
         loadData()
     }
     
@@ -244,7 +234,6 @@ class NewPillStepTwoViewController: UIViewController {
         }
         viewModel.updateNextButtonState()
     }
-    
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate

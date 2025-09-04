@@ -7,20 +7,12 @@
 
 import UIKit
 
-final class NewPillStepThreeViewController: UIViewController {
+final class NewPillStepThreeViewController: BaseStepViewController {
     // MARK: - Public Properties
-    static var stepThree = "NewPillStepThreeCell"
     let viewModel = NewPillStepThreeViewModel()
     
     // MARK: - Private Properties
-    private lazy var repeatLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 18, weight: .regular)
-        label.textColor = .dGray
-        label.text = "Повторить"
-        label.textAlignment = .left
-        return label
-    }()
+    private lazy var repeatLabel = createLabel(text: "Повторить")
     
     private lazy var presetButtonStackView: UIStackView = {
         let stackView = UIStackView()
@@ -501,6 +493,7 @@ final class NewPillStepThreeViewController: UIViewController {
         })
     }
     
+    // MARK: - Notification Alert
     private func showNotificationPermissionAlert() {
         let alert = UIAlertController(
             title: "Разрешение не предоставлено",

@@ -90,7 +90,6 @@ final class AddNewPillViewModel {
     private func moveToStepOne() {
         guard let stepOneVC = currentChildVC as? NewPillStepOneViewController else { return }
         
-        // Обновляем модель первого шага данными из view controller'а
         pillStepOneModel.title = stepOneVC.titleTextField.text
         
         if let dosageText = stepOneVC.dosageTextField.text,

@@ -7,25 +7,26 @@
 
 import UIKit
 
-class NewPillStepOneViewController: UIViewController {
+class NewPillStepOneViewController: BaseStepViewController {
     
     // MARK: - Public Properties
-    
     let viewModel = NewPillStepOneViewModel()
     
-    lazy var titleTextField: UITextField = createTextField()
-    lazy var dosageTextField: UITextField = createTextField()
-    
-    lazy var unitButton: UIButton = {
-        let unitButton = UIButton(type: .custom)
-        unitButton.setTitle("Выберите единицу", for: .normal)
-        unitButton.setTitleColor(.dGray, for: .normal)
-        unitButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-        unitButton.backgroundColor = .lGray
-        unitButton.layer.cornerRadius = 8
-        unitButton.addTarget(self, action: #selector(didTapUnitButton), for: .touchUpInside)
-        return unitButton
+    lazy var titleTextField: UITextField = {
+        let tf = createTextField(placeholder: "Введите название", delegate: self)
+        tf.returnKeyType = .next
+        tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        return tf
     }()
+    
+    lazy var dosageTextField: UITextField = {
+        let tf = createTextField(placeholder: "Введите дозировку", keyboardType: .decimalPad, delegate: self)
+        tf.returnKeyType = .done
+        tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        return tf
+    }()
+    
+    lazy var unitButton = createButton(title: "Выберите единицу", target: self, action: #selector(didTapUnitButton))
     
     lazy var formTypesButton: UIButton = {
         let button = UIButton()
@@ -37,8 +38,8 @@ class NewPillStepOneViewController: UIViewController {
     }()
     
     // MARK: - Private Properties
-    private lazy var titleLabel: UILabel = createLabel(text: "Название", textColor: .black, fontSize: 18)
-    private lazy var dosageLabel: UILabel = createLabel(text: "Дозировка", textColor: .black, fontSize: 18)
+    private lazy var titleLabel = createLabel(text: "Название")
+    private lazy var dosageLabel = createLabel(text: "Дозировка")
         
     private lazy var spacerView: UIView = {
         let view = UIView()
@@ -160,43 +161,6 @@ class NewPillStepOneViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
-    private func createLabel(text: String, textColor: UIColor, fontSize: CGFloat) -> UILabel {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: fontSize)
-        label.text = text
-        label.textColor = textColor
-        label.textAlignment = .left
-        label.textColor = .dGray
-        return label
-    }
-    
-    private func createTextField() -> UITextField {
-        let textField = UITextField()
-        textField.layer.cornerRadius = 8
-        textField.backgroundColor = .white
-        textField.textColor = .dGray
-        textField.textAlignment = .left
-        textField.isUserInteractionEnabled = true
-        
-        textField.layer.shadowColor = UIColor.lGray.cgColor
-        textField.layer.shadowOpacity = 0.1
-        textField.layer.shadowOffset = CGSize(width: 0, height: 1)
-        textField.layer.shadowRadius = 6
-        
-        textField.layer.borderWidth = 1
-        textField.layer.borderColor = UIColor.lGray.cgColor
-        
-        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 60))
-        textField.leftViewMode = .always
-        textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 60))
-        textField.rightViewMode = .always
-
-        textField.delegate = self
-        
-        textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        return textField
-    }
-    
     private func setupTextFields() {
         titleTextField.returnKeyType = .next
         dosageTextField.returnKeyType = .done
@@ -204,33 +168,33 @@ class NewPillStepOneViewController: UIViewController {
     }
     
     func loadData() {
-        titleTextField.text = viewModel.pillStepOneModel?.title
+        titleTextField.text = viewModel.pillStepOneModel.title
         
-        if let dosage = viewModel.pillStepOneModel?.dosage {
+        if let dosage = viewModel.pillStepOneModel.dosage {
             dosageTextField.text = String(format: "%.1f", dosage)
         } else {
             dosageTextField.text = nil
         }
         
-        if let selectedIcon = viewModel.pillStepOneModel?.selectedIcon {
+        if let selectedIcon = viewModel.pillStepOneModel.selectedIcon {
             formTypesButton.setImage(selectedIcon, for: .normal)
         }
         
-        if let selectedUnit = viewModel.pillStepOneModel?.selectedUnit {
+        if let selectedUnit = viewModel.pillStepOneModel.selectedUnit {
             self.viewModel.selectedUnit = selectedUnit
             unitButton.setTitle(selectedUnit, for: .normal)
         }
     }
     
     func updateNextButtonStateStepOne() {
-        viewModel.pillStepOneModel?.title = titleTextField.text
+        viewModel.pillStepOneModel.title = titleTextField.text
         if let dosageText = dosageTextField.text, let dosageValue = Double(dosageText) {
-            viewModel.pillStepOneModel?.dosage = dosageValue
+            viewModel.pillStepOneModel.dosage = dosageValue
         } else {
-            viewModel.pillStepOneModel?.dosage = nil
+            viewModel.pillStepOneModel.dosage = nil
         }
         
-        let isEnabled = viewModel.pillStepOneModel?.isValid() ?? false
+        let isEnabled = viewModel.pillStepOneModel.isValid() ?? false
         
         if let addNewPillView = parent as? AddNewPillViewController {
             addNewPillView.nextButton.isEnabled = isEnabled

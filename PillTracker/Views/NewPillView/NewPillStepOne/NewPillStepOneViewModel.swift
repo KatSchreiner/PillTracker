@@ -8,10 +8,15 @@
 import UIKit
 
 class NewPillStepOneViewModel {
-    static let stepOne = "NewPillStepOneCell"
-    var pillStepOneModel: PillStepOneModel?
+    var pillStepOneModel = PillStepOneModel()
     
-    var selectedUnit: String?
+    var selectedUnit: String? {
+        didSet {
+            pillStepOneModel.selectedUnit = selectedUnit
+            updateUnitButtonTitle?()
+        }
+    }
+    
     var dosage: Double = 0 {
         didSet {
             updateUnitButtonTitle?()
@@ -29,7 +34,7 @@ class NewPillStepOneViewModel {
         let iconSelectionView = IconSelectionViewController()
         
         iconSelectionView.selectedIcon = { [weak self] selectedIcon in
-            self?.pillStepOneModel?.selectedIcon = selectedIcon
+            self?.pillStepOneModel.selectedIcon = selectedIcon
             self?.updateIconButton?(selectedIcon)
             self?.updateNextButtonState?()
         }
@@ -43,7 +48,7 @@ class NewPillStepOneViewModel {
         unitSelectionView.dosage = dosage
         unitSelectionView.selectedUnit = { [weak self] selectedUnit in
             self?.selectedUnit = selectedUnit
-            self?.pillStepOneModel?.selectedUnit = selectedUnit
+            self?.pillStepOneModel.selectedUnit = selectedUnit
             self?.updateUnitButtonTitle?()
             self?.updateNextButtonState?()
         }

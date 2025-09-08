@@ -34,7 +34,6 @@ final class NewPillStepTwoViewModel {
     ]
     
     var onTimesUpdated: (() -> Void)?
-    var onLoadData: (() -> Void)?
     var onValidationChange: ((Bool) -> Void)?
     
     func setSelectedOption(_ option: String?) {
@@ -57,17 +56,11 @@ final class NewPillStepTwoViewModel {
     }
 
     func checkValidity() {
+        pillStepTwoModel.selectedOption = selectedOption
+        pillStepTwoModel.selectedTimes = selectedTimes
+        
         let isValid = pillStepTwoModel.isValid()
         onValidationChange?(isValid)
-        print("Validation check: \(isValid)")
-    }
-    
-    func loadData(from model: PillStepTwoModel) {
-        selectedOption = model.selectedOption
-        selectedTimes = model.selectedTimes
-        
-        onTimesUpdated?()
-        checkValidity()
     }
     
     func sortTimes() {

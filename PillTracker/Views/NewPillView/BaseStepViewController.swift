@@ -7,11 +7,7 @@
 
 import UIKit
 
-protocol StepButtonStateHandler {
-    func updateButtonState(isEnabled: Bool, isNextButton: Bool)
-}
-
-class BaseStepViewController: UIViewController, StepButtonStateHandler {
+class BaseStepViewController: UIViewController {
     weak var parentStepHandler: AddNewPillViewController?
     
     // MARK: - UI Creation Methods

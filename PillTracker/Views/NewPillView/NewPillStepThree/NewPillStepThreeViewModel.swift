@@ -8,7 +8,7 @@
 import UIKit
 
 final class NewPillStepThreeViewModel {
-    var model = PillStepThreeModel()
+    var pillStepThreeModel = PillStepThreeModel()
     
     var selectedPreset: String? = nil {
         didSet {
@@ -95,28 +95,22 @@ final class NewPillStepThreeViewModel {
         return (calendar.component(.weekday, from: date) + 5) % 7 + 1
     }
     
-    func isValid() -> Bool {
-        guard startDate != nil && endDate != nil else { return false }
-        
-        if let end = endDate, let start = startDate, end < start {
-            return false
-        }
-        
-        if selectedPreset != "Свой вариант" {
-            return true
-        }
-        
-        return !selectedDays.isEmpty
-    }
-    
     func checkValidity() {
-        onValidationChange?(isValid())
+        pillStepThreeModel.selectedDays = selectedDays
+        pillStepThreeModel.selectedPreset = selectedPreset
+        pillStepThreeModel.startDate = startDate
+        pillStepThreeModel.endDate = endDate
+        pillStepThreeModel.interval = interval
+        pillStepThreeModel.isReminderEnabled = isReminderEnabled
+        
+        let isValid = pillStepThreeModel.isValid()
+        onValidationChange?(isValid)
     }
 }
 
 extension NewPillStepThreeViewModel {
     func configure(with model: PillStepThreeModel) {
-        self.model = model
+        self.pillStepThreeModel = model
         self.selectedPreset = model.selectedPreset
         self.selectedDays = model.selectedDays
         self.interval = model.interval

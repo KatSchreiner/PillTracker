@@ -204,10 +204,6 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         viewModel.onValidationChange = { [weak self] isValid in
             self?.updateButtonState(isEnabled: isValid, isNextButton: true)
         }
-        
-        viewModel.onLoadData = { [weak self] in
-            self?.loadData()
-        }
     }
     
     private func loadData() {

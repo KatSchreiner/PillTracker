@@ -7,7 +7,7 @@
 
 import UIKit
 
-class NewPillStepOneViewController: BaseStepViewController {
+final class NewPillStepOneViewController: BaseStepViewController {
     
     // MARK: - Public Properties
     let viewModel = NewPillStepOneViewModel()

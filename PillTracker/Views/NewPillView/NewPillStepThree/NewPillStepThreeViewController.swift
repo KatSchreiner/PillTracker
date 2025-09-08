@@ -173,7 +173,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     // MARK: - IB Actions
     @objc private func didTapEveryDayButton() {
         viewModel.selectedDays = []
-        resetDayButtons()
         
         viewModel.selectedPreset = "Каждый день"
         viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Каждый день")
@@ -186,7 +185,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     @objc private func didTapEveryOtherDayButton() {
         viewModel.selectedDays = []
-        resetDayButtons()
         
         viewModel.selectedPreset = "Через день"
         viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Через день")
@@ -199,7 +197,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     @objc private func didTapEveryTwoDaysButton() {
         viewModel.selectedDays = []
-        resetDayButtons()
         
         viewModel.selectedPreset = "Через 2 дня"
         viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Через 2 дня")
@@ -213,7 +210,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     @objc private func didTapCustomOptionButton() {
         viewModel.selectedDays = []
         viewModel.interval = nil
-        resetDayButtons()
         viewModel.selectedPreset = "Свой вариант"
         
         showDayButtonStackView()
@@ -230,18 +226,17 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     @objc
     private func didTapDayButton(sender: UIButton) {
+        sender.isHighlighted = false
+        
         let index = sender.tag + 1
         
         if let itemIndex = viewModel.selectedDays.firstIndex(of: index) {
             viewModel.selectedDays.remove(at: itemIndex)
-            sender.backgroundColor = .lGray
-            sender.setTitleColor(.dGray, for: .normal)
         } else {
             viewModel.selectedDays.append(index)
-            sender.backgroundColor = .dBlue
-            sender.setTitleColor(.lGray, for: .normal)
         }
         
+        updateDayButtonStates()
         viewModel.interval = nil
         viewModel.checkValidity()
     }
@@ -365,11 +360,16 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     }
     
     private func loadData() {
-        for button in dayButtons {
-            let index = button.tag + 1
-            let isSelected = viewModel.selectedDays.contains(index)
-            button.backgroundColor = isSelected ? .dBlue : .lGray
-            button.setTitleColor(isSelected ? .lGray : .dGray, for: .normal)
+        if viewModel.selectedPreset == "Свой вариант" {
+            for button in dayButtons {
+                let index = button.tag + 1
+                let isSelected = viewModel.selectedDays.contains(index)
+                button.backgroundColor = isSelected ? .dBlue : .lGray
+                button.setTitleColor(isSelected ? .lGray : .dGray, for: .normal)
+            }
+        } else {
+            hideDayButtonStackView()
+            resetDayButtons()
         }
         
         reminderSwitch.isOn = viewModel.isReminderEnabled
@@ -401,20 +401,24 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     private func updateDayButtonStates() {
         for button in dayButtons {
             let index = button.tag + 1
-            if viewModel.selectedDays.contains(index) {
-                button.backgroundColor = .dBlue
-                button.setTitleColor(.lGray, for: .normal)
-            } else {
-                button.backgroundColor = .lGray
-                button.setTitleColor(.dGray, for: .normal)
+            let isSelected = viewModel.selectedDays.contains(index)
+            
+            UIView.performWithoutAnimation {
+                button.isSelected = isSelected
+                button.backgroundColor = isSelected ? .dBlue : .lGray
+                button.setTitleColor(isSelected ? .lGray : .dGray, for: .normal)
+                button.layoutIfNeeded()
             }
         }
     }
     
     private func resetDayButtons() {
         for button in dayButtons {
+            button.isSelected = false
+            button.isHighlighted = false
             button.backgroundColor = .lGray
             button.setTitleColor(.dGray, for: .normal)
+            button.layoutIfNeeded()
         }
     }
     
@@ -436,32 +440,30 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         guard dayButtonStackView.alpha == 0 else { return }
         
         dayButtonStackView.isHidden = false
-        dayButtonStackView.alpha = 0
         dayButtonStackViewHeightConstraint.constant = 35
         view.layoutIfNeeded()
         
         UIView.animate(
             withDuration: 0.3,
-            delay: 0,
-            options: [.curveEaseInOut, .allowUserInteraction],
             animations: {
                 self.dayButtonStackView.alpha = 1
-                self.view.layoutIfNeeded()
-            },
-            completion: nil
+            }
         )
     }
     
     private func hideDayButtonStackView() {
         guard dayButtonStackView.alpha == 1 else { return }
         
-        UIView.animate(withDuration: 0.3, animations: {
-            self.dayButtonStackView.alpha = 0
-            self.view.layoutIfNeeded()
-        }) { _ in
-            self.dayButtonStackView.isHidden = true
-            self.dayButtonStackViewHeightConstraint.constant = 0
-        }
+        UIView.animate(
+            withDuration: 0.3,
+            animations: {
+                self.dayButtonStackView.alpha = 0
+            },
+            completion: { _ in
+                self.dayButtonStackView.isHidden = true
+                self.dayButtonStackViewHeightConstraint.constant = 0
+            }
+        )
     }
     
     // MARK: - Notification Alert

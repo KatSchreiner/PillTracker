@@ -16,15 +16,18 @@ final class NewPillStepThreeViewModel {
             checkValidity()
         }
     }
+    
     var selectedDays: [Int] = [] {
         didSet {
             onSelectedDaysChanged?(selectedDays)
             checkValidity()
         }
     }
+    
     var interval: Int? {
         didSet { onIntervalChanged?(interval) }
     }
+    
     var startDate: Date? {
         didSet {
             onStartDateChanged?(startDate)
@@ -56,22 +59,16 @@ final class NewPillStepThreeViewModel {
     }
     
     func calculateSelectedDaysForPreset(_ preset: String) -> [Int] {
-        guard let start = startDate, let end = endDate else { return [] }
+        guard let repeatPreset = RepeatPreset(rawValue: preset),
+              repeatPreset != .custom,
+              let start = startDate,
+              let end = endDate else { return [] }
+
+        let intervalDays = repeatPreset.interval
+        
         var selectedDays = [Int]()
-        var intervalDays: Int = 1
-        
-        switch preset {
-        case "Каждый день":
-            intervalDays = 1
-        case "Через день":
-            intervalDays = 2
-        case "Через 2 дня":
-            intervalDays = 3
-        default:
-            return []
-        }
-        
         var currentDate = start
+        
         while currentDate <= end {
             let weekday = weekdayNumber(from: currentDate)
             if !selectedDays.contains(weekday) {

@@ -20,15 +20,11 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         stackView.distribution = .fillEqually
         stackView.spacing = 10
         
-        let everyDayButton = createPresetButton(title: "Каждый день", action: #selector(didTapEveryDayButton))
-        let everyOtherDayButton = createPresetButton(title: "Через день", action: #selector(didTapEveryOtherDayButton))
-        let everyTwoDaysButton = createPresetButton(title: "Через 2 дня", action: #selector(didTapEveryTwoDaysButton))
-        let customOptionButton = createPresetButton(title: "Свой вариант", action: #selector(didTapCustomOptionButton))
-        
-        stackView.addArrangedSubview(everyDayButton)
-        stackView.addArrangedSubview(everyOtherDayButton)
-        stackView.addArrangedSubview(everyTwoDaysButton)
-        stackView.addArrangedSubview(customOptionButton)
+        RepeatPreset.allCases.forEach { preset in
+            let button = createPresetButton(title: preset.rawValue, action: #selector(presetButtonTapped(_:)))
+            button.tag = preset.hashValue
+            stackView.addArrangedSubview(button)
+        }
         
         return stackView
     }()
@@ -171,57 +167,25 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     }
     
     // MARK: - IB Actions
+    @objc private func presetButtonTapped(_ sender: UIButton) {
+        guard let preset = RepeatPreset(rawValue: sender.title(for: .normal) ?? "") else { return }
+        handlePresetSelection(preset)
+    }
+    
     @objc private func didTapEveryDayButton() {
-        viewModel.selectedDays = []
-        
-        viewModel.selectedPreset = "Каждый день"
-        viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Каждый день")
-        viewModel.interval = 0
-        
-        updatePresetButtonStates(selectedButton: "Каждый день")
-        hideDayButtonStackView()
-        viewModel.checkValidity()
+        handlePresetSelection(.everyDay)
     }
     
     @objc private func didTapEveryOtherDayButton() {
-        viewModel.selectedDays = []
-        
-        viewModel.selectedPreset = "Через день"
-        viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Через день")
-        viewModel.interval = 1
-        
-        updatePresetButtonStates(selectedButton: "Через день")
-        hideDayButtonStackView()
-        viewModel.checkValidity()
+        handlePresetSelection(.everyOtherDay)
     }
     
     @objc private func didTapEveryTwoDaysButton() {
-        viewModel.selectedDays = []
-        
-        viewModel.selectedPreset = "Через 2 дня"
-        viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset("Через 2 дня")
-        viewModel.interval = 2
-        
-        updatePresetButtonStates(selectedButton: "Через 2 дня")
-        hideDayButtonStackView()
-        viewModel.checkValidity()
+        handlePresetSelection(.everyTwoDays)
     }
     
     @objc private func didTapCustomOptionButton() {
-        viewModel.selectedDays = []
-        viewModel.interval = nil
-        viewModel.selectedPreset = "Свой вариант"
-        
-        showDayButtonStackView()
-                
-        for button in presetButtonStackView.arrangedSubviews {
-            if let presetButton = button as? UIButton {
-                presetButton.backgroundColor = .lGray
-                presetButton.setTitleColor(.dGray, for: .normal)
-            }
-        }
-        
-        updatePresetButtonStates(selectedButton: "Свой вариант")
+        handlePresetSelection(.custom)
     }
     
     @objc
@@ -324,7 +288,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         viewModel.onSelectedPresetChanged = { [weak self] preset in
             DispatchQueue.main.async {
                 self?.updatePresetButtonStates(selectedButton: preset ?? "")
-                if preset == "Свой вариант" {
+                if preset == RepeatPreset.custom.rawValue {
                     self?.showDayButtonStackView()
                 }
             }
@@ -360,7 +324,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     }
     
     private func loadData() {
-        if viewModel.selectedPreset == "Свой вариант" {
+        if viewModel.selectedPreset == RepeatPreset.custom.rawValue {
             for button in dayButtons {
                 let index = button.tag + 1
                 let isSelected = viewModel.selectedDays.contains(index)
@@ -388,11 +352,34 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         if let selectedPreset = viewModel.selectedPreset {
             updatePresetButtonStates(selectedButton: selectedPreset)
             
-            if selectedPreset == "Свой вариант" {
+            if selectedPreset == RepeatPreset.custom.rawValue {
                 showDayButtonStackView()
             } else {
                 hideDayButtonStackView()
             }
+        }
+        
+        viewModel.checkValidity()
+    }
+    
+    private func handlePresetSelection(_ preset: RepeatPreset) {
+        viewModel.selectedDays = []
+        
+        if preset != .custom {
+            viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset(preset.rawValue)
+            viewModel.interval = preset.interval - 1
+            self.resetDayButtons()
+        } else {
+            viewModel.interval = nil
+        }
+        
+        viewModel.selectedPreset = preset.rawValue
+        updatePresetButtonStates(selectedButton: preset.rawValue)
+        
+        if preset == .custom {
+            showDayButtonStackView()
+        } else {
+            hideDayButtonStackView()
         }
         
         viewModel.checkValidity()
@@ -462,6 +449,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
             completion: { _ in
                 self.dayButtonStackView.isHidden = true
                 self.dayButtonStackViewHeightConstraint.constant = 0
+                self.resetDayButtons()
             }
         )
     }

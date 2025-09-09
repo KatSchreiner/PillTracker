@@ -63,6 +63,13 @@ final class NewPillStepOneViewController: BaseStepViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
+        setupBindings()
+        loadData()
+        setupKeyboardObservers()
+    }
+    
+    deinit {
+        removeKeyboardObservers()
     }
     
     // MARK: - IB Actions
@@ -78,20 +85,15 @@ final class NewPillStepOneViewController: BaseStepViewController {
         viewModel.handleUnitButtonTap(presenter: self)
     }
     
-    @objc
-    private func textFieldDidChange(_ textField: UITextField) {
-        if textField == titleTextField {
-            viewModel.pillStepOneModel.title = textField.text
-        } else if textField == dosageTextField {
-            if let dosageText = textField.text, let dosageValue = Double(dosageText) {
-                viewModel.dosage = dosageValue
-                viewModel.pillStepOneModel.dosage = dosageValue
-            } else {
-                viewModel.dosage = 0
-                viewModel.pillStepOneModel.dosage = nil
-            }
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        switch textField {
+        case titleTextField:
+            viewModel.updateTitle(textField.text)
+        case dosageTextField:
+            viewModel.updateDosage(textField.text)
+        default:
+            break
         }
-        viewModel.checkValidity()
     }
     
     @objc private func keyboardWillShow(notification: Notification) {
@@ -115,14 +117,8 @@ final class NewPillStepOneViewController: BaseStepViewController {
     private func setupView() {
         view.backgroundColor = .white
             
-        setupTextFields()
-        setupBindings()
-        loadData()
-
         view.addSubview(stackView)
         addConstraint()
-        setupKeyboardObservers()
-
     }
     
     private func addConstraint() {
@@ -146,14 +142,7 @@ final class NewPillStepOneViewController: BaseStepViewController {
         }
         
         viewModel.updateUnitButtonTitle = { [weak self] in
-            guard let self = self else { return }
-            
-            if let selectedUnit = self.viewModel.selectedUnit {
-                let unitTitle = String.getUnitTitle(for: self.viewModel.dosage, unit: selectedUnit)
-                self.unitButton.setTitle(unitTitle, for: .normal)
-            } else {
-                self.unitButton.setTitle("Выберите единицу", for: .normal)
-            }
+            self?.updateUnitButtonTitle()
         }
         
         viewModel.onValidationChange = { [weak self] isValid in
@@ -161,30 +150,7 @@ final class NewPillStepOneViewController: BaseStepViewController {
         }
     }
     
-    private func setupKeyboardObservers() {
-        keyboardWillShowObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { [weak self] notification in
-            self?.keyboardWillShow(notification: notification)
-        }
-        keyboardWillHideObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] notification in
-            self?.keyboardWillHide(notification: notification)
-        }
-    }
-    
-    deinit {
-        if let observer = keyboardWillShowObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
-        if let observer = keyboardWillHideObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
-    }
-    
-    private func setupTextFields() {
-        titleTextField.returnKeyType = .next
-        dosageTextField.returnKeyType = .done
-    }
-    
-    func loadData() {
+    private func loadData() {
         if let selectedIcon = viewModel.pillStepOneModel.selectedIcon {
             formTypesButton.setImage(selectedIcon, for: .normal)
         }
@@ -209,6 +175,33 @@ final class NewPillStepOneViewController: BaseStepViewController {
         UIView.transition(with: formTypesButton, duration: 0.3, options: .transitionCrossDissolve, animations: {
             self.formTypesButton.setImage(newIcon, for: .normal)
         }, completion: nil)
+    }
+    
+    private func updateUnitButtonTitle() {
+        if let selectedUnit = viewModel.selectedUnit {
+            let title = String.getUnitTitle(for: viewModel.dosage, unit: selectedUnit)
+            unitButton.setTitle(title, for: .normal)
+        } else {
+            unitButton.setTitle("Выберите единицу", for: .normal)
+        }
+    }
+    
+    private func setupKeyboardObservers() {
+        keyboardWillShowObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { [weak self] notification in
+            self?.keyboardWillShow(notification: notification)
+        }
+        keyboardWillHideObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] notification in
+            self?.keyboardWillHide(notification: notification)
+        }
+    }
+    
+    private func removeKeyboardObservers() {
+        if let observer = keyboardWillShowObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        if let observer = keyboardWillHideObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 }
 

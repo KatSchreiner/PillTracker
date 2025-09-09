@@ -27,13 +27,25 @@ final class NewPillStepOneViewModel {
     var updateIconButton: ((UIImage?) -> Void)?
     var onValidationChange: ((Bool) -> Void)?
     
-
+    func updateTitle(_ title: String?) {
+        pillStepOneModel.title = title
+        checkValidity()
+    }
     
-    // MARK: - Button Actions
+    func updateDosage(_ dosageText: String?) {
+        if let text = dosageText, let value = Double(text) {
+            dosage = value
+            pillStepOneModel.dosage = value
+        } else {
+            dosage = 0
+            pillStepOneModel.dosage = nil
+        }
+        checkValidity()
+    }
+    
     func checkValidity() {
         let isValid = pillStepOneModel.isValid()
         onValidationChange?(isValid)
-        print("Validation check: \(isValid)")
     }
     
     func handleFormTypesButtonTap(presenter: UIViewController) {
@@ -61,8 +73,7 @@ final class NewPillStepOneViewModel {
         
         unitSelectionView.presentAsBottomSheet(on: presenter)
     }
- 
-    // MARK: - TextField Validation
+    
     func shouldChangeCharactersInDosageField(_ string: String, currentText: String, range: NSRange) -> Bool {
         let allowedCharacters = CharacterSet(charactersIn: "0123456789.")
         let characterSet = CharacterSet(charactersIn: string)

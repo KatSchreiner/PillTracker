@@ -56,6 +56,9 @@ final class NewPillStepOneViewController: BaseStepViewController {
          return stackView
      }()
     
+    private var keyboardWillShowObserver: NSObjectProtocol?
+    private var keyboardWillHideObserver: NSObjectProtocol?
+    
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -158,19 +161,27 @@ final class NewPillStepOneViewController: BaseStepViewController {
         }
     }
     
-    deinit {
-        NotificationCenter.default.removeObserver(self)
+    private func setupKeyboardObservers() {
+        keyboardWillShowObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { [weak self] notification in
+            self?.keyboardWillShow(notification: notification)
+        }
+        keyboardWillHideObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] notification in
+            self?.keyboardWillHide(notification: notification)
+        }
     }
     
-    private func setupKeyboardObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    deinit {
+        if let observer = keyboardWillShowObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        if let observer = keyboardWillHideObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
     
     private func setupTextFields() {
         titleTextField.returnKeyType = .next
         dosageTextField.returnKeyType = .done
-        dosageTextField.keyboardType = .numberPad
     }
     
     func loadData() {
@@ -195,16 +206,9 @@ final class NewPillStepOneViewController: BaseStepViewController {
     }
     
     private func animateIconChange(to newIcon: UIImage?) {
-        let currentImage = formTypesButton.image(for: .normal)
-        
-        formTypesButton.setImage(newIcon, for: .normal)
-        
-        formTypesButton.alpha = 0.0
-        
-        UIView.animate(withDuration: 0.3, animations: {
-            self.formTypesButton.alpha = 1.0
-        }) { _ in
-        }
+        UIView.transition(with: formTypesButton, duration: 0.3, options: .transitionCrossDissolve, animations: {
+            self.formTypesButton.setImage(newIcon, for: .normal)
+        }, completion: nil)
     }
 }
 

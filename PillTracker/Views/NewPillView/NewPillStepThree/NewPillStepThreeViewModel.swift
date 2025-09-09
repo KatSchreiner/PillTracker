@@ -19,7 +19,9 @@ final class NewPillStepThreeViewModel {
     
     var selectedDays: [Int] = [] {
         didSet {
-            onSelectedDaysChanged?(selectedDays)
+            DispatchQueue.main.async {
+                self.onSelectedDaysChanged?(self.selectedDays)
+            }
             checkValidity()
         }
     }
@@ -37,6 +39,7 @@ final class NewPillStepThreeViewModel {
     var endDate: Date? {
         didSet {
             onEndDateChanged?(endDate)
+            recalculateSelectedDaysIfNeeded()
             checkValidity()
         }
     }
@@ -60,9 +63,9 @@ final class NewPillStepThreeViewModel {
     
     func calculateSelectedDaysForPreset(_ preset: String) -> [Int] {
         guard let repeatPreset = RepeatPreset(rawValue: preset),
-              repeatPreset != .custom,
-              let start = startDate,
-              let end = endDate else { return [] }
+              repeatPreset != .custom else { return [] }
+        
+        guard let start = startDate, let end = endDate, start <= end else { return [] }
 
         let intervalDays = repeatPreset.interval
         
@@ -79,6 +82,13 @@ final class NewPillStepThreeViewModel {
         }
         
         return selectedDays
+    }
+    
+    private func recalculateSelectedDaysIfNeeded() {
+        guard let preset = selectedPreset,
+              preset != RepeatPreset.custom.rawValue else { return }
+        
+        selectedDays = calculateSelectedDaysForPreset(preset)
     }
     
     func startOfDayInLocalTimeZone(for date: Date) -> Date {

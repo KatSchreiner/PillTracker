@@ -290,6 +290,9 @@ final class NewPillStepThreeViewController: BaseStepViewController {
                 self?.updatePresetButtonStates(selectedButton: preset ?? "")
                 if preset == RepeatPreset.custom.rawValue {
                     self?.showDayButtonStackView()
+                } else {
+                    self?.hideDayButtonStackView()
+                    self?.resetDayButtons()
                 }
             }
         }
@@ -325,12 +328,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     private func loadData() {
         if viewModel.selectedPreset == RepeatPreset.custom.rawValue {
-            for button in dayButtons {
-                let index = button.tag + 1
-                let isSelected = viewModel.selectedDays.contains(index)
-                button.backgroundColor = isSelected ? .dBlue : .lGray
-                button.setTitleColor(isSelected ? .lGray : .dGray, for: .normal)
-            }
+            showDayButtonStackView()
         } else {
             hideDayButtonStackView()
             resetDayButtons()
@@ -364,24 +362,22 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     private func handlePresetSelection(_ preset: RepeatPreset) {
         viewModel.selectedDays = []
+        resetDayButtons()
         
         if preset != .custom {
+            hideDayButtonStackView()
             viewModel.selectedDays = viewModel.calculateSelectedDaysForPreset(preset.rawValue)
             viewModel.interval = preset.interval - 1
-            self.resetDayButtons()
         } else {
+            showDayButtonStackView()
             viewModel.interval = nil
         }
         
         viewModel.selectedPreset = preset.rawValue
         updatePresetButtonStates(selectedButton: preset.rawValue)
-        
-        if preset == .custom {
-            showDayButtonStackView()
-        } else {
-            hideDayButtonStackView()
+        DispatchQueue.main.async {
+            self.updateDayButtonStates()
         }
-        
         viewModel.checkValidity()
     }
     
@@ -399,16 +395,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         }
     }
     
-    private func resetDayButtons() {
-        for button in dayButtons {
-            button.isSelected = false
-            button.isHighlighted = false
-            button.backgroundColor = .lGray
-            button.setTitleColor(.dGray, for: .normal)
-            button.layoutIfNeeded()
-        }
-    }
-    
     private func updatePresetButtonStates(selectedButton: String) {
         for button in presetButtonStackView.arrangedSubviews {
             if let presetButton = button as? UIButton {
@@ -421,6 +407,20 @@ final class NewPillStepThreeViewController: BaseStepViewController {
                 }
             }
         }
+    }
+    
+    private func resetDayButtons() {
+        DispatchQueue.main.async {
+             UIView.performWithoutAnimation {
+                 for button in self.dayButtons {
+                     button.isSelected = false
+                     button.isHighlighted = false
+                     button.backgroundColor = .lGray
+                     button.setTitleColor(.dGray, for: .normal)
+                     button.layoutIfNeeded()
+                 }
+             }
+         }
     }
     
     private func showDayButtonStackView() {
@@ -440,6 +440,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     private func hideDayButtonStackView() {
         guard dayButtonStackView.alpha == 1 else { return }
+        resetDayButtons()
         
         UIView.animate(
             withDuration: 0.3,
@@ -449,7 +450,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
             completion: { _ in
                 self.dayButtonStackView.isHidden = true
                 self.dayButtonStackViewHeightConstraint.constant = 0
-                self.resetDayButtons()
             }
         )
     }

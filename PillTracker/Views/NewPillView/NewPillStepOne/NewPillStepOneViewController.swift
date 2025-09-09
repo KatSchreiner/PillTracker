@@ -216,7 +216,8 @@ final class NewPillStepOneViewController: BaseStepViewController {
 extension NewPillStepOneViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         if textField == dosageTextField {
-            return viewModel.shouldChangeCharactersInDosageField(string)
+            let currentText = textField.text ?? ""
+            return viewModel.shouldChangeCharactersInDosageField(string, currentText: currentText, range: range)
         }
         return true
     }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class NewPillStepOneViewModel {
+final class NewPillStepOneViewModel {
     var pillStepOneModel = PillStepOneModel()
     
     var selectedUnit: String? {
@@ -63,10 +63,16 @@ class NewPillStepOneViewModel {
     }
  
     // MARK: - TextField Validation
-    func shouldChangeCharactersInDosageField(_ string: String) -> Bool {
+    func shouldChangeCharactersInDosageField(_ string: String, currentText: String, range: NSRange) -> Bool {
         let allowedCharacters = CharacterSet(charactersIn: "0123456789.")
         let characterSet = CharacterSet(charactersIn: string)
-        return allowedCharacters.isSuperset(of: characterSet)
+        guard allowedCharacters.isSuperset(of: characterSet) else { return false }
+        
+        if string == "." {
+            return !currentText.contains(".")
+        }
+        
+        return true
     }
 }
 

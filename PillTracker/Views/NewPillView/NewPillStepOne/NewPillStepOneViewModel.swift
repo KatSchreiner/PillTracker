@@ -85,6 +85,12 @@ final class NewPillStepOneViewModel {
         
         return true
     }
+    
+    func formattedDosageText() -> String? {
+        guard let dosage = pillStepOneModel.dosage else { return nil }
+        return String(format: "%.1f", dosage)
+    }
+
 }
 
 extension NewPillStepOneViewModel {

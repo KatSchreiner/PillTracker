@@ -157,11 +157,7 @@ final class NewPillStepOneViewController: BaseStepViewController {
         
         titleTextField.text = viewModel.pillStepOneModel.title
         
-        if let dosage = viewModel.pillStepOneModel.dosage {
-            dosageTextField.text = String(format: "%.1f", dosage)
-        } else {
-            dosageTextField.text = nil
-        }
+        dosageTextField.text = viewModel.formattedDosageText()
         
         if let selectedUnit = viewModel.pillStepOneModel.selectedUnit {
             self.viewModel.selectedUnit = selectedUnit

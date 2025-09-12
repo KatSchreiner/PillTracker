@@ -8,6 +8,8 @@
 import UIKit
 
 final class NewPillStepTwoViewModel {
+    
+    // MARK: - Public Properties
     var pillStepTwoModel = PillStepTwoModel()
     
     var selectedTimes: [(hour: String, minute: String)] = [] {
@@ -33,9 +35,11 @@ final class NewPillStepTwoViewModel {
         UIImage(named: "beforeEatColor")?.withRenderingMode(.alwaysOriginal)
     ]
     
+    // MARK: - Callbacks
     var onTimesUpdated: (() -> Void)?
     var onValidationChange: ((Bool) -> Void)?
     
+    // MARK: - Public Methods
     func setSelectedOption(_ option: String?) {
         selectedOption = option
         pillStepTwoModel.selectedOption = option
@@ -44,7 +48,7 @@ final class NewPillStepTwoViewModel {
     
     func addTime(hour: String, minute: String) {
         selectedTimes.append((hour: hour, minute: minute))
-        pillStepTwoModel.selectedTimes = selectedTimes 
+        pillStepTwoModel.selectedTimes = selectedTimes
         checkValidity()
     }
     
@@ -54,7 +58,7 @@ final class NewPillStepTwoViewModel {
         pillStepTwoModel.selectedTimes = selectedTimes
         checkValidity()
     }
-
+    
     func checkValidity() {
         pillStepTwoModel.selectedOption = selectedOption
         pillStepTwoModel.selectedTimes = selectedTimes

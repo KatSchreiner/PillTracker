@@ -8,6 +8,8 @@
 import UIKit
 
 final class NewPillStepOneViewModel {
+    
+    // MARK: - Public Properties
     var pillStepOneModel = PillStepOneModel()
     
     var selectedUnit: String? {
@@ -23,10 +25,12 @@ final class NewPillStepOneViewModel {
         }
     }
     
+    // MARK: - Callbacks
     var updateUnitButtonTitle: (() -> Void)?
     var updateIconButton: ((UIImage?) -> Void)?
     var onValidationChange: ((Bool) -> Void)?
     
+    // MARK: - Public Methods
     func updateTitle(_ title: String?) {
         pillStepOneModel.title = title
         checkValidity()

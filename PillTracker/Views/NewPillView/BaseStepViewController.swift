@@ -7,7 +7,7 @@
 
 import UIKit
 
-class BaseStepViewController: UIViewController {
+final class BaseStepViewController: UIViewController {
     weak var parentStepHandler: AddNewPillViewController?
     
     // MARK: - UI Creation Methods

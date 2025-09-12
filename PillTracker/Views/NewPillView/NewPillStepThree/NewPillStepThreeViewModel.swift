@@ -8,6 +8,8 @@
 import UIKit
 
 final class NewPillStepThreeViewModel {
+    
+    // MARK: - Public Properties
     var pillStepThreeModel = PillStepThreeModel()
     
     var selectedPreset: String? = nil {
@@ -46,7 +48,14 @@ final class NewPillStepThreeViewModel {
     var isReminderEnabled: Bool = false {
         didSet { onIsReminderEnabledChanged?(isReminderEnabled) }
     }
-
+    
+    let daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+    
+    init() {
+        startDate = startOfDayInLocalTimeZone(for: Date())
+    }
+    
+    // MARK: - Callbacks
     var onSelectedPresetChanged: ((String?) -> Void)?
     var onSelectedDaysChanged: (([Int]) -> Void)?
     var onIntervalChanged: ((Int?) -> Void)?
@@ -55,18 +64,13 @@ final class NewPillStepThreeViewModel {
     var onIsReminderEnabledChanged: ((Bool) -> Void)?
     var onValidationChange: ((Bool) -> Void)?
     
-    let daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
-
-    init() {
-        startDate = startOfDayInLocalTimeZone(for: Date())
-    }
-    
+    // MARK: - Public Methods
     func calculateSelectedDaysForPreset(_ preset: String) -> [Int] {
         guard let repeatPreset = RepeatPreset(rawValue: preset),
               repeatPreset != .custom else { return [] }
         
         guard let start = startDate, let end = endDate, start <= end else { return [] }
-
+        
         let intervalDays = repeatPreset.interval
         
         var selectedDays = [Int]()

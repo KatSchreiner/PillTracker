@@ -22,13 +22,13 @@ final class NewPillStepTwoViewModel {
     
     var selectedOption: String?
     let optionData = ["До еды", "Во время еды", "После еды", "Не важно"]
-    let optionImages = [
+    let optionImagesDefault = [
         UIImage(named: "beforeEat")?.withRenderingMode(.alwaysOriginal),
         UIImage(named: "duringEat")?.withRenderingMode(.alwaysOriginal),
         UIImage(named: "afterEat")?.withRenderingMode(.alwaysOriginal),
         UIImage(named: "beforeEat")?.withRenderingMode(.alwaysOriginal)
     ]
-    let optionImagesColor = [
+    let optionImagesSelected = [
         UIImage(named: "beforeEatColor")?.withRenderingMode(.alwaysOriginal),
         UIImage(named: "duringEatColor")?.withRenderingMode(.alwaysOriginal),
         UIImage(named: "afterEatColor")?.withRenderingMode(.alwaysOriginal),

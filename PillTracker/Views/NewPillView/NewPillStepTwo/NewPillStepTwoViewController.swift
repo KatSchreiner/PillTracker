@@ -207,25 +207,30 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     }
     
     private func loadData() {
-        if let selectedOption = viewModel.selectedOption,
-           let selectedIndex = viewModel.optionData.firstIndex(of: selectedOption) {
-            
-            for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
-                if let buttonContainer = subview as? UIStackView,
-                   let button = buttonContainer.arrangedSubviews.first as? UIButton {
-                    
-                    let image = (index == selectedIndex) ? viewModel.optionImagesColor[index] : viewModel.optionImages[index]
-                    button.setImage(image, for: .normal)
-                    
-                    if index == selectedIndex {
-                        DispatchQueue.main.async {
-                            button.animatePress()
-                        }
-                    }
-                }
-            }
+        guard let selectedOption = viewModel.selectedOption,
+              let selectedIndex = viewModel.optionData.firstIndex(of: selectedOption) else {
+            viewModel.checkValidity()
+            return
         }
+        
+        updateOptionButtons(selectedIndex: selectedIndex)
         viewModel.checkValidity()
+    }
+    
+    private func updateOptionButtons(selectedIndex: Int) {
+        for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
+            guard let container = subview as? UIStackView,
+                  let button = container.arrangedSubviews.first as? UIButton else { continue }
+            
+            let image = (index == selectedIndex) ? viewModel.optionImagesSelected[index] : viewModel.optionImagesDefault[index]
+            
+            UIView.transition(with: button, duration: 0.3, options: .transitionCrossDissolve, animations: {
+                button.setImage(image, for: .normal)
+                if index == selectedIndex {
+                    button.animatePress()
+                }
+            })
+        }
     }
 }
 
@@ -240,7 +245,7 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
+        
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TimeCell.identifier, for: indexPath) as? TimeCell else {
             return UITableViewCell()
         }
@@ -251,14 +256,14 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
         return cell
     }
     
-
+    
 }
 
 // MARK: - TimePickerDelegate
 extension NewPillStepTwoViewController: TimePickerDelegate {
     func didSelectTime(selectedTime: String) {
         print("Selected time: \(selectedTime)")
-
+        
         let components = selectedTime.split(separator: ":")
         if components.count == 2 {
             let hour = String(components[0])

@@ -45,33 +45,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         stackView.distribution = .fillEqually
         
         for (index, option) in viewModel.optionData.enumerated() {
-            let button = UIButton(type: .custom)
-            button.setTitle(option, for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: 10)
-            button.setTitleColor(.dGray, for: .normal)
-            button.tag = index
-            button.addTarget(self, action: #selector(optionButtonTapped(_:)), for: .touchUpInside)
-            button.layer.cornerRadius = 8
-            button.layer.masksToBounds = true
-            
-            button.adjustsImageWhenHighlighted = false
-            
-            if let image = viewModel.optionImages[index] {
-                button.setImage(image, for: .normal)
-                button.imageView?.contentMode = .scaleAspectFit
-            }
-            
-            let label = UILabel()
-            label.text = option
-            label.font = UIFont.systemFont(ofSize: 10)
-            label.textColor = .dGray
-            label.textAlignment = .center
-            
-            let buttonContainer = UIStackView(arrangedSubviews: [button, label])
-            buttonContainer.axis = .vertical
-            buttonContainer.spacing = 4
-            buttonContainer.alignment = .center
-            
+            let buttonContainer = createOptionButtonContainer(option: option, index: index)
             stackView.addArrangedSubview(buttonContainer)
         }
         
@@ -98,7 +72,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         let selectedOption = viewModel.optionData[sender.tag]
         viewModel.setSelectedOption(selectedOption)
         
-        viewModel.pillStepTwoModel.selectedIcon =  viewModel.optionImagesColor[sender.tag]
+        viewModel.pillStepTwoModel.selectedIcon =  viewModel.optionImagesSelected[sender.tag]
         viewModel.pillStepTwoModel.selectedOption = viewModel.selectedOption
         
         for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
@@ -108,11 +82,11 @@ final class NewPillStepTwoViewController: BaseStepViewController {
                 if index == sender.tag {
                     UIView.transition(with: button, duration: 0.3, options: .transitionCrossDissolve, animations: {
                         button.animatePress()
-                        button.setImage(self.viewModel.optionImagesColor[index], for: .normal)
+                        button.setImage(self.viewModel.optionImagesSelected[index], for: .normal)
                     })
                 } else {
                     UIView.transition(with: button, duration: 0.3, options: .transitionCrossDissolve, animations: {
-                        button.setImage(self.viewModel.optionImages[index], for: .normal)
+                        button.setImage(self.viewModel.optionImagesDefault[index], for: .normal)
                     }, completion: nil)
                 }
             }
@@ -231,6 +205,37 @@ final class NewPillStepTwoViewController: BaseStepViewController {
                 }
             })
         }
+    }
+    
+    private func createOptionButtonContainer(option: String, index: Int) -> UIStackView {
+        let button = UIButton(type: .custom)
+        button.setTitle(option, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 10)
+        button.setTitleColor(.dGray, for: .normal)
+        button.tag = index
+        button.addTarget(self, action: #selector(optionButtonTapped(_:)), for: .touchUpInside)
+        button.layer.cornerRadius = 8
+        button.layer.masksToBounds = true
+        
+        button.adjustsImageWhenHighlighted = false
+        
+        if let image = viewModel.optionImagesDefault[index] {
+            button.setImage(image, for: .normal)
+            button.imageView?.contentMode = .scaleAspectFit
+        }
+        
+        let label = UILabel()
+        label.text = option
+        label.font = UIFont.systemFont(ofSize: 10)
+        label.textColor = .dGray
+        label.textAlignment = .center
+        
+        let buttonContainer = UIStackView(arrangedSubviews: [button, label])
+        buttonContainer.axis = .vertical
+        buttonContainer.spacing = 4
+        buttonContainer.alignment = .center
+        
+        return buttonContainer
     }
 }
 

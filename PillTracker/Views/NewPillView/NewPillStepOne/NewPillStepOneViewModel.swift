@@ -90,7 +90,14 @@ final class NewPillStepOneViewModel {
         guard let dosage = pillStepOneModel.dosage else { return nil }
         return String(format: "%.1f", dosage)
     }
-
+    
+    func keyboardWillShowTransform(keyboardHeight: CGFloat) -> CGAffineTransform {
+        return CGAffineTransform(translationX: 0, y: -keyboardHeight / 2)
+    }
+    
+    func keyboardWillHideTransform() -> CGAffineTransform {
+        return .identity
+    }
 }
 
 extension NewPillStepOneViewModel {

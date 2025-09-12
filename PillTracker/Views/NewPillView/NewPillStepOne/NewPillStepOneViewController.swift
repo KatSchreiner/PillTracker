@@ -101,15 +101,18 @@ final class NewPillStepOneViewController: BaseStepViewController {
               let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
         
         let keyboardHeight = keyboardFrame.cgRectValue.height
+        let transform = viewModel.keyboardWillShowTransform(keyboardHeight: keyboardHeight)
 
         UIView.animate(withDuration: 0.3) {
-            self.stackView.transform = CGAffineTransform(translationX: 0, y: -keyboardHeight / 2)
+            self.stackView.transform = transform
         }
     }
     
     @objc private func keyboardWillHide(notification: Notification) {
+        let transform = viewModel.keyboardWillHideTransform()
+        
         UIView.animate(withDuration: 0.3) {
-            self.stackView.transform = .identity
+            self.stackView.transform = transform
         }
     }
     

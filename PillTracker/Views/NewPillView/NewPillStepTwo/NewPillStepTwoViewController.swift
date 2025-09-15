@@ -71,26 +71,10 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     private func optionButtonTapped(_ sender: UIButton) {
         let selectedOption = viewModel.optionData[sender.tag]
         viewModel.setSelectedOption(selectedOption)
-        
         viewModel.pillStepTwoModel.selectedIcon =  viewModel.optionImagesSelected[sender.tag]
         viewModel.pillStepTwoModel.selectedOption = viewModel.selectedOption
         
-        for (index, subview) in buttonStackView.arrangedSubviews.enumerated() {
-            if let buttonContainer = subview as? UIStackView,
-               let button = buttonContainer.arrangedSubviews.first as? UIButton {
-                
-                if index == sender.tag {
-                    UIView.transition(with: button, duration: 0.3, options: .transitionCrossDissolve, animations: {
-                        button.animatePress()
-                        button.setImage(self.viewModel.optionImagesSelected[index], for: .normal)
-                    })
-                } else {
-                    UIView.transition(with: button, duration: 0.3, options: .transitionCrossDissolve, animations: {
-                        button.setImage(self.viewModel.optionImagesDefault[index], for: .normal)
-                    }, completion: nil)
-                }
-            }
-        }
+        updateOptionButtons(selectedIndex: sender.tag)
         viewModel.checkValidity()
     }
     
@@ -106,26 +90,23 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     @objc
     private func didTapRemoveTimeCell(_ sender: UIButton) {
         viewModel.removeTime(at: sender.tag)
-        updateSelectedTimes()
+        refreshTimesTableView()
         viewModel.checkValidity()
     }
     
     // MARK: - Public Methods
-    func updateSelectedTimes() {
+    func refreshTimesTableView() {
         viewModel.sortTimes()
         viewModel.pillStepTwoModel.selectedTimes = viewModel.selectedTimes
         
         let rowCount = viewModel.selectedTimes.count
-        let calculatedHeight = CGFloat(rowCount * 60)
+        let timeCellHeight: CGFloat = 60
+        let calculatedHeight = CGFloat(rowCount) * timeCellHeight
         
         timesTableViewHeightConstraint.constant = min(calculatedHeight, maxTimesTableHeight)
         timesTableView.isScrollEnabled = calculatedHeight > maxTimesTableHeight
         
-        if rowCount > 0 {
-            addTimePickerButtonTopConstraint.constant = 16
-        } else {
-            addTimePickerButtonTopConstraint.constant = 0
-        }
+        addTimePickerButtonTopConstraint.constant = rowCount > 0 ? 16 : 0
         
         timesTableView.reloadData()
         view.layoutIfNeeded()
@@ -172,7 +153,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     
     private func setupBindings() {
         viewModel.onTimesUpdated = { [weak self] in
-            self?.updateSelectedTimes()
+            self?.refreshTimesTableView()
         }
         
         viewModel.onValidationChange = { [weak self] isValid in
@@ -274,7 +255,7 @@ extension NewPillStepTwoViewController: TimePickerDelegate {
             let hour = String(components[0])
             let minute = String(components[1])
             viewModel.addTime(hour: hour, minute: minute)
-            updateSelectedTimes()
+            refreshTimesTableView()
         }
     }
 }

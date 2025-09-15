@@ -106,7 +106,7 @@ final class AddNewPillViewModel {
     private func moveToStepTwo() {
         guard let stepTwoVC = currentChildVC as? NewPillStepTwoViewController else { return }
         
-        stepTwoVC.updateSelectedTimes()
+        stepTwoVC.refreshTimesTableView()
         pillStepTwoModel.selectedTimes = stepTwoVC.viewModel.selectedTimes
         pillStepTwoModel.selectedIcon = pillStepOneModel.selectedIcon
         pillStepTwoModel.selectedOption = stepTwoVC.viewModel.selectedOption

@@ -68,18 +68,19 @@ final class NewPillStepTwoViewModel {
     }
     
     func sortTimes() {
-        guard !selectedTimes.isEmpty else { return }
-        
-        selectedTimes = selectedTimes.sorted { (time1, time2) -> Bool in
-            if let hour1 = Int(time1.hour), let hour2 = Int(time2.hour) {
-                if hour1 != hour2 {
-                    return hour1 < hour2
-                }
-                if let minute1 = Int(time1.minute), let minute2 = Int(time2.minute) {
-                    return minute1 < minute2
-                }
-            }
-            return false
+        selectedTimes.sort { time1, time2 in
+            var components1: DateComponents = DateComponents()
+            components1.hour = Int(time1.hour)
+            components1.minute = Int(time1.minute)
+            
+            var components2: DateComponents = DateComponents()
+            components2.hour = Int(time2.hour)
+            components2.minute = Int(time2.minute)
+            
+            let date1 = Calendar.current.date(from: components1) ?? Date.distantPast
+            let date2 = Calendar.current.date(from: components2) ?? Date.distantPast
+            
+            return date1 < date2
         }
     }
 }

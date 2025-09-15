@@ -52,8 +52,8 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         return stackView
     }()
     
-    private var addTimePickerButtonTopConstraint: NSLayoutConstraint!
-    private var timesTableViewHeightConstraint: NSLayoutConstraint!
+    private var addTimePickerButtonTopConstraint: NSLayoutConstraint?
+    private var timesTableViewHeightConstraint: NSLayoutConstraint?
     private var maxTimesTableHeight: CGFloat {
         return view.frame.height - (buttonStackView.frame.height + 40 + 120)
     }
@@ -103,10 +103,10 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         let timeCellHeight: CGFloat = 60
         let calculatedHeight = CGFloat(rowCount) * timeCellHeight
         
-        timesTableViewHeightConstraint.constant = min(calculatedHeight, maxTimesTableHeight)
+        timesTableViewHeightConstraint?.constant = min(calculatedHeight, maxTimesTableHeight)
         timesTableView.isScrollEnabled = calculatedHeight > maxTimesTableHeight
         
-        addTimePickerButtonTopConstraint.constant = rowCount > 0 ? 16 : 0
+        addTimePickerButtonTopConstraint?.constant = rowCount > 0 ? 16 : 0
         
         timesTableView.reloadData()
         view.layoutIfNeeded()

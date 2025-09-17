@@ -18,10 +18,13 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.distribution = .fillEqually
-        stackView.spacing = 10
+        stackView.spacing = Constants.smallPadding
         
         RepeatPreset.allCases.forEach { preset in
-            let button = createPresetButton(title: preset.rawValue, action: #selector(presetButtonTapped(_:)))
+            let button = createPresetButton(
+                title: preset.rawValue,
+                action: #selector(presetButtonTapped(_:))
+            )
             button.tag = preset.hashValue
             stackView.addArrangedSubview(button)
         }
@@ -29,18 +32,16 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         return stackView
     }()
     
-    
     private func createPresetButton(title: String, action: Selector) -> UIButton {
         let button = UIButton()
         button.setTitle(title, for: .normal)
         button.setTitleColor(.dGray, for: .normal)
         button.backgroundColor = .lGray
-        button.layer.cornerRadius = 8
+        button.layer.cornerRadius = Constants.defaultRadius
         button.isEnabled = true
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }
-    
     
     private lazy var dayButtons: [UIButton] = []
     
@@ -48,15 +49,15 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         let dayButtonStackView = UIStackView()
         dayButtonStackView.axis = .horizontal
         dayButtonStackView.distribution = .fillEqually
-        dayButtonStackView.spacing = 10
+        dayButtonStackView.spacing = Constants.smallPadding
         
         for (index, day) in viewModel.daysOfWeek.enumerated() {
             let button = UIButton()
-            button.layer.cornerRadius = 8
+            button.layer.cornerRadius = Constants.defaultRadius
             button.backgroundColor = .lGray
             button.setTitle(day, for: .normal)
             button.setTitleColor(.gray, for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+            button.titleLabel?.font = Constants.defaultFontSize
             button.tag = index
             button.addTarget(self, action: #selector(didTapDayButton), for: .touchUpInside)
             dayButtons.append(button)
@@ -112,27 +113,27 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     private lazy var startDateStackView: UIStackView = {
         let startDateStackView = UIStackView(arrangedSubviews: [startDateLabel, startDatePicker])
         startDateStackView.axis = .horizontal
-        startDateStackView.spacing = 10
+        startDateStackView.spacing = Constants.smallPadding
         return startDateStackView
     }()
     
     private lazy var endDateStackView: UIStackView = {
         let endDateStackView = UIStackView(arrangedSubviews: [endDateLabel, endDatePicker])
         endDateStackView.axis = .horizontal
-        endDateStackView.spacing = 10
+        endDateStackView.spacing = Constants.smallPadding
         return endDateStackView
     }()
     
     private lazy var customDateRangeStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [startDateStackView, endDateStackView])
         stackView.axis = .vertical
-        stackView.spacing = 10
+        stackView.spacing = Constants.smallPadding
         return stackView
     }()
     
     private lazy var reminderLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 18, weight: .regular)
+        label.font = Constants.defaultFontSize
         label.textColor = .dGray
         label.text = "Напомнить?"
         label.textAlignment = .left
@@ -149,7 +150,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     private lazy var reminderStackView: UIStackView = {
         let reminderStackView = UIStackView(arrangedSubviews: [reminderLabel, reminderSwitch])
         reminderStackView.axis = .horizontal
-        reminderStackView.spacing = 20
+        reminderStackView.spacing = Constants.defaultPadding
         return reminderStackView
     }()
     
@@ -168,29 +169,16 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     // MARK: - IB Actions
     @objc private func presetButtonTapped(_ sender: UIButton) {
-        guard let preset = RepeatPreset(rawValue: sender.title(for: .normal) ?? "") else { return }
+        guard let buttonTitle = sender.title(for: .normal),
+              let preset = RepeatPreset(rawValue: buttonTitle) else {
+            return
+        }
         handlePresetSelection(preset)
-    }
-    
-    @objc private func didTapEveryDayButton() {
-        handlePresetSelection(.everyDay)
-    }
-    
-    @objc private func didTapEveryOtherDayButton() {
-        handlePresetSelection(.everyOtherDay)
-    }
-    
-    @objc private func didTapEveryTwoDaysButton() {
-        handlePresetSelection(.everyTwoDays)
-    }
-    
-    @objc private func didTapCustomOptionButton() {
-        handlePresetSelection(.custom)
     }
     
     @objc
     private func didTapDayButton(sender: UIButton) {
-        sender.isHighlighted = false
+        sender.isSelected.toggle()
         
         let index = sender.tag + 1
         
@@ -232,7 +220,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
                 }
             }
         }
-        
         viewModel.checkValidity()
     }
     
@@ -256,7 +243,6 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         dayButtonStackViewHeightConstraint?.isActive = true
         
         NSLayoutConstraint.activate([
-            
             durationLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             durationLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             
@@ -375,9 +361,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         
         viewModel.selectedPreset = preset.rawValue
         updatePresetButtonStates(selectedButton: preset.rawValue)
-        DispatchQueue.main.async {
-            self.updateDayButtonStates()
-        }
+        updateDayButtonStates()
         viewModel.checkValidity()
     }
     
@@ -411,16 +395,16 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     private func resetDayButtons() {
         DispatchQueue.main.async {
-             UIView.performWithoutAnimation {
-                 for button in self.dayButtons {
-                     button.isSelected = false
-                     button.isHighlighted = false
-                     button.backgroundColor = .lGray
-                     button.setTitleColor(.dGray, for: .normal)
-                     button.layoutIfNeeded()
-                 }
-             }
-         }
+            UIView.performWithoutAnimation {
+                for button in self.dayButtons {
+                    button.isSelected = false
+                    button.isHighlighted = false
+                    button.backgroundColor = .lGray
+                    button.setTitleColor(.dGray, for: .normal)
+                    button.layoutIfNeeded()
+                }
+            }
+        }
     }
     
     private func showDayButtonStackView() {
@@ -428,13 +412,11 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         
         dayButtonStackView.isHidden = false
         dayButtonStackViewHeightConstraint?.constant = 35
-        view.layoutIfNeeded()
         
-        UIView.animate(
-            withDuration: 0.3,
-            animations: {
-                self.dayButtonStackView.alpha = 1
-            }
+        UIView.animate(withDuration: 0.3, animations: {
+            self.view.layoutIfNeeded()
+            self.dayButtonStackView.alpha = 1
+        }
         )
     }
     

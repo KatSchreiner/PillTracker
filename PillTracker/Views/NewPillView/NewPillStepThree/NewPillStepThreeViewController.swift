@@ -153,7 +153,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         return reminderStackView
     }()
     
-    private var dayButtonStackViewHeightConstraint: NSLayoutConstraint!
+    private var dayButtonStackViewHeightConstraint: NSLayoutConstraint?
     private var isDurationSet: Bool = false
     private var currentAlertController: UIAlertController?
     
@@ -253,7 +253,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     private func addConstraint() {
         dayButtonStackViewHeightConstraint = dayButtonStackView.heightAnchor.constraint(equalToConstant: 0)
-        dayButtonStackViewHeightConstraint.isActive = true
+        dayButtonStackViewHeightConstraint?.isActive = true
         
         NSLayoutConstraint.activate([
             
@@ -427,7 +427,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         guard dayButtonStackView.alpha == 0 else { return }
         
         dayButtonStackView.isHidden = false
-        dayButtonStackViewHeightConstraint.constant = 35
+        dayButtonStackViewHeightConstraint?.constant = 35
         view.layoutIfNeeded()
         
         UIView.animate(
@@ -449,7 +449,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
             },
             completion: { _ in
                 self.dayButtonStackView.isHidden = true
-                self.dayButtonStackViewHeightConstraint.constant = 0
+                self.dayButtonStackViewHeightConstraint?.constant = 0
             }
         )
     }

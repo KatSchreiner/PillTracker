@@ -144,10 +144,10 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         ])
         
         addTimePickerButtonTopConstraint = addTimePickerButton.topAnchor.constraint(equalTo: timesTableView.bottomAnchor)
-        addTimePickerButtonTopConstraint.isActive = true
+        addTimePickerButtonTopConstraint?.isActive = true
         
         timesTableViewHeightConstraint = timesTableView.heightAnchor.constraint(equalToConstant: 0)
-        timesTableViewHeightConstraint.isActive = true
+        timesTableViewHeightConstraint?.isActive = true
         
     }
     

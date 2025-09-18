@@ -75,12 +75,7 @@ extension IconSelectionViewController: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "IconCell", for: indexPath) as! IconCell
         
         let selectedImage = imagesFormTypes[indexPath.item]
-        
-        cell.imageView.image = selectedImage
-        
-        if selectedImage == nil {
-            print("Image not found for index: \(indexPath.item)")
-        }
+        cell.configure(with: selectedImage)
         
         return cell
     }
@@ -90,7 +85,6 @@ extension IconSelectionViewController: UICollectionViewDataSource {
 extension IconSelectionViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedImage = imagesFormTypes[indexPath.item]
-        
         selectedIcon?(selectedImage)
         dismiss(animated: true)
     }

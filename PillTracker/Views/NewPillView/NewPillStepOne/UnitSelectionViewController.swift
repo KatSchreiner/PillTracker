@@ -8,30 +8,34 @@
 import UIKit
 
 final class UnitSelectionViewController: UIViewController {
-    
-    var units = ["мл", "мг", "мкг", "г", "%", "мг/мл", "МЕ", "Капля", "Таблетка", "Капсула", "Пакетик", "Укол", "Пшик"]
+    // MARK: - Public Properties
     var selectedUnit: ((String) -> Void)?
     var dosage: Double = 0
     
+    // MARK: - Private Properties
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
         return tableView
     }()
     
+    private let cellIdentifier = "UnitCell"
+    private var units = ["мл", "мг", "мкг", "г", "%", "мг/мл", "МЕ", "Капля", "Таблетка", "Капсула", "Пакетик", "Укол", "Пшик"]
+    
+    // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
     }
     
+    // MARK: - Private Methods
     private func setupView() {
         view.backgroundColor = .white
         
         view.addSubview(tableView)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-
         addConstraint()
     }
     
@@ -43,6 +47,19 @@ final class UnitSelectionViewController: UIViewController {
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
         ])
     }
+    
+    private func configureCell(_ cell: UITableViewCell, for unit: String) {
+        let formattedUnit = getUnitTitle(for: dosage, unit: unit)
+        cell.textLabel?.text = formattedUnit
+        cell.textLabel?.textColor = .dGray
+        cell.textLabel?.textAlignment = .center
+        cell.separatorInset = .zero
+        cell.layoutMargins = .zero
+    }
+    
+    private func getUnitTitle(for dosage: Double, unit: String) -> String {
+        return String.getUnitTitle(for: dosage, unit: unit)
+    }
 }
 
 // MARK: - UITableViewDataSource
@@ -52,17 +69,9 @@ extension UnitSelectionViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
         let unit = units[indexPath.row]
-        
-        let formattedUnit = getUnitTitle(for: dosage, unit: unit)
-        
-        cell.textLabel?.text = formattedUnit
-        cell.textLabel?.textColor = .dGray
-        cell.textLabel?.textAlignment = .center
-        cell.separatorInset = UIEdgeInsets.zero 
-        cell.layoutMargins = UIEdgeInsets.zero
-        
+        configureCell(cell, for: unit)
         return cell
     }
 }
@@ -72,9 +81,7 @@ extension UnitSelectionViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedUnit = units[indexPath.row]
         self.selectedUnit?(selectedUnit)
-        
         tableView.deselectRow(at: indexPath, animated: false)
-
         dismiss(animated: true, completion: nil)
     }
 }
@@ -82,19 +89,12 @@ extension UnitSelectionViewController: UITableViewDelegate {
 // MARK: - UIViewControllerTransitioningDelegate
 extension UnitSelectionViewController: UIViewControllerTransitioningDelegate {
     func presentAsBottomSheet(on parent: UIViewController) {
-        self.modalPresentationStyle = .custom
-        self.transitioningDelegate = self
-        
+        modalPresentationStyle = .custom
+        transitioningDelegate = self
         parent.present(self, animated: true, completion: nil)
     }
     
     func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
         return CustomPresentationController(presentedViewController: presented, presenting: presenting)
-    }
-}
-
-extension UnitSelectionViewController {
-    private func getUnitTitle(for dosage: Double, unit: String) -> String {
-        return String.getUnitTitle(for: dosage, unit: unit)
     }
 }

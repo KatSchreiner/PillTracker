@@ -7,7 +7,7 @@
 
 import UIKit
 
-class MyPillsViewController: UIViewController {
+final class MyPillsViewController: UIViewController {
     // MARK: - Properties
     var userName: String?
     private var viewModel = PillsViewModel()

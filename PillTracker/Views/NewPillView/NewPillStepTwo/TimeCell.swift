@@ -7,7 +7,7 @@
 
 import UIKit
 
-class TimeCell: UITableViewCell {
+final class TimeCell: UITableViewCell {
     static let identifier = "TimeCell"
     
     let timeLabel: UILabel = {

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class DeleteAlertViewController: UIViewController {
+final class DeleteAlertViewController: UIViewController {
     var titleText: String?
     var tableView: UITableView?
     

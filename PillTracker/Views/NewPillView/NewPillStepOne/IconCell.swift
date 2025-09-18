@@ -7,7 +7,7 @@
 
 import UIKit
 
-class IconCell: UICollectionViewCell {
+final class IconCell: UICollectionViewCell {
     let imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit

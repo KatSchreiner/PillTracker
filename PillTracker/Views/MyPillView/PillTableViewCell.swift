@@ -7,7 +7,7 @@
 
 import UIKit
 
-class PillTableViewCell: UITableViewCell {
+final class PillTableViewCell: UITableViewCell {
     static let identifier = "PillTableViewCell"
         
     let pillTimeLabel: UILabel = {

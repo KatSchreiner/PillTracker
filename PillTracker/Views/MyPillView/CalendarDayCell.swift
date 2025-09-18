@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CalendarDayCell: UICollectionViewCell {
+final class CalendarDayCell: UICollectionViewCell {
     lazy var dayLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center

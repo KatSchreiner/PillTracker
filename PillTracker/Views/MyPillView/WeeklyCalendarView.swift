@@ -11,7 +11,7 @@ protocol WeeklyCalendarViewDelegate: AnyObject {
     func didSelectDate(_ date: Date)
 }
 
-class WeeklyCalendarView: UIView {
+final class WeeklyCalendarView: UIView {
     // MARK: - Public Properties
     weak var delegate: WeeklyCalendarViewDelegate?
 

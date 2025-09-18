@@ -7,7 +7,7 @@
 
 import UIKit
 
-class UnitSelectionViewController: UIViewController {
+final class UnitSelectionViewController: UIViewController {
     
     var units = ["мл", "мг", "мкг", "г", "%", "мг/мл", "МЕ", "Капля", "Таблетка", "Капсула", "Пакетик", "Укол", "Пшик"]
     var selectedUnit: ((String) -> Void)?

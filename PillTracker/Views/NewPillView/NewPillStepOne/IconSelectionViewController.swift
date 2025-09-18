@@ -7,7 +7,7 @@
 
 import UIKit
 
-class IconSelectionViewController: UIViewController {
+final class IconSelectionViewController: UIViewController {
     // MARK: - Public Properties
     var images: [UIImage?] = []
     private let imagesFormTypes = [

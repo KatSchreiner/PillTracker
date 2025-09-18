@@ -11,7 +11,7 @@ protocol TimePickerDelegate: AnyObject {
     func didSelectTime(selectedTime: String)
 }
 
-class TimePickerViewController: UIViewController {
+final class TimePickerViewController: UIViewController {
     weak var delegate: TimePickerDelegate?
     
     private lazy var timePicker: UIDatePicker = {

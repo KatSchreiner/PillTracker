@@ -32,7 +32,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         button.setImage(UIImage(systemName: "plus"), for: .normal)
         button.tintColor = .dGray
         button.backgroundColor = .lGray
-        button.layer.cornerRadius = 8
+        button.layer.cornerRadius = Constants.defaultRadius
         button.addTarget(self, action: #selector(didTapAddTimePicker), for: .touchUpInside)
         return button
     }()
@@ -40,7 +40,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     private lazy var buttonStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
-        stackView.spacing = 10
+        stackView.spacing = Constants.smallPadding
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.distribution = .fillEqually
         

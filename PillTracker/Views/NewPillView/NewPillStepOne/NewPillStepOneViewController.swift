@@ -50,7 +50,7 @@ final class NewPillStepOneViewController: BaseStepViewController {
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [formTypesButton, titleLabel, titleTextField, dosageLabel, dosageTextField, spacerView, unitButton])
          stackView.axis = .vertical
-         stackView.spacing = 20
+        stackView.spacing = Constants.defaultPadding
         stackView.distribution = .equalSpacing
          stackView.translatesAutoresizingMaskIntoConstraints = false
          return stackView

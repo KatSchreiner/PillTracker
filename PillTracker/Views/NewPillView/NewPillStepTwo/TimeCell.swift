@@ -8,9 +8,21 @@
 import UIKit
 
 final class TimeCell: UITableViewCell {
+    // MARK: - Public Properties
     static let identifier = "TimeCell"
     
-    let timeLabel: UILabel = {
+    var onRemoveButtonTapped: (() -> Void)?
+    
+    let removeButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "minus.circle"), for: .normal)
+        button.tintColor = .red
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    // MARK: - Private Properties
+    private let timeLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 18)
         label.textColor = .dGray
@@ -21,15 +33,7 @@ final class TimeCell: UITableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    let removeButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "minus.circle"), for: .normal)
-        button.tintColor = .red
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
+
     private lazy var containerStackView: UIStackView = {
         let stack = UIStackView(arrangedSubviews: [timeLabel, removeButton])
         stack.axis = .horizontal
@@ -60,7 +64,18 @@ final class TimeCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with timeText: String) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        timeLabel.text = nil
+        onRemoveButtonTapped = nil
+    }
+    
+    @objc private func removeButtonTapped() {
+        onRemoveButtonTapped?()
+    }
+    
+    func configure(with timeText: String, onRemove: (() -> Void)? = nil) {
         timeLabel.text = timeText
+        onRemoveButtonTapped = onRemove
     }
 }

@@ -9,8 +9,7 @@ import UIKit
 
 final class IconSelectionViewController: UIViewController {
     // MARK: - Public Properties
-    var images: [UIImage?] = []
-    private let imagesFormTypes = [
+    private let imagesFormTypes: [UIImage] = [
         UIImage(named: "capsule"),
         UIImage(named: "tablet"),
         UIImage(named: "drops"),
@@ -20,7 +19,9 @@ final class IconSelectionViewController: UIViewController {
         UIImage(named: "spray"),
         UIImage(named: "nasalspray"),
         UIImage(named: "vitamins")
-    ]
+    ].compactMap { $0 }
+    
+    private let cellIdentifier = "IconCell"
     
     var selectedIcon: ((UIImage?) -> Void)?
     
@@ -36,10 +37,10 @@ final class IconSelectionViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.allowsSelection = true
-        collectionView.register(IconCell.self, forCellWithReuseIdentifier: "IconCell")
+        collectionView.register(IconCell.self, forCellWithReuseIdentifier: cellIdentifier)
         return collectionView
     }()
-
+    
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,7 +71,7 @@ extension IconSelectionViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return imagesFormTypes.count
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "IconCell", for: indexPath) as! IconCell
         
@@ -92,9 +93,9 @@ extension IconSelectionViewController: UICollectionViewDelegate {
 
 extension IconSelectionViewController: UIViewControllerTransitioningDelegate {
     func presentAsBottomSheet(on parent: UIViewController) {
-        self.modalPresentationStyle = .custom
-        self.transitioningDelegate = self
-        
+        modalPresentationStyle = .custom
+        transitioningDelegate = self
+        modalPresentationCapturesStatusBarAppearance = true
         parent.present(self, animated: true, completion: nil)
     }
     

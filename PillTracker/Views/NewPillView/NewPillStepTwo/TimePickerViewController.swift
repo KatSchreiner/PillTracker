@@ -60,6 +60,12 @@ final class TimePickerViewController: UIViewController {
         return stackView
     }()
     
+    private let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+    
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,10 +76,7 @@ final class TimePickerViewController: UIViewController {
     // MARK: - IB Actions
     @objc
     private func didTapDoneButton() {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        let selectedTime = dateFormatter.string(from: timePicker.date)
-        
+        let selectedTime = timeFormatter.string(from: timePicker.date)
         delegate?.didSelectTime(selectedTime: selectedTime)
     }
     
@@ -106,15 +109,17 @@ final class TimePickerViewController: UIViewController {
     }
     
     private func setCurrentTime() {
-        let currentDate = Date()
+        let currentTime = Date()
         let calendar = Calendar.current
         
-        let currentHour = calendar.component(.hour, from: currentDate)
-        let currentMinute = 0
+        let components = calendar.dateComponents([.hour, .minute], from: currentTime)
+        guard let hour = components.hour, let minute = components.minute else { return }
+        
+        let roundedMinute = (minute / timePicker.minuteInterval) * timePicker.minuteInterval
         
         var dateComponents = DateComponents()
-        dateComponents.hour = currentHour
-        dateComponents.minute = currentMinute
+        dateComponents.hour = hour
+        dateComponents.minute = roundedMinute
         
         if let date = calendar.date(from: dateComponents) {
             timePicker.setDate(date, animated: false)

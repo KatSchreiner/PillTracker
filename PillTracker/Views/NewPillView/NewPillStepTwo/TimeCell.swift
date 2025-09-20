@@ -11,8 +11,6 @@ final class TimeCell: UITableViewCell {
     // MARK: - Public Properties
     static let identifier = "TimeCell"
     
-    var onRemoveButtonTapped: (() -> Void)?
-    
     let removeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "minus.circle"), for: .normal)
@@ -67,15 +65,9 @@ final class TimeCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         timeLabel.text = nil
-        onRemoveButtonTapped = nil
     }
     
-    @objc private func removeButtonTapped() {
-        onRemoveButtonTapped?()
-    }
-    
-    func configure(with timeText: String, onRemove: (() -> Void)? = nil) {
+    func configure(with timeText: String) {
         timeLabel.text = timeText
-        onRemoveButtonTapped = onRemove
     }
 }

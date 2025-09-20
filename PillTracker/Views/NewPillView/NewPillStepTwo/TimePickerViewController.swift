@@ -12,8 +12,10 @@ protocol TimePickerDelegate: AnyObject {
 }
 
 final class TimePickerViewController: UIViewController {
+    // MARK: - Public Properties
     weak var delegate: TimePickerDelegate?
     
+    // MARK: - Private Properties
     private lazy var timePicker: UIDatePicker = {
         let timePicker = UIDatePicker()
         timePicker.datePickerMode = .time
@@ -58,12 +60,14 @@ final class TimePickerViewController: UIViewController {
         return stackView
     }()
     
+    // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setCurrentTime()
     }
     
+    // MARK: - IB Actions
     @objc
     private func didTapDoneButton() {
         let dateFormatter = DateFormatter()
@@ -78,6 +82,7 @@ final class TimePickerViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
     
+    // MARK: - Public Methods
     private func setupView() {
         view.backgroundColor = .systemBackground
         view.layer.cornerRadius = 16

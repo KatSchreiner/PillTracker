@@ -14,6 +14,7 @@ final class CustomButton {
         backgroundColor: UIColor,
         cornerRadius: CGFloat = 10,
         contentEdgeInsets: UIEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20),
+        font: UIFont = UIFont.systemFont(ofSize: 18),
         target: Any?,
         action: Selector
     ) -> UIButton {

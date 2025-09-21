@@ -26,29 +26,27 @@ final class TimePickerViewController: UIViewController {
     }()
     
     private lazy var doneButton: UIButton = {
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle("Добавить", for: .normal)
-        doneButton.backgroundColor = .lBlue
-        doneButton.titleLabel?.textColor = .white
-        doneButton.tintColor = .white
-        doneButton.layer.cornerRadius = 8
-        doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-        doneButton.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
-        doneButton.translatesAutoresizingMaskIntoConstraints = false
-        return doneButton
+        return CustomButton.makeButton(
+            title: "Добавить",
+            titleColor: .white,
+            backgroundColor: .lBlue,
+            cornerRadius: Constants.defaultRadius,
+            contentEdgeInsets: UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20),
+            target: self,
+            action: #selector(didTapDoneButton)
+        )
     }()
-    
+
     private lazy var cancelButton: UIButton = {
-        let cancelButton = UIButton(type: .system)
-        cancelButton.setTitle("Закрыть", for: .normal)
-        cancelButton.backgroundColor = .dBlue
-        cancelButton.titleLabel?.textColor = .white
-        cancelButton.tintColor = .white
-        cancelButton.layer.cornerRadius = 8
-        cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-        cancelButton.addTarget(self, action: #selector(didTapCancelButton), for: .touchUpInside)
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        return cancelButton
+        return CustomButton.makeButton(
+            title: "Закрыть",
+            titleColor: .white,
+            backgroundColor: .dBlue,
+            cornerRadius: Constants.defaultRadius,
+            contentEdgeInsets: UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20),
+            target: self,
+            action: #selector(didTapCancelButton)
+        )
     }()
     
     private lazy var buttonStackView: UIStackView = {
@@ -91,7 +89,6 @@ final class TimePickerViewController: UIViewController {
         view.layer.cornerRadius = 16
 
         [timePicker, buttonStackView].forEach { view.addSubview($0) }
-        
         addConstraints()
     }
     

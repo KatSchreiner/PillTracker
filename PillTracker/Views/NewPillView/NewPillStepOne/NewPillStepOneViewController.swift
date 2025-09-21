@@ -26,7 +26,13 @@ final class NewPillStepOneViewController: BaseStepViewController {
         return tf
     }()
     
-    lazy var unitButton = createButton(title: "Выберите единицу", target: self, action: #selector(didTapUnitButton))
+    lazy var unitButton = CustomButton.makeButton(
+        title: "Выберите единицу",
+        titleColor: .dGray,
+        backgroundColor: .lGray,
+        target: self,
+        action: #selector(didTapUnitButton)
+    )
     
     lazy var formTypesButton: UIButton = {
         let button = UIButton()

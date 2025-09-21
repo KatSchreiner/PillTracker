@@ -21,24 +21,6 @@ class BaseStepViewController: UIViewController {
         return label
     }
     
-    func createButton(title: String? = nil, image: UIImage? = nil, target: Any?, action: Selector) -> UIButton {
-        let button = UIButton(type: .custom)
-        if let title = title {
-            button.setTitle(title, for: .normal)
-            button.setTitleColor(.dGray, for: .normal)
-            button.titleLabel?.font = Constants.defaultFontSize
-        }
-        if let image = image {
-            button.setImage(image, for: .normal)
-            button.imageView?.contentMode = .scaleAspectFit
-        }
-        button.backgroundColor = .lGray
-        button.layer.cornerRadius = Constants.defaultRadius
-        button.addTarget(target, action: action, for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }
-    
     func createTextField(placeholder: String? = nil, keyboardType: UIKeyboardType = .default, delegate: UITextFieldDelegate? = nil) -> UITextField {
         let textField = UITextField()
         textField.layer.cornerRadius = Constants.defaultRadius

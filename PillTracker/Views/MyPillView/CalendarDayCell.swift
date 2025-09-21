@@ -8,6 +8,7 @@
 import UIKit
 
 final class CalendarDayCell: UICollectionViewCell {
+    // MARK: - Public Properties
     lazy var dayLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
@@ -21,7 +22,22 @@ final class CalendarDayCell: UICollectionViewCell {
         label.font = .systemFont(ofSize: 18, weight: .regular)
         return label
     }()
+    
+    // MARK: - Private Properties
+    private static let dayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE"
+        formatter.locale = Locale(identifier: "ru_RU")
+        return formatter
+    }()
+    
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d"
+        return formatter
+    }()
 
+    // MARK: - Overrides Methods
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -32,10 +48,11 @@ final class CalendarDayCell: UICollectionViewCell {
         setupViews()
     }
     
+    // MARK: - Private Methods
     private func setupViews() {
-        [dayLabel, dateLabel].forEach { contentView in
-            self.contentView.addSubview(contentView)
-            contentView.translatesAutoresizingMaskIntoConstraints = false
+        [dayLabel, dateLabel].forEach { subview in
+            self.contentView.addSubview(subview)
+            subview.translatesAutoresizingMaskIntoConstraints = false
         }
         
         addConstraint()
@@ -56,13 +73,10 @@ final class CalendarDayCell: UICollectionViewCell {
     }
     
     func configure(with date: Date) {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEE"
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        dayLabel.text = dateFormatter.string(from: date)
-
-        let dayFormatter = DateFormatter()
-        dayFormatter.dateFormat = "d"
-        dateLabel.text = dayFormatter.string(from: date)
+        dayLabel.text = Self.dayFormatter.string(from: date)
+        dateLabel.text = Self.dateFormatter.string(from: date)
+        
+        accessibilityLabel = "\(dayLabel.text ?? ""), \(dateLabel.text ?? "")"
+        accessibilityTraits = .button
     }
 }

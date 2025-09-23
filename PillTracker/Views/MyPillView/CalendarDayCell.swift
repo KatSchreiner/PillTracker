@@ -15,7 +15,7 @@ final class CalendarDayCell: UICollectionViewCell {
         label.font = .systemFont(ofSize: 16)
         return label
     }()
-
+    
     lazy var dateLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
@@ -36,16 +36,25 @@ final class CalendarDayCell: UICollectionViewCell {
         formatter.dateFormat = "d"
         return formatter
     }()
-
+    
     // MARK: - Overrides Methods
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
     }
-
+    
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupViews()
+    }
+    
+    // MARK: - Public Methods
+    func configure(with date: Date) {
+        dayLabel.text = Self.dayFormatter.string(from: date)
+        dateLabel.text = Self.dateFormatter.string(from: date)
+        
+        accessibilityLabel = "\(dayLabel.text ?? ""), \(dateLabel.text ?? "")"
+        accessibilityTraits = .button
     }
     
     // MARK: - Private Methods
@@ -70,13 +79,5 @@ final class CalendarDayCell: UICollectionViewCell {
             dateLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             dateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
-    }
-    
-    func configure(with date: Date) {
-        dayLabel.text = Self.dayFormatter.string(from: date)
-        dateLabel.text = Self.dateFormatter.string(from: date)
-        
-        accessibilityLabel = "\(dayLabel.text ?? ""), \(dateLabel.text ?? "")"
-        accessibilityTraits = .button
     }
 }

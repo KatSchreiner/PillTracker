@@ -8,42 +8,36 @@
 import UIKit
 
 final class PillTableViewCell: UITableViewCell {
+    // MARK: - Public Properties
     static let identifier = "PillTableViewCell"
-        
-    let pillTimeLabel: UILabel = {
+    
+    lazy var pillTimeLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.textAlignment = .center
         return label
     }()
     
-    let pillImageView: UIImageView = {
+    lazy var pillImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
-    let pillNameLabel: UILabel = {
+    lazy var pillNameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 16)
         return label
     }()
     
-    private let dosageLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = .gray
-        return label
-    }()
-    
-    let howToTakeLabel: UILabel = {
+    lazy var howToTakeLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12)
         label.textColor = .gray
         return label
     }()
     
-    let markAsTakenButton: UIButton = {
+    lazy var markAsTakenButton: UIButton = {
         let button = UIButton(type: .custom)
         button.layer.cornerRadius = 8
         button.layer.borderWidth = 1.5
@@ -54,12 +48,18 @@ final class PillTableViewCell: UITableViewCell {
         return button
     }()
     
+    // MARK: - Callback
     var markAsTakenButtonAction: (() -> Void)?
     
-    @objc private func didTapMarkAsTaken() {
-        markAsTakenButtonAction?()
-    }
+    // MARK: - Private Properties
+    private let dosageLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = .gray
+        return label
+    }()
     
+    // MARK: - Overrides Methods
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupView()
@@ -69,14 +69,42 @@ final class PillTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        pillTimeLabel.text = nil
+        pillImageView.image = nil
+        pillNameLabel.text = nil
+        dosageLabel.text = nil
+        howToTakeLabel.text = nil
+        markAsTakenButton.setImage(nil, for: .normal)
+        markAsTakenButton.backgroundColor = .clear
+        markAsTakenButton.layer.borderColor = UIColor.gray.cgColor
+        markAsTakenButtonAction = nil
+    }
+    
+    // MARK: - IB Actions
+    @objc private func didTapMarkAsTaken() {
+        markAsTakenButtonAction?()
+    }
+    
+    // MARK: - Public Methods
+    func configure(with pill: Pill, time: (hour: String, minute: String)) {
+        pillTimeLabel.text = "\(time.hour):\(time.minute)"
+        pillImageView.image = pill.icon
+        pillNameLabel.text = pill.name
+        dosageLabel.text = formattedDosage(pill.dosage, unit: pill.unit)
+        howToTakeLabel.text = "\(pill.howToTake)"
+    }
+    
+    // MARK: - Private Methods
     private func setupView() {
         self.backgroundColor = UIColor.white
         
         self.selectionStyle = .none
-                
-        [pillTimeLabel, pillImageView, pillNameLabel, dosageLabel, howToTakeLabel, markAsTakenButton].forEach { contentView in
-            self.contentView.addSubview(contentView)
-            contentView.translatesAutoresizingMaskIntoConstraints = false
+        
+        [pillTimeLabel, pillImageView, pillNameLabel, dosageLabel, howToTakeLabel, markAsTakenButton].forEach { subview in
+            self.contentView.addSubview(subview)
+            subview.translatesAutoresizingMaskIntoConstraints = false
         }
         
         markAsTakenButton.addTarget(self, action: #selector(didTapMarkAsTaken), for: .touchUpInside)
@@ -114,17 +142,11 @@ final class PillTableViewCell: UITableViewCell {
         ])
     }
     
-    func configure(with pill: Pill, time: (hour: String, minute: String)) {
-        pillTimeLabel.text = "\(time.hour):\(time.minute)"
-        pillImageView.image = pill.icon
-        pillNameLabel.text = pill.name
-        
-        if pill.dosage.truncatingRemainder(dividingBy: 1) == 0 {
-            dosageLabel.text = "\(Int(pill.dosage)) \(pill.unit)"
+    private func formattedDosage(_ dosage: Double, unit: String) -> String {
+        if dosage.truncatingRemainder(dividingBy: 1) == 0 {
+            return "\(Int(dosage)) \(unit)"
         } else {
-            dosageLabel.text = "\(pill.dosage) \(pill.unit)"
+            return "\(dosage) \(unit)"
         }
-        
-        howToTakeLabel.text = "\(pill.howToTake)"
     }
 }

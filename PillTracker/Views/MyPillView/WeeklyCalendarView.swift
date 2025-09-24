@@ -47,11 +47,10 @@ final class WeeklyCalendarView: UIView {
     }
     // MARK: - IB Actions
     @objc func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
-        if gesture.direction == .right {
-            currentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate)!
-        } else if gesture.direction == .left {
-            currentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate)!
-        }
+        let direction: Int = gesture.direction == .right ? -1 : 1
+        guard let newDate = Calendar.current.date(byAdding: .weekOfYear, value: direction, to: currentDate) else { return }
+        
+        currentDate = newDate
         populateDates()
     }
     

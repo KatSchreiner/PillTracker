@@ -76,7 +76,10 @@ final class WeeklyCalendarView: UIView {
     }
     
     private func populateDates() {
-        dates = Date.datesForWeek(from: currentDate)
+        let newDates = Date.datesForWeek(from: currentDate)
+        guard !dates.elementsEqual(newDates, by: { Calendar.current.isDate($0, inSameDayAs: $1)}) else { return }
+        
+        dates = newDates
         collectionView.reloadData()
     }
 

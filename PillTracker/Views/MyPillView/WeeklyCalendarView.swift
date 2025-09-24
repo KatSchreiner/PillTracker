@@ -15,7 +15,7 @@ final class WeeklyCalendarView: UIView {
     // MARK: - Public Properties
     weak var delegate: WeeklyCalendarViewDelegate?
 
-    lazy var collectionView: UICollectionView = {
+    private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -117,14 +117,10 @@ extension WeeklyCalendarView: UICollectionViewDataSource {
     }
     
     private func configureCellAppearance(_ cell: CalendarDayCell, for date: Date, today: Date) {
-        if Calendar.current.isDate(date, inSameDayAs: today) {
-            cell.dateLabel.textColor = .lRed
-        } else if Calendar.current.isDate(date, inSameDayAs: selectedDate ?? today) {
-            cell.dateLabel.textColor = .lBlue
-        } else {
-            cell.dateLabel.textColor = .black
+            let isToday = Calendar.current.isDate(date, inSameDayAs: today)
+            let isSelected = selectedDate != nil && Calendar.current.isDate(date, inSameDayAs: selectedDate!)
+            cell.updateAppearance(isToday: isToday, isSelected: isSelected)
         }
-    }
 }
 
 // MARK: – UICollectionViewDelegate

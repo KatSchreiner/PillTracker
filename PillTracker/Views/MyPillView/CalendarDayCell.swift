@@ -53,8 +53,26 @@ final class CalendarDayCell: UICollectionViewCell {
         dayLabel.text = Self.dayFormatter.string(from: date)
         dateLabel.text = Self.dateFormatter.string(from: date)
         
+        updateAppearance(isToday: false, isSelected: false)
+
         accessibilityLabel = "\(dayLabel.text ?? ""), \(dateLabel.text ?? "")"
         accessibilityTraits = .button
+    }
+    
+    func updateAppearance(isToday: Bool, isSelected: Bool) {
+        let color: UIColor
+        
+        switch (isToday, isSelected) {
+        case (true, _):
+            color = .lRed
+        case (_, true):
+            color = .lBlue
+        default:
+            color = .label
+        }
+        
+        dayLabel.textColor = color
+        dateLabel.textColor = color
     }
     
     // MARK: - Private Methods

@@ -27,4 +27,35 @@ final class CustomButton {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }
+    
+    static func smallButton(
+        image: UIImage? = nil,
+        tintColor: UIColor? = nil,
+        backgroundColor: UIColor = .clear,
+        cornerRadius: CGFloat = 8,
+        size: CGSize = CGSize(width: 45, height: 45),
+        target: Any?,
+        action: Selector
+    ) -> UIButton {
+        let button = UIButton(type: .custom)
+        
+        if let image = image {
+            button.setImage(image, for: .normal)
+            button.tintColor = tintColor
+        } else {
+            button.tintColor = .clear
+        }
+        
+        button.backgroundColor = backgroundColor
+        button.layer.cornerRadius = cornerRadius
+        button.clipsToBounds = true
+        button.contentEdgeInsets = .zero
+        button.addTarget(target, action: action, for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        button.widthAnchor.constraint(equalToConstant: size.width).isActive = true
+        button.heightAnchor.constraint(equalToConstant: size.height).isActive = true
+        
+        return button
+    }
 }

@@ -27,14 +27,17 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         return tableView
     }()
     
-    private lazy var addTimePickerButton: UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(systemName: "plus"), for: .normal)
-        button.tintColor = .dGray
-        button.backgroundColor = .lGray
-        button.layer.cornerRadius = Constants.defaultRadius
-        button.addTarget(self, action: #selector(didTapAddTimePicker), for: .touchUpInside)
-        return button
+    lazy var addTimePickerButton: UIButton = {
+        let image = UIImage(systemName: "plus")!
+        return CustomButton.smallButton(
+            image: image,
+            tintColor: .dGray,
+            backgroundColor: .lGray,
+            cornerRadius: 8,
+            size: CGSize(width: 45, height: 45),
+            target: self,
+            action: #selector(didTapAddTimePicker)
+        )
     }()
     
     private lazy var buttonStackView: UIStackView = {

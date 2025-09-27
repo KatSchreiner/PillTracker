@@ -14,17 +14,6 @@ protocol WeeklyCalendarViewDelegate: AnyObject {
 final class WeeklyCalendarView: UIView {
     // MARK: - Public Properties
     weak var delegate: WeeklyCalendarViewDelegate?
-
-    private lazy var collectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .systemBackground
-        collectionView.dataSource = self
-        collectionView.delegate = self
-        collectionView.register(CalendarDayCell.self, forCellWithReuseIdentifier: "CalendarDayCell")
-        return collectionView
-    }()
     
     var currentDate: Date = Date() {
         didSet {
@@ -33,10 +22,22 @@ final class WeeklyCalendarView: UIView {
     }
     
     // MARK: - Private Properties
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .systemBackground
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(CalendarDayCell.self, forCellWithReuseIdentifier: "CalendarDayCell")
+        return collectionView
+    }()
+    
     private var dates: [Date] = []
     private var selectedDate: Date?
-
-    // MARK: - Overrides Methods
+    
+    // MARK: - Override Methods
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -45,6 +46,7 @@ final class WeeklyCalendarView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     // MARK: - IB Actions
     @objc func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
         let direction: Int = gesture.direction == .right ? -1 : 1
@@ -62,7 +64,6 @@ final class WeeklyCalendarView: UIView {
         }
         
         addConstraint()
-        populateDates()
         addSwipeGestures()
     }
     
@@ -82,7 +83,7 @@ final class WeeklyCalendarView: UIView {
         dates = newDates
         collectionView.reloadData()
     }
-
+    
     private func addSwipeGestures() {
         let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
         swipeLeft.direction = .left
@@ -91,11 +92,6 @@ final class WeeklyCalendarView: UIView {
         let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
         swipeRight.direction = .right
         collectionView.addGestureRecognizer(swipeRight)
-    }
-    
-    func updateSelectedDate(_ date: Date) {
-        self.selectedDate = date
-        populateDates()
     }
 }
 
@@ -107,7 +103,7 @@ extension WeeklyCalendarView: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CalendarDayCell", for: indexPath) as! CalendarDayCell
-       
+        
         let date = dates[indexPath.item]
         cell.configure(with: date)
         
@@ -119,22 +115,22 @@ extension WeeklyCalendarView: UICollectionViewDataSource {
     }
     
     private func configureCellAppearance(_ cell: CalendarDayCell, for date: Date, today: Date) {
-            let isToday = Calendar.current.isDate(date, inSameDayAs: today)
-            let isSelected = selectedDate != nil && Calendar.current.isDate(date, inSameDayAs: selectedDate!)
-            cell.updateAppearance(isToday: isToday, isSelected: isSelected)
-        }
+        let isToday = Calendar.current.isDate(date, inSameDayAs: today)
+        let isSelected = selectedDate != nil && Calendar.current.isDate(date, inSameDayAs: selectedDate!)
+        cell.updateAppearance(isToday: isToday, isSelected: isSelected)
+    }
 }
 
 // MARK: – UICollectionViewDelegate
 extension WeeklyCalendarView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedDate = dates[indexPath.item]
-        currentDate = selectedDate
+        //currentDate = selectedDate
         self.selectedDate = selectedDate
         
         delegate?.didSelectDate(selectedDate)
         
-        populateDates()
+        collectionView.reloadData()
     }
 }
 

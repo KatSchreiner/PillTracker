@@ -37,16 +37,15 @@ final class PillTableViewCell: UITableViewCell {
         return label
     }()
     
-    lazy var markAsTakenButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.layer.cornerRadius = 8
-        button.layer.borderWidth = 1.5
-        button.layer.borderColor = UIColor.gray.cgColor
-        button.backgroundColor = .clear
-        button.adjustsImageWhenHighlighted = false
-        button.layer.masksToBounds = true
-        return button
-    }()
+    lazy var markAsTakenButton = CustomButton.smallButton(
+        image: nil,
+        tintColor: .clear,
+        backgroundColor: .clear,
+        cornerRadius: 8,
+        size: CGSize(width: 30, height: 30),
+        target: self,
+        action: #selector(didTapMarkAsTaken)
+    )
     
     // MARK: - Callback
     var markAsTakenButtonAction: (() -> Void)?
@@ -77,6 +76,7 @@ final class PillTableViewCell: UITableViewCell {
         dosageLabel.text = nil
         howToTakeLabel.text = nil
         markAsTakenButton.setImage(nil, for: .normal)
+        markAsTakenButton.tintColor = .clear
         markAsTakenButton.backgroundColor = .clear
         markAsTakenButton.layer.borderColor = UIColor.gray.cgColor
         markAsTakenButtonAction = nil
@@ -107,8 +107,7 @@ final class PillTableViewCell: UITableViewCell {
             subview.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        markAsTakenButton.addTarget(self, action: #selector(didTapMarkAsTaken), for: .touchUpInside)
-        
+        setupMarkAsTakenButton()
         addConstraint()
     }
     
@@ -136,9 +135,7 @@ final class PillTableViewCell: UITableViewCell {
             howToTakeLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
             
             markAsTakenButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            markAsTakenButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            markAsTakenButton.widthAnchor.constraint(equalToConstant: 25),
-            markAsTakenButton.heightAnchor.constraint(equalToConstant: 25)
+            markAsTakenButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
     
@@ -148,5 +145,14 @@ final class PillTableViewCell: UITableViewCell {
         } else {
             return "\(dosage) \(unit)"
         }
+    }
+    
+    private func setupMarkAsTakenButton() {
+        markAsTakenButton.layer.borderWidth = 1.5
+        markAsTakenButton.layer.borderColor = UIColor.gray.cgColor
+        markAsTakenButton.layer.masksToBounds = true
+        
+        contentView.addSubview(markAsTakenButton)
+        markAsTakenButton.translatesAutoresizingMaskIntoConstraints = false
     }
 }

@@ -58,15 +58,16 @@ final class MyPillsViewController: UIViewController {
     }()
     
     lazy var addPillButton: UIButton = {
-        let button = UIButton()
-        let image = UIImage(systemName: "plus")
-        button.setImage(image, for: .normal)
-        button.backgroundColor = .lBlue
-        button.tintColor = .white
-        button.layer.cornerRadius = 25
-        button.clipsToBounds = true
-        button.addTarget(self, action: #selector(didTapAddPillButton), for: .touchUpInside)
-        return button
+        let image = UIImage(systemName: "plus")!
+        return CustomButton.smallButton(
+            image: image,
+            tintColor: .white,
+            backgroundColor: .lBlue,
+            cornerRadius: 8,  
+            size: CGSize(width: 45, height: 45),
+            target: self,
+            action: #selector(didTapAddPillButton)
+        )
     }()
     
     // MARK: - View Life Cycles
@@ -274,7 +275,6 @@ extension MyPillsViewController: UITableViewDelegate {
         let deleteAlertView = DeleteAlertViewController()
         deleteAlertView.titleText = "Удалить \(pillToDelete.name) в \(timeToDelete.hour):\(timeToDelete.minute)?"
         
-        // Удаление только этой дозы
         deleteAlertView.onDeleteSingleDose = { [weak self] in
             guard let self = self else {
                 completionHandler(false)
@@ -295,7 +295,6 @@ extension MyPillsViewController: UITableViewDelegate {
             }
         }
         
-        // Удаление всего лекарства
         deleteAlertView.onDeleteFutureDoses = { [weak self] in
             guard let self = self else {
                 completionHandler(false)

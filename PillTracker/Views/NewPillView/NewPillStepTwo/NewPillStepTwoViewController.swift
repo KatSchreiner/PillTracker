@@ -24,6 +24,9 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         tableView.backgroundColor = .clear
         tableView.isScrollEnabled = true
         tableView.tableFooterView = UIView()
+        tableView.estimatedRowHeight = 0 
+        tableView.estimatedSectionHeaderHeight = 0
+        tableView.estimatedSectionFooterHeight = 0
         return tableView
     }()
     
@@ -92,8 +95,15 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     
     @objc
     private func didTapRemoveTimeCell(_ sender: UIButton) {
+        guard sender.tag < viewModel.selectedTimes.count else {
+            print("Invalid tag for removal: \(sender.tag)")
+            return
+        }
+        let indexPath = IndexPath(row: sender.tag, section: 0)
         viewModel.removeTime(at: sender.tag)
-        refreshTimesTableView()
+        viewModel.pillStepTwoModel.selectedTimes = viewModel.selectedTimes
+        timesTableView.deleteRows(at: [indexPath], with: .automatic)
+        updateTableViewConstraints()
         viewModel.checkValidity()
     }
     
@@ -112,7 +122,25 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         addTimePickerButtonTopConstraint?.constant = rowCount > 0 ? 16 : 0
         
         timesTableView.reloadData()
-        view.layoutIfNeeded()
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func updateTableViewConstraints() {
+        let rowCount = viewModel.selectedTimes.count
+        let timeCellHeight: CGFloat = 60
+        let calculatedHeight = CGFloat(rowCount) * timeCellHeight
+        
+        timesTableViewHeightConstraint?.constant = min(calculatedHeight, maxTimesTableHeight)
+        timesTableView.isScrollEnabled = calculatedHeight > maxTimesTableHeight
+        
+        addTimePickerButtonTopConstraint?.constant = rowCount > 0 ? 16 : 0
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     
@@ -239,9 +267,12 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
             return UITableViewCell()
         }
         let time = viewModel.selectedTimes[indexPath.row]
-        cell.configure(with: "\(time.hour):\(time.minute)")
-        cell.removeButton.tag = indexPath.row
-        cell.removeButton.addTarget(self, action: #selector(didTapRemoveTimeCell(_:)), for: .touchUpInside)
+        cell.configure(
+                with: "\(time.hour):\(time.minute)",
+                target: self,
+                action: #selector(didTapRemoveTimeCell(_:)),
+                tag: indexPath.row
+            )
         return cell
     }
     
@@ -251,14 +282,13 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
 // MARK: - TimePickerDelegate
 extension NewPillStepTwoViewController: TimePickerDelegate {
     func didSelectTime(selectedTime: String) {
-        print("Selected time: \(selectedTime)")
-        
         let components = selectedTime.split(separator: ":")
         if components.count == 2 {
             let hour = String(components[0])
             let minute = String(components[1])
             viewModel.addTime(hour: hour, minute: minute)
             refreshTimesTableView()
+            viewModel.checkValidity()
         }
     }
 }

@@ -112,11 +112,9 @@ final class TimePickerViewController: UIViewController {
         let components = calendar.dateComponents([.hour, .minute], from: currentTime)
         guard let hour = components.hour, let minute = components.minute else { return }
         
-        let roundedMinute = (minute / timePicker.minuteInterval) * timePicker.minuteInterval
-        
         var dateComponents = DateComponents()
         dateComponents.hour = hour
-        dateComponents.minute = roundedMinute
+        dateComponents.minute = 0
         
         if let date = calendar.date(from: dateComponents) {
             timePicker.setDate(date, animated: false)

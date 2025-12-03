@@ -22,11 +22,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         tableView.separatorStyle = .none
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .clear
-        tableView.isScrollEnabled = true
-        tableView.tableFooterView = UIView()
-        tableView.estimatedRowHeight = 0 
-        tableView.estimatedSectionHeaderHeight = 0
-        tableView.estimatedSectionFooterHeight = 0
+        tableView.estimatedRowHeight = 60
         return tableView
     }()
     
@@ -58,15 +54,14 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         return stackView
     }()
     
-    private var addTimePickerButtonTopConstraint: NSLayoutConstraint?
-    private var timesTableViewHeightConstraint: NSLayoutConstraint?
-    private var maxTimesTableHeight: CGFloat {
-        return view.frame.height - (buttonStackView.frame.height + 40 + 120)
-    }
+    private var tableViewHeightConstraint: NSLayoutConstraint!
+    private let maxTableViewHeight: CGFloat = UIScreen.main.bounds.height * 0.4
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.view.isUserInteractionEnabled = true
+
         setupView()
         setupBindings()
         loadData()
@@ -93,56 +88,13 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         timePickerView.presentAsBottomSheet(on: self)
     }
     
-    @objc
-    private func didTapRemoveTimeCell(_ sender: UIButton) {
-        guard sender.tag < viewModel.selectedTimes.count else {
-            print("Invalid tag for removal: \(sender.tag)")
-            return
-        }
-        let indexPath = IndexPath(row: sender.tag, section: 0)
-        viewModel.removeTime(at: sender.tag)
-        viewModel.pillStepTwoModel.selectedTimes = viewModel.selectedTimes
-        timesTableView.deleteRows(at: [indexPath], with: .automatic)
-        updateTableViewConstraints()
-        viewModel.checkValidity()
-    }
-    
     // MARK: - Public Methods
     func refreshTimesTableView() {
         viewModel.sortTimes()
         viewModel.pillStepTwoModel.selectedTimes = viewModel.selectedTimes
-        
-        let rowCount = viewModel.selectedTimes.count
-        let timeCellHeight: CGFloat = 60
-        let calculatedHeight = CGFloat(rowCount) * timeCellHeight
-        
-        timesTableViewHeightConstraint?.constant = min(calculatedHeight, maxTimesTableHeight)
-        timesTableView.isScrollEnabled = calculatedHeight > maxTimesTableHeight
-        
-        addTimePickerButtonTopConstraint?.constant = rowCount > 0 ? 16 : 0
-        
-        timesTableView.reloadData()
-        
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
-            self.view.layoutIfNeeded()
-        }
+        updateTableViewHeight()
+        //timesTableView.reloadData()
     }
-    
-    private func updateTableViewConstraints() {
-        let rowCount = viewModel.selectedTimes.count
-        let timeCellHeight: CGFloat = 60
-        let calculatedHeight = CGFloat(rowCount) * timeCellHeight
-        
-        timesTableViewHeightConstraint?.constant = min(calculatedHeight, maxTimesTableHeight)
-        timesTableView.isScrollEnabled = calculatedHeight > maxTimesTableHeight
-        
-        addTimePickerButtonTopConstraint?.constant = rowCount > 0 ? 16 : 0
-        
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
-            self.view.layoutIfNeeded()
-        }
-    }
-    
     
     // MARK: - Private Methods
     private func setupView() {
@@ -157,6 +109,9 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     }
     
     private func addConstraints() {
+        tableViewHeightConstraint = timesTableView.heightAnchor.constraint(equalToConstant: 0)
+        tableViewHeightConstraint.isActive = true
+        
         NSLayoutConstraint.activate([
             buttonStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
@@ -168,18 +123,13 @@ final class NewPillStepTwoViewController: BaseStepViewController {
             timesTableView.topAnchor.constraint(equalTo: timePickerLabel.bottomAnchor, constant: 20),
             timesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             timesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            timesTableView.heightAnchor.constraint(lessThanOrEqualToConstant: maxTableViewHeight),
             
+            addTimePickerButton.topAnchor.constraint(equalTo: timesTableView.bottomAnchor, constant: 10),
             addTimePickerButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             addTimePickerButton.widthAnchor.constraint(equalToConstant: 40),
             addTimePickerButton.heightAnchor.constraint(equalToConstant: 40),
         ])
-        
-        addTimePickerButtonTopConstraint = addTimePickerButton.topAnchor.constraint(equalTo: timesTableView.bottomAnchor)
-        addTimePickerButtonTopConstraint?.isActive = true
-        
-        timesTableViewHeightConstraint = timesTableView.heightAnchor.constraint(equalToConstant: 0)
-        timesTableViewHeightConstraint?.isActive = true
-        
     }
     
     private func setupBindings() {
@@ -249,6 +199,23 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         
         return buttonContainer
     }
+    
+    private func updateTableViewHeight() {
+        let rowHeight: CGFloat = 60
+        let numberOfRows = viewModel.selectedTimes.count
+        var newHeight = CGFloat(numberOfRows) * rowHeight
+        
+        newHeight = min(newHeight, maxTableViewHeight)
+        
+        //UIView.animate(withDuration: 0.3) {
+            self.tableViewHeightConstraint.constant = newHeight
+            self.view.layoutIfNeeded()
+        //}
+        
+        timesTableView.isScrollEnabled = true
+        timesTableView.alwaysBounceVertical = true
+        timesTableView.showsVerticalScrollIndicator = numberOfRows * Int(rowHeight) > Int(self.maxTableViewHeight)
+    }
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
@@ -267,16 +234,27 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
             return UITableViewCell()
         }
         let time = viewModel.selectedTimes[indexPath.row]
-        cell.configure(
-                with: "\(time.hour):\(time.minute)",
-                target: self,
-                action: #selector(didTapRemoveTimeCell(_:)),
-                tag: indexPath.row
-            )
+        cell.configure(with: "\(time.hour):\(time.minute)")
         return cell
     }
     
-    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        print("Swipe triggered for row \(indexPath.row)")
+        let deleteAction = UIContextualAction(style: .destructive, title: "Удалить") { [weak self] (action, view, completionHandler) in
+            self?.viewModel.removeTime(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+            self?.updateTableViewHeight()
+            self?.viewModel.checkValidity()
+            completionHandler(true)
+        }
+        
+        deleteAction.backgroundColor = .lRed
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
 }
 
 // MARK: - TimePickerDelegate
@@ -287,7 +265,9 @@ extension NewPillStepTwoViewController: TimePickerDelegate {
             let hour = String(components[0])
             let minute = String(components[1])
             viewModel.addTime(hour: hour, minute: minute)
-            refreshTimesTableView()
+            let newIndexPath = IndexPath(row: viewModel.selectedTimes.count - 1, section: 0)
+            timesTableView.insertRows(at: [newIndexPath], with: .automatic)
+            updateTableViewHeight()
             viewModel.checkValidity()
         }
     }

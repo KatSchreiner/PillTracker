@@ -53,8 +53,15 @@ final class NewPillStepTwoViewModel {
     }
     
     func removeTime(at index: Int) {
-        guard index < selectedTimes.count else { return }
+        print("Removing time at index \(index), current count: \(selectedTimes.count)")
+
+        guard index < selectedTimes.count else {
+            print("Index out of bounds")
+            return
+        }
         selectedTimes.remove(at: index)
+        print("New count: \(selectedTimes.count)")
+
         pillStepTwoModel.selectedTimes = selectedTimes
         checkValidity()
     }

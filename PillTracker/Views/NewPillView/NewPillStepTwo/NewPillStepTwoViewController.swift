@@ -19,10 +19,15 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         tableView.register(TimeCell.self, forCellReuseIdentifier: TimeCell.identifier)
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.separatorStyle = .none
+        tableView.separatorStyle = .singleLine
+        tableView.separatorColor = .dGray.withAlphaComponent(0.20)
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .clear
         tableView.estimatedRowHeight = 60
+        tableView.backgroundColor = .lGray
+        tableView.layer.cornerRadius = 8
+        tableView.clipsToBounds = true
         return tableView
     }()
     
@@ -93,7 +98,6 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         viewModel.sortTimes()
         viewModel.pillStepTwoModel.selectedTimes = viewModel.selectedTimes
         updateTableViewHeight()
-        //timesTableView.reloadData()
     }
     
     // MARK: - Private Methods
@@ -207,10 +211,10 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         
         newHeight = min(newHeight, maxTableViewHeight)
         
-        //UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.3) {
             self.tableViewHeightConstraint.constant = newHeight
             self.view.layoutIfNeeded()
-        //}
+        }
         
         timesTableView.isScrollEnabled = true
         timesTableView.alwaysBounceVertical = true
@@ -235,25 +239,39 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
         }
         let time = viewModel.selectedTimes[indexPath.row]
         cell.configure(with: "\(time.hour):\(time.minute)")
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
-
+    
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        print("Swipe triggered for row \(indexPath.row)")
-        let deleteAction = UIContextualAction(style: .destructive, title: "Удалить") { [weak self] (action, view, completionHandler) in
-            self?.viewModel.removeTime(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
-            self?.updateTableViewHeight()
-            self?.viewModel.checkValidity()
-            completionHandler(true)
+        
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] (action, view, completionHandler) in
+            UIView.animate(withDuration: 0.2, animations: {
+                if let cell = tableView.cellForRow(at: indexPath) {
+                    cell.transform = CGAffineTransform(translationX: -cell.bounds.width, y: 0)
+                    cell.alpha = 0
+                }
+            }) { _ in
+                self?.viewModel.removeTime(at: indexPath.row)
+                tableView.deleteRows(at: [indexPath], with: .none) 
+                self?.updateTableViewHeight()
+                self?.viewModel.checkValidity()
+                completionHandler(true)
+            }
         }
         
+        let trashImage = UIImage(systemName: "trash")?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        deleteAction.image = trashImage
         deleteAction.backgroundColor = .lRed
-        return UISwipeActionsConfiguration(actions: [deleteAction])
+        
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+        configuration.performsFirstActionWithFullSwipe = false
+        
+        return configuration
     }
 }
 

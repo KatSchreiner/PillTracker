@@ -17,15 +17,25 @@ final class TimeCell: UITableViewCell {
         label.font = Constants.defaultFontSize
         label.textColor = .dGray
         label.textAlignment = .center
-        label.backgroundColor = .lGray
+        label.backgroundColor = .clear
         label.layer.cornerRadius = Constants.defaultRadius
         label.layer.masksToBounds = true
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
+        
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupViews()
+        selectionStyle = .none
+        backgroundColor = .clear
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupViews() {
         contentView.addSubview(timeLabel)
         
         NSLayoutConstraint.activate([
@@ -34,13 +44,6 @@ final class TimeCell: UITableViewCell {
             timeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             timeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
         ])
-        
-        selectionStyle = .none
-        backgroundColor = .clear
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
     
     func configure(with timeText: String) {

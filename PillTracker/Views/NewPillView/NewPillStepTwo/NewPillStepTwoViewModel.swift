@@ -66,6 +66,16 @@ final class NewPillStepTwoViewModel {
         checkValidity()
     }
     
+    func updateTime(at index: Int, hour: String, minute: String) {
+        guard index >= 0 && index < selectedTimes.count else { return }
+        
+        selectedTimes[index] = (hour: hour, minute: minute)
+        sortTimes()
+        pillStepTwoModel.selectedTimes = selectedTimes
+        checkValidity()
+        
+    }
+    
     func checkValidity() {
         pillStepTwoModel.selectedOption = selectedOption
         pillStepTwoModel.selectedTimes = selectedTimes

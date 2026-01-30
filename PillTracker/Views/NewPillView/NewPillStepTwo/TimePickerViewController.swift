@@ -9,14 +9,17 @@ import UIKit
 
 protocol TimePickerDelegate: AnyObject {
     func didSelectTime(selectedTime: String)
+    func didUpdateTime(selectedTime: String, at index: Int)
 }
 
 final class TimePickerViewController: UIViewController {
     // MARK: - Public Properties
     weak var delegate: TimePickerDelegate?
     
+    var editingIndex: Int?
+    
     // MARK: - Private Properties
-    private lazy var timePicker: UIDatePicker = {
+    lazy var timePicker: UIDatePicker = {
         let timePicker = UIDatePicker()
         timePicker.datePickerMode = .time
         timePicker.preferredDatePickerStyle = .wheels
@@ -75,7 +78,13 @@ final class TimePickerViewController: UIViewController {
     @objc
     private func didTapDoneButton() {
         let selectedTime = timeFormatter.string(from: timePicker.date)
-        delegate?.didSelectTime(selectedTime: selectedTime)
+        
+        if let index = editingIndex {
+            delegate?.didUpdateTime(selectedTime: selectedTime, at: index)
+        } else {
+            delegate?.didSelectTime(selectedTime: selectedTime)
+        }
+        
     }
     
     @objc

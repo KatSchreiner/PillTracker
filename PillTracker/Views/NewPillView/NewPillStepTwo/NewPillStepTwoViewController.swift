@@ -268,15 +268,55 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
         deleteAction.image = trashImage
         deleteAction.backgroundColor = .lRed
         
-        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+        let editAction = UIContextualAction(style: .normal, title: nil) { [weak self] (action, view, completionHandler) in
+            self?.editTime(at: indexPath)
+            completionHandler(true)
+        }
+        
+        let editImage = UIImage(systemName: "pencil")?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        editAction.image = editImage
+        editAction.backgroundColor = .dBlue
+        
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
         configuration.performsFirstActionWithFullSwipe = false
         
         return configuration
+    }
+    
+    private func editTime(at indexPath: IndexPath) {
+        let timeToEdit = viewModel.selectedTimes[indexPath.row]
+        
+        let timePickerView = TimePickerViewController()
+        timePickerView.delegate = self
+        
+        let calendar = Calendar.current
+            var dateComponents = DateComponents()
+            dateComponents.hour = Int(timeToEdit.hour)
+            dateComponents.minute = Int(timeToEdit.minute)
+        
+        if let date = calendar.date(from: dateComponents) {
+            timePickerView.timePicker.setDate(date, animated: false)
+        }
+        
+        timePickerView.editingIndex = indexPath.row
+        
+        timePickerView.presentAsBottomSheet(on: self)
     }
 }
 
 // MARK: - TimePickerDelegate
 extension NewPillStepTwoViewController: TimePickerDelegate {
+    func didUpdateTime(selectedTime: String, at index: Int) {
+        let components = selectedTime.split(separator: ":")
+        if components.count == 2 {
+            let hour = String(components[0])
+            let minute = String(components[1])
+            viewModel.updateTime(at: index, hour: hour, minute: minute)
+            timesTableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+            viewModel.checkValidity()
+        }
+    }
+    
     func didSelectTime(selectedTime: String) {
         let components = selectedTime.split(separator: ":")
         if components.count == 2 {

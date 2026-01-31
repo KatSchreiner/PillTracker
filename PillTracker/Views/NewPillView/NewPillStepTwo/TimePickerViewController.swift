@@ -78,9 +78,12 @@ final class TimePickerViewController: UIViewController {
     @objc
     private func didTapDoneButton() {
         let selectedTime = timeFormatter.string(from: timePicker.date)
+        let components = selectedTime.components(separatedBy: ":")
+        guard components.count == 2 else { return }
         
         if let index = editingIndex {
             delegate?.didUpdateTime(selectedTime: selectedTime, at: index)
+            dismiss(animated: true)
         } else {
             delegate?.didSelectTime(selectedTime: selectedTime)
         }
@@ -99,6 +102,7 @@ final class TimePickerViewController: UIViewController {
 
         [timePicker, buttonStackView].forEach { view.addSubview($0) }
         addConstraints()
+        updateButtonTitle()
     }
     
     private func addConstraints() {
@@ -128,6 +132,11 @@ final class TimePickerViewController: UIViewController {
         if let date = calendar.date(from: dateComponents) {
             timePicker.setDate(date, animated: false)
         }
+    }
+    
+    private func updateButtonTitle() {
+        let title = editingIndex != nil ? "Изменить" : "Добавить"
+        doneButton.setTitle(title, for: .normal)
     }
 }
 

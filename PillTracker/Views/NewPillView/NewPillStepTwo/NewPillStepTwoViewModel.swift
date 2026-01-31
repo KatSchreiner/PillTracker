@@ -70,8 +70,9 @@ final class NewPillStepTwoViewModel {
         guard index >= 0 && index < selectedTimes.count else { return }
         
         selectedTimes[index] = (hour: hour, minute: minute)
-        sortTimes()
         pillStepTwoModel.selectedTimes = selectedTimes
+        
+        sortTimes()
         checkValidity()
         
     }

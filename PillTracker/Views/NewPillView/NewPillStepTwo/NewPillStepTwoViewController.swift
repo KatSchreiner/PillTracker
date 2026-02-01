@@ -290,14 +290,7 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
         timePickerView.delegate = self
         timePickerView.editingIndex = indexPath.row
         
-        let calendar = Calendar.current
-        var dateComponents = DateComponents()
-        dateComponents.hour = Int(timeToEdit.hour)
-        dateComponents.minute = Int(timeToEdit.minute)
-        
-        if let date = calendar.date(from: dateComponents) {
-            timePickerView.timePicker.setDate(date, animated: false)
-        }
+        timePickerView.setSpecificTime(hour: timeToEdit.hour, minute: timeToEdit.minute)
         
         timePickerView.presentAsBottomSheet(on: self)
     }

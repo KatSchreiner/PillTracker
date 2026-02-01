@@ -71,7 +71,6 @@ final class TimePickerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        setCurrentTime()
     }
     
     // MARK: - IB Actions
@@ -96,6 +95,20 @@ final class TimePickerViewController: UIViewController {
     }
     
     // MARK: - Public Methods
+    func setSpecificTime(hour: String, minute: String) {
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        dateComponents.hour = Int(hour)
+        dateComponents.minute = Int(minute)
+       
+        if let date = calendar.date(from: dateComponents) {
+            timePicker.setDate(date, animated: false)
+        } else {
+            timePicker.setDate(Date(), animated: false)
+        }
+    }
+    
+    // MARK: - Private Methods
     private func setupView() {
         view.backgroundColor = .systemBackground
         view.layer.cornerRadius = 16
@@ -116,22 +129,6 @@ final class TimePickerViewController: UIViewController {
             buttonStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
             buttonStackView.heightAnchor.constraint(equalToConstant: 60) 
         ])
-    }
-    
-    private func setCurrentTime() {
-        let currentTime = Date()
-        let calendar = Calendar.current
-        
-        let components = calendar.dateComponents([.hour, .minute], from: currentTime)
-        guard let hour = components.hour, let minute = components.minute else { return }
-        
-        var dateComponents = DateComponents()
-        dateComponents.hour = hour
-        dateComponents.minute = 0
-        
-        if let date = calendar.date(from: dateComponents) {
-            timePicker.setDate(date, animated: false)
-        }
     }
     
     private func updateButtonTitle() {

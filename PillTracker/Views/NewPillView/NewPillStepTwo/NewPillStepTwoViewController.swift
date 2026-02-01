@@ -288,17 +288,16 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
         
         let timePickerView = TimePickerViewController()
         timePickerView.delegate = self
+        timePickerView.editingIndex = indexPath.row
         
         let calendar = Calendar.current
-            var dateComponents = DateComponents()
-            dateComponents.hour = Int(timeToEdit.hour)
-            dateComponents.minute = Int(timeToEdit.minute)
+        var dateComponents = DateComponents()
+        dateComponents.hour = Int(timeToEdit.hour)
+        dateComponents.minute = Int(timeToEdit.minute)
         
         if let date = calendar.date(from: dateComponents) {
             timePickerView.timePicker.setDate(date, animated: false)
         }
-        
-        timePickerView.editingIndex = indexPath.row
         
         timePickerView.presentAsBottomSheet(on: self)
     }
@@ -312,7 +311,7 @@ extension NewPillStepTwoViewController: TimePickerDelegate {
             let hour = String(components[0])
             let minute = String(components[1])
             viewModel.updateTime(at: index, hour: hour, minute: minute)
-            timesTableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+            timesTableView.reloadData()
             viewModel.checkValidity()
         }
     }
@@ -324,7 +323,7 @@ extension NewPillStepTwoViewController: TimePickerDelegate {
             let minute = String(components[1])
             viewModel.addTime(hour: hour, minute: minute)
             let newIndexPath = IndexPath(row: viewModel.selectedTimes.count - 1, section: 0)
-            timesTableView.insertRows(at: [newIndexPath], with: .automatic)
+            timesTableView.reloadData()
             updateTableViewHeight()
             viewModel.checkValidity()
         }

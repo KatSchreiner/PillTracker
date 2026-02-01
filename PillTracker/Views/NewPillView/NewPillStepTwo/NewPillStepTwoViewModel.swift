@@ -48,6 +48,7 @@ final class NewPillStepTwoViewModel {
     
     func addTime(hour: String, minute: String) {
         selectedTimes.append((hour: hour, minute: minute))
+        sortTimes()
         pillStepTwoModel.selectedTimes = selectedTimes
         checkValidity()
     }
@@ -70,11 +71,10 @@ final class NewPillStepTwoViewModel {
         guard index >= 0 && index < selectedTimes.count else { return }
         
         selectedTimes[index] = (hour: hour, minute: minute)
+        sortTimes()
         pillStepTwoModel.selectedTimes = selectedTimes
         
-        sortTimes()
         checkValidity()
-        
     }
     
     func checkValidity() {

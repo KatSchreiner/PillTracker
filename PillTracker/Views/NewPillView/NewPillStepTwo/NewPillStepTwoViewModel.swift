@@ -89,14 +89,6 @@ final class NewPillStepTwoViewModel {
         checkValidity()
     }
     
-    func checkValidity() {
-        pillStepTwoModel.selectedOption = selectedOption
-        pillStepTwoModel.selectedTimes = selectedTimes
-        
-        let isValid = pillStepTwoModel.isValid()
-        onValidationChange?(isValid)
-    }
-    
     func sortTimes() {
         let sorted = selectedTimes.sorted { time1, time2 in
             var components1: DateComponents = DateComponents()
@@ -114,6 +106,19 @@ final class NewPillStepTwoViewModel {
         }
         
         selectedTimes = sorted
+    }
+    
+    func checkValidity() {
+        pillStepTwoModel.selectedOption = selectedOption
+        pillStepTwoModel.selectedTimes = selectedTimes
+        
+        let isValid = pillStepTwoModel.isValid()
+        onValidationChange?(isValid)
+    }
+    
+    func getPreferredTableViewHeight(rowHeight: CGFloat, maxHeight: CGFloat) -> CGFloat {
+        let height = CGFloat(selectedTimes.count) * rowHeight
+        return min(height, maxHeight)
     }
 }
 

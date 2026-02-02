@@ -204,11 +204,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     }
     
     private func updateTableViewHeight() {
-        let rowHeight: CGFloat = 60
-        let numberOfRows = viewModel.selectedTimes.count
-        var newHeight = CGFloat(numberOfRows) * rowHeight
-        
-        newHeight = min(newHeight, maxTableViewHeight)
+        let newHeight = viewModel.getPreferredTableViewHeight(rowHeight: 60, maxHeight: maxTableViewHeight)
         
         UIView.animate(withDuration: 0.3) {
             self.tableViewHeightConstraint.constant = newHeight

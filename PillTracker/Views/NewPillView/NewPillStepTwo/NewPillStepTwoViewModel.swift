@@ -10,6 +10,11 @@ import UIKit
 final class NewPillStepTwoViewModel {
     
     // MARK: - Public Properties
+    var selectedIndex: Int? {
+        didSet {
+            onOptionSelected?(selectedIndex)
+        }
+    }
     var pillStepTwoModel = PillStepTwoModel()
     
     var selectedTimes: [(hour: String, minute: String)] = [] {
@@ -38,12 +43,19 @@ final class NewPillStepTwoViewModel {
     // MARK: - Callbacks
     var onTimesUpdated: (() -> Void)?
     var onValidationChange: ((Bool) -> Void)?
+    var onOptionSelected: ((Int?) -> Void)?
     
     // MARK: - Public Methods
     func setSelectedOption(_ option: String?) {
         selectedOption = option
+        selectedIndex = optionData.firstIndex(of: option ?? "")
         pillStepTwoModel.selectedOption = option
+        pillStepTwoModel.selectedIcon = selectedIndex != nil ? optionImagesSelected[selectedIndex!] : nil
         checkValidity()
+    }
+    
+    func getSelectedIndex() -> Int? {
+        return selectedIndex ?? optionData.firstIndex(of: selectedOption ?? "")
     }
     
     func addTime(hour: String, minute: String) {

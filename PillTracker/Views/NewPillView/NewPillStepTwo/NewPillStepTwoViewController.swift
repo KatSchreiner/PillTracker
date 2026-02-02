@@ -79,7 +79,6 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         viewModel.pillStepTwoModel.selectedIcon =  viewModel.optionImagesSelected[sender.tag]
         viewModel.pillStepTwoModel.selectedOption = viewModel.selectedOption
         
-        updateOptionButtons(selectedIndex: sender.tag)
         viewModel.checkValidity()
     }
     
@@ -143,16 +142,17 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         viewModel.onValidationChange = { [weak self] isValid in
             self?.updateButtonState(isEnabled: isValid, isNextButton: true)
         }
+        
+        viewModel.onOptionSelected = { [weak self] index in
+            guard let index = index else { return }
+            self?.updateOptionButtons(selectedIndex: index)
+        }
     }
     
     private func loadData() {
-        guard let selectedOption = viewModel.selectedOption,
-              let selectedIndex = viewModel.optionData.firstIndex(of: selectedOption) else {
-            viewModel.checkValidity()
-            return
+        if let selectedIndex = viewModel.getSelectedIndex() {
+            updateOptionButtons(selectedIndex: selectedIndex)
         }
-        
-        updateOptionButtons(selectedIndex: selectedIndex)
         viewModel.checkValidity()
     }
     

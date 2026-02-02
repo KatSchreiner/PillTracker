@@ -86,7 +86,7 @@ final class NewPillStepTwoViewModel {
     }
     
     func sortTimes() {
-        selectedTimes.sort { time1, time2 in
+        let sorted = selectedTimes.sorted { time1, time2 in
             var components1: DateComponents = DateComponents()
             components1.hour = Int(time1.hour)
             components1.minute = Int(time1.minute)
@@ -100,6 +100,8 @@ final class NewPillStepTwoViewModel {
             
             return date1 < date2
         }
+        
+        selectedTimes = sorted
     }
 }
 

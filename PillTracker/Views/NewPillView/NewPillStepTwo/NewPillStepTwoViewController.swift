@@ -66,7 +66,6 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.isUserInteractionEnabled = true
-
         setupView()
         setupBindings()
         loadData()
@@ -95,7 +94,6 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     
     // MARK: - Public Methods
     func refreshTimesTableView() {
-        viewModel.sortTimes()
         viewModel.pillStepTwoModel.selectedTimes = viewModel.selectedTimes
         updateTableViewHeight()
     }
@@ -139,6 +137,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     private func setupBindings() {
         viewModel.onTimesUpdated = { [weak self] in
             self?.refreshTimesTableView()
+            self?.updateTableViewHeight()
         }
         
         viewModel.onValidationChange = { [weak self] isValid in
@@ -215,10 +214,6 @@ final class NewPillStepTwoViewController: BaseStepViewController {
             self.tableViewHeightConstraint.constant = newHeight
             self.view.layoutIfNeeded()
         }
-        
-        timesTableView.isScrollEnabled = true
-        timesTableView.alwaysBounceVertical = true
-        timesTableView.showsVerticalScrollIndicator = numberOfRows * Int(rowHeight) > Int(self.maxTableViewHeight)
     }
 }
 

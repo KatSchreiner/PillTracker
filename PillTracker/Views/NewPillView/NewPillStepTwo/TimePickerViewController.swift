@@ -76,6 +76,8 @@ final class TimePickerViewController: UIViewController {
     // MARK: - IB Actions
     @objc
     private func didTapDoneButton() {
+        doneButton.animatePress(duration: 0.2)
+        
         let selectedTime = timeFormatter.string(from: timePicker.date)
         let components = selectedTime.components(separatedBy: ":")
         guard components.count == 2 else { return }
@@ -91,6 +93,8 @@ final class TimePickerViewController: UIViewController {
     
     @objc
     private func didTapCancelButton() {
+        cancelButton.animatePress(duration: 0.2)
+        
         dismiss(animated: true, completion: nil)
     }
     

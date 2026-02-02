@@ -203,10 +203,15 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         return buttonContainer
     }
     
-    private func updateTableViewHeight() {
+    private func updateTableViewHeight(animated: Bool = false) {
         let newHeight = viewModel.getPreferredTableViewHeight(rowHeight: 60, maxHeight: maxTableViewHeight)
         
-        UIView.animate(withDuration: 0.3) {
+        if animated {
+            UIView.animate(withDuration: 0.3) {
+                self.tableViewHeightConstraint.constant = newHeight
+                self.view.layoutIfNeeded()
+            }
+        } else {
             self.tableViewHeightConstraint.constant = newHeight
             self.view.layoutIfNeeded()
         }
@@ -274,18 +279,14 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
     }
     
     private func deleteTime(at indexPath: IndexPath, completionHandler: @escaping (Bool) -> Void) {
-        UIView.animate(withDuration: 0.2, animations: {
-            if let cell = self.timesTableView.cellForRow(at: indexPath) {
-                cell.transform = CGAffineTransform(translationX: -cell.bounds.width, y: 0)
-                cell.alpha = 0
-            }
-        }) { _ in
-            self.viewModel.removeTime(at: indexPath.row)
-            self.timesTableView.deleteRows(at: [indexPath], with: .none)
-            self.updateTableViewHeight()
-            self.viewModel.checkValidity()
-            completionHandler(true)
-        }
+        self.viewModel.removeTime(at: indexPath.row)
+        self.timesTableView.deleteRows(at: [indexPath], with: .automatic)  // Или .fade для плавного исчезновения
+        
+        // Обновляем высоту с анимацией после удаления
+        self.updateTableViewHeight(animated: true)
+        self.viewModel.checkValidity()
+        completionHandler(true)
+        
     }
 }
 

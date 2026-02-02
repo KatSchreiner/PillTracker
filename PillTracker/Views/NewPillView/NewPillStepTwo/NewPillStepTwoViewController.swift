@@ -249,33 +249,20 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
-        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] (action, view, completionHandler) in
-            UIView.animate(withDuration: 0.2, animations: {
-                if let cell = tableView.cellForRow(at: indexPath) {
-                    cell.transform = CGAffineTransform(translationX: -cell.bounds.width, y: 0)
-                    cell.alpha = 0
-                }
-            }) { _ in
-                self?.viewModel.removeTime(at: indexPath.row)
-                tableView.deleteRows(at: [indexPath], with: .none) 
-                self?.updateTableViewHeight()
-                self?.viewModel.checkValidity()
-                completionHandler(true)
-            }
-        }
-        
-        let trashImage = UIImage(systemName: "trash")?.withTintColor(.white, renderingMode: .alwaysOriginal)
-        deleteAction.image = trashImage
-        deleteAction.backgroundColor = .lRed
-        
         let editAction = UIContextualAction(style: .normal, title: nil) { [weak self] (action, view, completionHandler) in
             self?.editTime(at: indexPath)
             completionHandler(true)
         }
         
-        let editImage = UIImage(systemName: "pencil")?.withTintColor(.white, renderingMode: .alwaysOriginal)
-        editAction.image = editImage
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
+            self?.deleteTime(at: indexPath, completionHandler: completionHandler)
+        }
+        
+        editAction.image = UIImage(systemName: "pencil")?.withTintColor(.white, renderingMode: .alwaysOriginal)
         editAction.backgroundColor = .dBlue
+        
+        deleteAction.image = UIImage(systemName: "trash")?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        deleteAction.backgroundColor = .lRed
         
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
         configuration.performsFirstActionWithFullSwipe = false
@@ -294,21 +281,25 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
         
         timePickerView.presentAsBottomSheet(on: self)
     }
+    
+    private func deleteTime(at indexPath: IndexPath, completionHandler: @escaping (Bool) -> Void) {
+        UIView.animate(withDuration: 0.2, animations: {
+            if let cell = self.timesTableView.cellForRow(at: indexPath) {
+                cell.transform = CGAffineTransform(translationX: -cell.bounds.width, y: 0)
+                cell.alpha = 0
+            }
+        }) { _ in
+            self.viewModel.removeTime(at: indexPath.row)
+            self.timesTableView.deleteRows(at: [indexPath], with: .none)
+            self.updateTableViewHeight()
+            self.viewModel.checkValidity()
+            completionHandler(true)
+        }
+    }
 }
 
 // MARK: - TimePickerDelegate
 extension NewPillStepTwoViewController: TimePickerDelegate {
-    func didUpdateTime(selectedTime: String, at index: Int) {
-        let components = selectedTime.split(separator: ":")
-        if components.count == 2 {
-            let hour = String(components[0])
-            let minute = String(components[1])
-            viewModel.updateTime(at: index, hour: hour, minute: minute)
-            timesTableView.reloadData()
-            viewModel.checkValidity()
-        }
-    }
-    
     func didSelectTime(selectedTime: String) {
         let components = selectedTime.split(separator: ":")
         if components.count == 2 {
@@ -318,6 +309,17 @@ extension NewPillStepTwoViewController: TimePickerDelegate {
             let newIndexPath = IndexPath(row: viewModel.selectedTimes.count - 1, section: 0)
             timesTableView.reloadData()
             updateTableViewHeight()
+            viewModel.checkValidity()
+        }
+    }
+    
+    func didUpdateTime(selectedTime: String, at index: Int) {
+        let components = selectedTime.split(separator: ":")
+        if components.count == 2 {
+            let hour = String(components[0])
+            let minute = String(components[1])
+            viewModel.updateTime(at: index, hour: hour, minute: minute)
+            timesTableView.reloadData()
             viewModel.checkValidity()
         }
     }

@@ -414,11 +414,12 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         dayButtonStackView.isHidden = false
         dayButtonStackViewHeightConstraint?.constant = 35
         
-        UIView.animate(withDuration: 0.3, animations: {
-            self.view.layoutIfNeeded()
+        self.view.layoutIfNeeded()
+        
+        UIView.animate(withDuration: 0.3) {
             self.dayButtonStackView.alpha = 1
+            self.view.layoutIfNeeded()
         }
-        )
     }
     
     private func hideDayButtonStackView() {

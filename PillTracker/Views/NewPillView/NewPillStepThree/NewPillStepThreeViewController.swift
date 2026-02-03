@@ -27,6 +27,8 @@ final class NewPillStepThreeViewController: BaseStepViewController {
             )
             button.tag = preset.hashValue
             stackView.addArrangedSubview(button)
+            
+            button.heightAnchor.constraint(equalToConstant: 50).isActive = true
         }
         
         return stackView
@@ -169,6 +171,8 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     // MARK: - IB Actions
     @objc private func presetButtonTapped(_ sender: UIButton) {
+        sender.animatePress()
+        
         guard let buttonTitle = sender.title(for: .normal),
               let preset = RepeatPreset(rawValue: buttonTitle) else {
             return
@@ -210,10 +214,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         if sender.isOn {
             MedicationNotificationManager.shared.requestAuthorization { [weak self] granted in
                 DispatchQueue.main.async {
-                    if granted {
-                        self?.showReminderActivatedAlert()
-                    } else {
-                        self?.showNotificationPermissionAlert()
+                    if !granted {
                         sender.isOn = false
                         self?.viewModel.isReminderEnabled = false
                     }
@@ -261,7 +262,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
             dayButtonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             dayButtonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
-            reminderStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
+            reminderStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
             reminderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
@@ -434,36 +435,5 @@ final class NewPillStepThreeViewController: BaseStepViewController {
                 self.dayButtonStackViewHeightConstraint?.constant = 0
             }
         )
-    }
-    
-    // MARK: - Notification Alert
-    private func showNotificationPermissionAlert() {
-        let alert = UIAlertController(
-            title: "Разрешение не предоставлено",
-            message: "Пожалуйста, разрешите уведомления в настройках, чтобы получать напоминания о приеме лекарств",
-            preferredStyle: .alert
-        )
-        
-        alert.addAction(UIAlertAction(title: "Настройки", style: .default) { _ in
-            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(settingsURL)
-            }
-        })
-        
-        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
-        
-        present(alert, animated: true)
-    }
-    
-    private func showReminderActivatedAlert() {
-        let alert = UIAlertController(
-            title: "Напоминания включены",
-            message: "Вы будете получать уведомления о приеме лекарства в установленное время",
-            preferredStyle: .alert
-        )
-        
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        
-        present(alert, animated: true)
     }
 }

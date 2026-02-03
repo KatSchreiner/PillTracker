@@ -280,9 +280,8 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
     
     private func deleteTime(at indexPath: IndexPath, completionHandler: @escaping (Bool) -> Void) {
         self.viewModel.removeTime(at: indexPath.row)
-        self.timesTableView.deleteRows(at: [indexPath], with: .automatic)  // Или .fade для плавного исчезновения
+        self.timesTableView.deleteRows(at: [indexPath], with: .automatic)
         
-        // Обновляем высоту с анимацией после удаления
         self.updateTableViewHeight(animated: true)
         self.viewModel.checkValidity()
         completionHandler(true)

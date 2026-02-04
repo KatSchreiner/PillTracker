@@ -146,6 +146,8 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         let switchControl = UISwitch()
         switchControl.isOn = false
         switchControl.addTarget(self, action: #selector(didToggleReminderSwitch), for: .valueChanged)
+        switchControl.onTintColor = .dBlue
+        switchControl.tintColor = .lGray
         return switchControl
     }()
     

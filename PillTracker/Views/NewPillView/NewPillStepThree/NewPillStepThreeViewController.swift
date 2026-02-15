@@ -188,10 +188,20 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         
         let index = sender.tag + 1
         
-        if let itemIndex = viewModel.selectedDays.firstIndex(of: index) {
-            viewModel.selectedDays.remove(at: itemIndex)
+        if viewModel.selectedPreset == RepeatPreset.custom.rawValue && viewModel.endDate == nil {
+            if viewModel.selectedDays.contains(index) {
+                if viewModel.selectedDays.count > 1 {
+                    viewModel.selectedDays.removeAll { $0 == index }
+                }
+            } else {
+                viewModel.selectedDays = [index]
+            }
         } else {
-            viewModel.selectedDays.append(index)
+            if let itemIndex = viewModel.selectedDays.firstIndex(of: index) {
+                viewModel.selectedDays.remove(at: itemIndex)
+            } else {
+                viewModel.selectedDays.append(index)
+            }
         }
         
         updateDayButtonStates()

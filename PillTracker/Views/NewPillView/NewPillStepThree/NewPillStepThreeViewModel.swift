@@ -106,6 +106,16 @@ final class NewPillStepThreeViewModel {
         return (calendar.component(.weekday, from: date) + 5) % 7 + 1
     }
     
+    private func isCurrentDayValidForCustomPreset() -> Bool {
+        guard selectedPreset == RepeatPreset.custom.rawValue else { return true }
+        guard endDate == nil else { return true }
+        
+        guard let start = startDate else { return false }
+        
+        let currentWeekday = weekdayNumber(from: start)
+        return selectedDays.contains(currentWeekday)
+    }
+    
     func checkValidity() {
         pillStepThreeModel.selectedDays = selectedDays
         pillStepThreeModel.selectedPreset = selectedPreset
@@ -114,9 +124,15 @@ final class NewPillStepThreeViewModel {
         pillStepThreeModel.interval = interval
         pillStepThreeModel.isReminderEnabled = isReminderEnabled
         
-        let isValid = pillStepThreeModel.isValid()
+        var isValid = pillStepThreeModel.isValid()
+        
+        if isValid {
+            isValid = isCurrentDayValidForCustomPreset()
+        }
+        
         onValidationChange?(isValid)
     }
+    
 }
 
 extension NewPillStepThreeViewModel {

@@ -19,13 +19,10 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         tableView.register(TimeCell.self, forCellReuseIdentifier: TimeCell.identifier)
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.separatorStyle = .singleLine
-        tableView.separatorColor = .dGray.withAlphaComponent(0.20)
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        tableView.separatorStyle = .none
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = .clear
+        tableView.backgroundColor = .white
         tableView.estimatedRowHeight = 60
-        tableView.backgroundColor = .lGray
         tableView.layer.cornerRadius = 8
         tableView.clipsToBounds = true
         return tableView
@@ -242,23 +239,29 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
-    
+
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        guard let pencilImage = UIImage(systemName: "pencil")?.withTintColor(.white, renderingMode: .alwaysOriginal),
+              let trashImage = UIImage(systemName: "trash")?.withTintColor(.white, renderingMode: .alwaysOriginal) else { return nil }
         
         let editAction = UIContextualAction(style: .normal, title: nil) { [weak self] (action, view, completionHandler) in
             self?.editTime(at: indexPath)
             completionHandler(true)
         }
         
-        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
+        let deleteAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completionHandler in
             self?.deleteTime(at: indexPath, completionHandler: completionHandler)
         }
         
-        editAction.image = UIImage(systemName: "pencil")?.withTintColor(.white, renderingMode: .alwaysOriginal)
-        editAction.backgroundColor = .dBlue
+        let diameter: CGFloat = 50
+        let editImage = UIImage.circularImage(from: pencilImage, backgroundColor: .dBlue, diameter: diameter)
+        let deleteImage = UIImage.circularImage(from: trashImage, backgroundColor: .lRed, diameter: diameter)
         
-        deleteAction.image = UIImage(systemName: "trash")?.withTintColor(.white, renderingMode: .alwaysOriginal)
-        deleteAction.backgroundColor = .lRed
+        editAction.image = editImage
+        editAction.backgroundColor = .white
+        
+        deleteAction.image = deleteImage
+        deleteAction.backgroundColor = .white
         
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
         configuration.performsFirstActionWithFullSwipe = false

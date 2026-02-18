@@ -17,11 +17,18 @@ final class TimeCell: UITableViewCell {
         label.font = Constants.defaultFontSize
         label.textColor = .dGray
         label.textAlignment = .center
-        label.backgroundColor = .clear
+        label.backgroundColor = .lGray
         label.layer.cornerRadius = Constants.defaultRadius
         label.layer.masksToBounds = true
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    
+    private lazy var containerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
         
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -36,13 +43,19 @@ final class TimeCell: UITableViewCell {
     }
     
     private func setupViews() {
-        contentView.addSubview(timeLabel)
+        contentView.addSubview(containerView)
+        containerView.addSubview(timeLabel)
         
         NSLayoutConstraint.activate([
-            timeLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
-            timeLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            timeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            timeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
+            
+            timeLabel.topAnchor.constraint(equalTo: containerView.topAnchor),
+            timeLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            timeLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            timeLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
         ])
     }
     

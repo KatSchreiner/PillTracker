@@ -28,4 +28,13 @@ extension UIView {
         
         layer.insertSublayer(gradient, at: 0)
     }
+    
+    var allSubviews: [UIView] {
+        var views = [UIView]()
+        for subview in subviews {
+            views.append(subview)
+            views.append(contentsOf: subview.allSubviews)
+        }
+        return views
+    }
 }

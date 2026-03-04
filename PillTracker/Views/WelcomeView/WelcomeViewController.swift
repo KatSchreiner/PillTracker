@@ -43,7 +43,7 @@ final class WelcomeViewController: UIViewController {
     private var messageLabel: UILabel = {
         let label = UILabel()
         label.backgroundColor = .dGray
-        label.textColor = .white
+        label.textColor = .lGray
         label.textAlignment = Constants.centerTextAlignment
         label.layer.cornerRadius = Constants.defaultRadius
         label.clipsToBounds = true
@@ -67,7 +67,7 @@ final class WelcomeViewController: UIViewController {
     
     // MARK: - Private Methods
     private func setupView() {
-        view.backgroundColor = .lGray
+        view.backgroundColor = .background
         
         [horizontalStackView, messageLabel].forEach { view in
             self.view.addSubview(view)

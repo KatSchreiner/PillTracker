@@ -42,11 +42,13 @@ class CustomPresentationController: UIPresentationController {
         presentedView.frame = frameOfPresentedViewInContainerView
         presentedView.alpha = 0
         
+//        presentedView.backgroundColor = .background.withAlphaComponent(0.9)
+        
         presentedView.layer.cornerRadius = 15
         presentedView.layer.masksToBounds = true
         
         UIView.animate(withDuration: 0.3) {
-            presentedView.alpha = 1
+            presentedView.alpha = 0.9
         }
     }
     

@@ -28,7 +28,7 @@ final class EditMyPillViewController: UIViewController {
     }
     
     private func setupView() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .background
         
         addNewPillVC.delegate = self
         

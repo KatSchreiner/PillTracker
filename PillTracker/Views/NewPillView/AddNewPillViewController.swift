@@ -93,7 +93,7 @@ final class AddNewPillViewController: UIViewController {
     }
     
     private func setupView() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .background
         setupNavigation()
         
         [progressView, containerView, buttonStackView].forEach { [weak self] view in

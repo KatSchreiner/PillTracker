@@ -49,7 +49,7 @@ final class IconSelectionViewController: UIViewController {
     
     // MARK: - Private Methods
     private func setupView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .lWhite
         view.addSubview(collectionView)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         

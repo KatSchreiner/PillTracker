@@ -19,6 +19,7 @@ final class UnitSelectionViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+        tableView.backgroundColor = .clear
         return tableView
     }()
     
@@ -33,7 +34,7 @@ final class UnitSelectionViewController: UIViewController {
     
     // MARK: - Private Methods
     private func setupView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .background
         
         view.addSubview(tableView)
         addConstraint()
@@ -55,6 +56,9 @@ final class UnitSelectionViewController: UIViewController {
         cell.textLabel?.textAlignment = .center
         cell.separatorInset = .zero
         cell.layoutMargins = .zero
+        cell.backgroundColor = .clear
+        cell.contentView.backgroundColor = .clear
+        cell.selectionStyle = .none
     }
     
     private func getUnitTitle(for dosage: Double, unit: String) -> String {

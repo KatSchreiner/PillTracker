@@ -18,24 +18,31 @@ final class TimeCell: UITableViewCell {
         label.textColor = .dGray
         label.textAlignment = .center
         label.backgroundColor = .lGray
+        label.layer.borderWidth = 1
+        label.layer.borderColor = UIColor.lGray.cgColor
         label.layer.cornerRadius = Constants.defaultRadius
         label.layer.masksToBounds = true
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    private lazy var containerView: UIView = {
+        
+    lazy var bottomSeparatorView: UIView = {
         let view = UIView()
-        view.backgroundColor = .clear
-        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .background
         return view
     }()
-        
+    
+    lazy var topSeparatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .background
+        return view
+    }()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
         selectionStyle = .none
-        backgroundColor = .clear
+        backgroundColor = .background
     }
     
     required init?(coder: NSCoder) {
@@ -43,19 +50,28 @@ final class TimeCell: UITableViewCell {
     }
     
     private func setupViews() {
-        contentView.addSubview(containerView)
-        containerView.addSubview(timeLabel)
+        [timeLabel, bottomSeparatorView, topSeparatorView].forEach {
+            contentView.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
         
+
         NSLayoutConstraint.activate([
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
+            topSeparatorView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            topSeparatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            topSeparatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            topSeparatorView.heightAnchor.constraint(equalToConstant: 5),
             
-            timeLabel.topAnchor.constraint(equalTo: containerView.topAnchor),
-            timeLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            timeLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            timeLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+            timeLabel.topAnchor.constraint(equalTo: topSeparatorView.bottomAnchor),
+            timeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            timeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            timeLabel.heightAnchor.constraint(equalToConstant: 44),
+            
+            bottomSeparatorView.topAnchor.constraint(equalTo: timeLabel.bottomAnchor),
+            bottomSeparatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            bottomSeparatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            bottomSeparatorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            bottomSeparatorView.heightAnchor.constraint(equalToConstant: 5)
         ])
     }
     

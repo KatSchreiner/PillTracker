@@ -15,6 +15,7 @@ final class PillTableViewCell: UITableViewCell {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.textAlignment = .center
+        label.textColor = .dGray
         return label
     }()
     
@@ -27,6 +28,7 @@ final class PillTableViewCell: UITableViewCell {
     lazy var pillNameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 16)
+        label.textColor = .dGray
         return label
     }()
     
@@ -46,6 +48,18 @@ final class PillTableViewCell: UITableViewCell {
         target: self,
         action: #selector(didTapMarkAsTaken)
     )
+    
+    lazy var bottomSeparatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .background
+        return view
+    }()
+    
+    lazy var topSeparatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .background
+        return view
+    }()
     
     // MARK: - Callback
     var markAsTakenButtonAction: (() -> Void)?
@@ -98,11 +112,10 @@ final class PillTableViewCell: UITableViewCell {
     
     // MARK: - Private Methods
     private func setupView() {
-        self.backgroundColor = UIColor.white
-        
+        self.backgroundColor = .lGray.withAlphaComponent(0.5)
         self.selectionStyle = .none
         
-        [pillTimeLabel, pillImageView, pillNameLabel, dosageLabel, howToTakeLabel, markAsTakenButton].forEach { subview in
+        [bottomSeparatorView, topSeparatorView, pillTimeLabel, pillImageView, pillNameLabel, dosageLabel, howToTakeLabel, markAsTakenButton].forEach { subview in
             self.contentView.addSubview(subview)
             subview.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -113,6 +126,16 @@ final class PillTableViewCell: UITableViewCell {
     
     private func addConstraint() {
         NSLayoutConstraint.activate([
+            bottomSeparatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            bottomSeparatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            bottomSeparatorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            bottomSeparatorView.heightAnchor.constraint(equalToConstant: 5),
+            
+            topSeparatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            topSeparatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            topSeparatorView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            topSeparatorView.heightAnchor.constraint(equalToConstant: 5),
+            
             pillTimeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             pillTimeLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             pillTimeLabel.widthAnchor.constraint(equalToConstant: 80),

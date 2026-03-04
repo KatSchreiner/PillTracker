@@ -21,7 +21,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
         tableView.delegate = self
         tableView.separatorStyle = .none
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = .white
+        tableView.backgroundColor = .clear
         tableView.estimatedRowHeight = 60
         tableView.layer.cornerRadius = 8
         tableView.clipsToBounds = true
@@ -96,7 +96,7 @@ final class NewPillStepTwoViewController: BaseStepViewController {
     
     // MARK: - Private Methods
     private func setupView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .background
         
         [buttonStackView, timePickerLabel, timesTableView, addTimePickerButton].forEach { view in
             self.view.addSubview(view)
@@ -258,10 +258,10 @@ extension NewPillStepTwoViewController: UITableViewDataSource, UITableViewDelega
         let deleteImage = UIImage.circularImage(from: trashImage, backgroundColor: .lRed, diameter: diameter)
         
         editAction.image = editImage
-        editAction.backgroundColor = .white
+        editAction.backgroundColor = .background
         
         deleteAction.image = deleteImage
-        deleteAction.backgroundColor = .white
+        deleteAction.backgroundColor = .background
         
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
         configuration.performsFirstActionWithFullSwipe = false

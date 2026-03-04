@@ -38,7 +38,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         let button = UIButton()
         button.setTitle(title, for: .normal)
         button.setTitleColor(.dGray, for: .normal)
-        button.backgroundColor = .lGray
+        button.backgroundColor = .lGray.withAlphaComponent(0.5)
         button.layer.cornerRadius = Constants.defaultRadius
         button.isEnabled = true
         button.addTarget(self, action: action, for: .touchUpInside)
@@ -238,7 +238,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
     
     // MARK: - Private Methods
     private func setupView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .background
         
         dayButtonStackView.isHidden = true
         dayButtonStackView.alpha = 0
@@ -386,7 +386,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
             UIView.performWithoutAnimation {
                 button.isSelected = isSelected
                 button.backgroundColor = isSelected ? .dBlue : .lGray
-                button.setTitleColor(isSelected ? .lGray : .dGray, for: .normal)
+                button.setTitleColor(isSelected ? .lGray : .white, for: .normal)
                 button.layoutIfNeeded()
             }
         }

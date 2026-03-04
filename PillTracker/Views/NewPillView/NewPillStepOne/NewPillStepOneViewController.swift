@@ -29,7 +29,7 @@ final class NewPillStepOneViewController: BaseStepViewController {
     lazy var unitButton = CustomButton.makeButton(
         title: "Выберите единицу",
         titleColor: .dGray,
-        backgroundColor: .lGray,
+        backgroundColor: .lGray.withAlphaComponent(0.5),
         target: self,
         action: #selector(didTapUnitButton)
     )
@@ -124,7 +124,7 @@ final class NewPillStepOneViewController: BaseStepViewController {
     
     // MARK: - Private Methods
     private func setupView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .background
             
         view.addSubview(stackView)
         addConstraint()

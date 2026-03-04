@@ -12,6 +12,7 @@ final class CalendarDayCell: UICollectionViewCell {
     lazy var dayLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
+        label.textColor = .dGray
         label.font = .systemFont(ofSize: 16)
         return label
     }()
@@ -20,6 +21,7 @@ final class CalendarDayCell: UICollectionViewCell {
         let label = UILabel()
         label.textAlignment = .center
         label.font = .systemFont(ofSize: 18, weight: .regular)
+        label.textColor = .dGray
         return label
     }()
     

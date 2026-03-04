@@ -19,9 +19,7 @@ final class MyPillsViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = .clear
-        tableView.separatorStyle = .singleLine
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
-        tableView.separatorColor = UIColor.lightGray.withAlphaComponent(0.5)
+        tableView.separatorStyle = .none
         return tableView
     }()
     
@@ -30,17 +28,12 @@ final class MyPillsViewController: UIViewController {
         return view
     }()
     
-    lazy var bottomBorderView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .lGray
-        return view
-    }()
-    
     private lazy var userNameLabel: UILabel = {
         let label = UILabel()
         label.text = "Привет, \(userName ?? "друг")!"
         label.textAlignment = .left
-        label.font = UIFont.systemFont(ofSize: 18, weight: .bold)
+        label.font = UIFont.systemFont(ofSize: 18, weight: .regular)
+        label.textColor = .dGray
         return label
     }()
     
@@ -48,6 +41,7 @@ final class MyPillsViewController: UIViewController {
         let label = UILabel()
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 18)
+        label.textColor = .dGray
         return label
     }()
     
@@ -89,11 +83,11 @@ final class MyPillsViewController: UIViewController {
     
     // MARK: - Private Methods
     private func setupView() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .background
         navigationItem.hidesBackButton = true
         weeklyCalendarView.delegate = self
         
-        [userNameLabel, weeklyCalendarView, dateLabelBackground, dateLabel, addPillButton, bottomBorderView, tableView].forEach {
+        [userNameLabel, weeklyCalendarView, dateLabelBackground, dateLabel, addPillButton, tableView].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -123,19 +117,18 @@ final class MyPillsViewController: UIViewController {
             userNameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             dateLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            
             weeklyCalendarView.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 10),
             weeklyCalendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -10),
             weeklyCalendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 10),
             weeklyCalendarView.heightAnchor.constraint(equalToConstant: 70),
             weeklyCalendarView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            bottomBorderView.topAnchor.constraint(equalTo: weeklyCalendarView.bottomAnchor),
-            bottomBorderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomBorderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomBorderView.heightAnchor.constraint(equalToConstant: 2),
+            
             tableView.topAnchor.constraint(equalTo: weeklyCalendarView.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: addPillButton.topAnchor, constant: -20),
+            
             addPillButton.widthAnchor.constraint(equalToConstant: 50),
             addPillButton.heightAnchor.constraint(equalToConstant: 50),
             addPillButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -201,8 +194,8 @@ extension MyPillsViewController: UITableViewDataSource {
         let isTaken = viewModel.isPillTaken(pill: pill, time: time)
         let checkmarkImage = UIImage(systemName: "checkmark")
         
-        cell.pillNameLabel.textColor = isTaken ? .gray : .black
-        cell.pillTimeLabel.textColor = isTaken ? .gray : .black
+        cell.pillNameLabel.textColor = isTaken ? .gray : .dGray
+        cell.pillTimeLabel.textColor = isTaken ? .gray : .dGray
         cell.markAsTakenButton.tintColor = isTaken ? .gray : .clear
         cell.markAsTakenButton.setImage(isTaken ? checkmarkImage : nil, for: .normal)
         cell.pillImageView.alpha = isTaken ? 0.5 : 1.0
@@ -337,7 +330,7 @@ extension MyPillsViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80
+        return 90
     }
 }
 

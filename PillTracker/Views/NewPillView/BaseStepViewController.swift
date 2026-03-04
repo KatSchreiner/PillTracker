@@ -24,7 +24,7 @@ class BaseStepViewController: UIViewController {
     func createTextField(placeholder: String? = nil, keyboardType: UIKeyboardType = .default, delegate: UITextFieldDelegate? = nil) -> UITextField {
         let textField = UITextField()
         textField.layer.cornerRadius = Constants.defaultRadius
-        textField.backgroundColor = .white
+        textField.backgroundColor = .lWhite
         textField.textColor = .dGray
         textField.textAlignment = .left
         textField.keyboardType = keyboardType

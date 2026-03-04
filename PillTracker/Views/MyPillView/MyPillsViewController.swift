@@ -223,35 +223,31 @@ extension MyPillsViewController: UITableViewDataSource {
 // MARK: – UITableViewDelegate
 extension MyPillsViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let deleteAction = createSwipeAction(title: nil, style: .destructive, image: UIImage(named: "deleteButton")) { [weak self] completionHandler in
-            guard let self = self else {
-                completionHandler(false)
-                return
-            }
-            self.handleDeleteAction(at: indexPath, in: tableView, completionHandler: completionHandler)
-        }
+        guard let pencilImage = UIImage(systemName: "pencil")?.withTintColor(.white, renderingMode: .alwaysOriginal),
+              let trashImage = UIImage(systemName: "trash")?.withTintColor(.white, renderingMode: .alwaysOriginal) else { return nil }
         
-        let editAction = createSwipeAction(title: nil, style: .normal, image: UIImage(named: "editButton")) { [weak self] completionHandler in
-            guard let self = self else {
-                completionHandler(false)
-                return
-            }
-            self.handleEditAction(at: indexPath)
+        let editAction = UIContextualAction(style: .normal, title: nil) { [weak self] (action, view, completionHandler) in
+            self?.handleEditAction(at: indexPath)
             completionHandler(true)
         }
+        
+        let deleteAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completionHandler in
+            self?.handleDeleteAction(at: indexPath, in: tableView, completionHandler: completionHandler)
+        }
+        
+        let diameter: CGFloat = 50
+        let editImage = UIImage.circularImage(from: pencilImage, backgroundColor: .dBlue, diameter: diameter)
+        let deleteImage = UIImage.circularImage(from: trashImage, backgroundColor: .lRed, diameter: diameter)
+        
+        editAction.image = editImage
+        editAction.backgroundColor = .background
+        
+        deleteAction.image = deleteImage
+        deleteAction.backgroundColor = .background
         
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
         configuration.performsFirstActionWithFullSwipe = false
         return configuration
-    }
-    
-    private func createSwipeAction(title: String?, style: UIContextualAction.Style, image: UIImage?, handler: @escaping (@escaping (Bool) -> Void) -> Void) -> UIContextualAction {
-        let action = UIContextualAction(style: style, title: title) { (action, view, completionHandler) in
-            handler(completionHandler)
-        }
-        action.image = image
-        action.backgroundColor = (style == .destructive) ? .lRed : .dBlue
-        return action
     }
     
     private func handleDeleteAction(at indexPath: IndexPath, in tableView: UITableView, completionHandler: @escaping (Bool) -> Void) {

@@ -38,7 +38,7 @@ final class NewPillStepThreeViewController: BaseStepViewController {
         let button = UIButton()
         button.setTitle(title, for: .normal)
         button.setTitleColor(.dGray, for: .normal)
-        button.backgroundColor = .lGray.withAlphaComponent(0.5)
+        button.backgroundColor = .lGray
         button.layer.cornerRadius = Constants.defaultRadius
         button.isEnabled = true
         button.addTarget(self, action: action, for: .touchUpInside)

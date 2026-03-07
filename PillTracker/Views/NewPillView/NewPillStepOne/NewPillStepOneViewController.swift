@@ -29,7 +29,7 @@ final class NewPillStepOneViewController: BaseStepViewController {
     lazy var unitButton = CustomButton.makeButton(
         title: "Выберите единицу",
         titleColor: .dGray,
-        backgroundColor: .lGray.withAlphaComponent(0.5),
+        backgroundColor: .lGray,
         target: self,
         action: #selector(didTapUnitButton)
     )

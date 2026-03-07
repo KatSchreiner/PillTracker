@@ -112,7 +112,7 @@ final class PillTableViewCell: UITableViewCell {
     
     // MARK: - Private Methods
     private func setupView() {
-        self.backgroundColor = .lGray.withAlphaComponent(0.5)
+        self.backgroundColor = .lGray
         self.selectionStyle = .none
         
         [bottomSeparatorView, topSeparatorView, pillTimeLabel, pillImageView, pillNameLabel, dosageLabel, howToTakeLabel, markAsTakenButton].forEach { subview in

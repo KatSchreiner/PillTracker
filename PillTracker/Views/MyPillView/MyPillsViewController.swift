@@ -45,10 +45,10 @@ final class MyPillsViewController: UIViewController {
         return label
     }()
     
-    lazy var dateLabelBackground: UIView = {
-        let dateLabelBackground = UIView()
-        dateLabelBackground.backgroundColor = .clear
-        return dateLabelBackground
+    private lazy var separatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemGray6
+        return view
     }()
     
     lazy var addPillButton: UIButton = {
@@ -87,7 +87,7 @@ final class MyPillsViewController: UIViewController {
         navigationItem.hidesBackButton = true
         weeklyCalendarView.delegate = self
         
-        [userNameLabel, weeklyCalendarView, dateLabelBackground, dateLabel, addPillButton, tableView].forEach {
+        [userNameLabel, weeklyCalendarView, dateLabel, addPillButton, tableView, separatorView].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -114,17 +114,22 @@ final class MyPillsViewController: UIViewController {
     private func addConstraint() {
         NSLayoutConstraint.activate([
             userNameLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            userNameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            userNameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15),
             dateLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -15),
             
             weeklyCalendarView.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 10),
-            weeklyCalendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -10),
-            weeklyCalendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 10),
+            weeklyCalendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            weeklyCalendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             weeklyCalendarView.heightAnchor.constraint(equalToConstant: 70),
             weeklyCalendarView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            tableView.topAnchor.constraint(equalTo: weeklyCalendarView.bottomAnchor, constant: 20),
+            separatorView.topAnchor.constraint(equalTo: weeklyCalendarView.bottomAnchor, constant: 10),
+            separatorView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            separatorView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            separatorView.heightAnchor.constraint(equalToConstant: 1),
+            
+            tableView.topAnchor.constraint(equalTo: separatorView.bottomAnchor, constant: 10),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: addPillButton.topAnchor, constant: -20),

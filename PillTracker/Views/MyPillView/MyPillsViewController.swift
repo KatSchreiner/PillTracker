@@ -64,12 +64,23 @@ final class MyPillsViewController: UIViewController {
         )
     }()
     
+    lazy var emptyStateView: UILabel = {
+        let emptyStateLabel = UILabel()
+        emptyStateLabel.text = "Здесь пока нет ни одной записи"
+        emptyStateLabel.font = UIFont.systemFont(ofSize: 18, weight: .regular)
+        emptyStateLabel.textColor = .dGray
+        emptyStateLabel.textAlignment = .center
+        emptyStateLabel.isHidden = true
+        return emptyStateLabel
+    }()
+    
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setupBindings()
         viewModel.loadData(userName: userName)
+        updateEmptyState()
     }
     
     init(userName: String?) {
@@ -81,13 +92,34 @@ final class MyPillsViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Actions
+    @objc private func didTapAddPillButton() {
+        addPillButton.animatePress()
+        let addNewPill = AddNewPillViewController()
+        addNewPill.delegate = self
+        navigationController?.pushViewController(addNewPill, animated: true)
+    }
+    
+    @objc func handleDaySwipe(_ gesture: UISwipeGestureRecognizer) {
+        viewModel.handleDaySwipe(gesture, calendarView: weeklyCalendarView) { [weak self] newDate in
+            self?.dateLabel.text = self?.viewModel.formattedDateString(for: newDate)
+            
+            let screenWidth = self?.view.bounds.width ?? 0
+            let directionMultiplier: CGFloat = gesture.direction == .left ? 1 : -1
+            self?.tableView.transform = CGAffineTransform(translationX: directionMultiplier * screenWidth, y: 0)
+            UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
+                self?.tableView.transform = .identity
+            }, completion: nil)
+        }
+    }
+    
     // MARK: - Private Methods
     private func setupView() {
         view.backgroundColor = .background
         navigationItem.hidesBackButton = true
         weeklyCalendarView.delegate = self
         
-        [userNameLabel, weeklyCalendarView, dateLabel, addPillButton, tableView, separatorView].forEach {
+        [userNameLabel, weeklyCalendarView, dateLabel, addPillButton, tableView, separatorView, emptyStateView].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -100,6 +132,7 @@ final class MyPillsViewController: UIViewController {
     private func setupBindings() {
         viewModel.onPillsUpdated = { [weak self] in
             self?.tableView.reloadData()
+            self?.updateEmptyState()
         }
         
         viewModel.onTakenPillsUpdated = { [weak self] in
@@ -129,6 +162,9 @@ final class MyPillsViewController: UIViewController {
             separatorView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             separatorView.heightAnchor.constraint(equalToConstant: 1),
             
+            emptyStateView.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
+            emptyStateView.centerYAnchor.constraint(equalTo: tableView.centerYAnchor),
+            
             tableView.topAnchor.constraint(equalTo: separatorView.bottomAnchor, constant: 10),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -141,34 +177,9 @@ final class MyPillsViewController: UIViewController {
         ])
     }
     
-    // MARK: - Actions
-    @objc private func didTapAddPillButton() {
-        addPillButton.animatePress()
-        let addNewPill = AddNewPillViewController()
-        addNewPill.delegate = self
-        navigationController?.pushViewController(addNewPill, animated: true)
-    }
-    
-    @objc func handleDaySwipe(_ gesture: UISwipeGestureRecognizer) {
-        viewModel.handleDaySwipe(gesture, calendarView: weeklyCalendarView) { [weak self] newDate in
-            self?.dateLabel.text = self?.viewModel.formattedDateString(for: newDate)
-            
-            let screenWidth = self?.view.bounds.width ?? 0
-            let directionMultiplier: CGFloat = gesture.direction == .left ? 1 : -1
-            self?.tableView.transform = CGAffineTransform(translationX: directionMultiplier * screenWidth, y: 0)
-            UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
-                self?.tableView.transform = .identity
-            }, completion: nil)
-        }
-    }
-}
-
-// MARK: - WeeklyCalendarViewDelegate
-extension MyPillsViewController: WeeklyCalendarViewDelegate {
-    func didSelectDate(_ date: Date) {
-        viewModel.selectedDate = date
-        dateLabel.text = viewModel.formattedDateString(for: date)
-        tableView.reloadData()
+    private func updateEmptyState() {
+        let count = viewModel.sortedPillsWithTimes().count
+        emptyStateView.isHidden = count > 0
     }
 }
 
@@ -332,6 +343,16 @@ extension MyPillsViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 90
+    }
+}
+
+// MARK: - WeeklyCalendarViewDelegate
+extension MyPillsViewController: WeeklyCalendarViewDelegate {
+    func didSelectDate(_ date: Date) {
+        viewModel.selectedDate = date
+        dateLabel.text = viewModel.formattedDateString(for: date)
+        tableView.reloadData()
+        updateEmptyState()
     }
 }
 

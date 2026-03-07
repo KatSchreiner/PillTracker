@@ -9,7 +9,7 @@ import UIKit
 
 final class WelcomeViewController: UIViewController {
     // MARK: - Private Properties
-    private let userStore = UserStore()
+    var userStore = UserStore()
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()

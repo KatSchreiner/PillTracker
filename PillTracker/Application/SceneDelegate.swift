@@ -16,11 +16,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window = UIWindow(windowScene: windowScene)
+
+        let splashVC = SplashViewController()
+        splashVC.window = window
         
-        let welcomeViewController = WelcomeViewController()
-        let navigationController = UINavigationController(rootViewController: welcomeViewController)
-        
-        window?.rootViewController = navigationController
+        window?.rootViewController = splashVC
         window?.makeKeyAndVisible()
     }
 

@@ -18,7 +18,7 @@ final class PillsViewModel {
     }
     
     // MARK: - Data Stores
-    private let pillStore = PillStore()
+    private var pillStore = PillStore()
     private let userStore = UserStore()
     private let takenPillsStore = TakenPillsStore()
     
@@ -46,6 +46,10 @@ final class PillsViewModel {
     var onTakenPillsUpdated: (() -> Void)?
     var onUserNameUpdated: ((String) -> Void)?
     var onDateUpdated: ((Date) -> Void)?
+    
+    init(pillStore: PillStore = PillStore()) {
+        self.pillStore = pillStore
+    }
     
     // MARK: - Public Methods
     func loadData(userName: String?) {

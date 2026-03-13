@@ -8,7 +8,7 @@
 import CoreData
 import UIKit
 
-final class PillStore: NSObject, NSFetchedResultsControllerDelegate {
+class PillStore: NSObject, NSFetchedResultsControllerDelegate {
     private let context: NSManagedObjectContext
     private let selectedDaysTransformer = SelectedDaysTransformer()
     private let timesTransformer = TimesTransformer()

@@ -30,6 +30,10 @@ final class PillsViewModelTests: XCTestCase {
         let viewModel = try XCTUnwrap(self.viewModel)
         let pillStoreMock = try XCTUnwrap(self.pillStoreMock)
         
+        pillStoreMock.savedPills.removeAll()
+        pillStoreMock.updatedPills.removeAll()
+        pillStoreMock.deletedPillId.removeAll()
+        
         let pill = try makeTestPill()
         pillStoreMock.savedPills = []
         
@@ -39,6 +43,32 @@ final class PillsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.sortedPillsWithTimes().count, pill.times.count)
     }
     
+    func testDeletePill_removesPill() throws {
+        let viewModel = try XCTUnwrap(self.viewModel)
+        let pillStoreMock = try XCTUnwrap(self.pillStoreMock)
+        
+        pillStoreMock.savedPills = []
+        pillStoreMock.deletedPillId = []
+        
+        let pill = try makeTestPill()
+        viewModel.addOrUpdatePill(pill)
+        
+        XCTAssertEqual(pillStoreMock.savedPills.count, 1)
+        
+        let expectation = expectation(description: "Лекарство удалено")
+        
+        viewModel.deletePill(pill.id) { succes in
+          XCTAssert(succes)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 1.0)
+        
+        XCTAssertEqual(pillStoreMock.deletedPillId.count, 1)
+        XCTAssertEqual(pillStoreMock.deletedPillId.first, pill.id)
+        XCTAssertFalse(viewModel.sortedPillsWithTimes().contains { $0.pill.id == pill.id })
+    }
+        
     private func makeTestPill() throws -> Pill {
         let calendar = Calendar.current
             let todayStart = calendar.startOfDay(for: Date())
